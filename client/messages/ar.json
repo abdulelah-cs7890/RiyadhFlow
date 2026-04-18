@@ -1,0 +1,94 @@
+{
+  "routing": {
+    "startLabel": "نقطة الانطلاق",
+    "destinationLabel": "الوجهة",
+    "startPlaceholder": "مثال: جامعة الملك سعود",
+    "destinationPlaceholder": "مثال: الفيحاء",
+    "swapLocations": "تبديل المواقع",
+    "swapAriaLabel": "تبديل نقطة الانطلاق والوجهة",
+    "findRoute": "🚦 أفضل مسار",
+    "analyzing": "جارٍ التحليل...",
+    "save": "💾 حفظ",
+    "saved": "✓ تم الحفظ!",
+    "reset": "✕ إعادة تعيين",
+    "clearRoute": "مسح المسار والمدخلات",
+    "resetRoute": "إعادة تعيين المسار",
+    "recenter": "🎯 توسيط",
+    "recenterTitle": "توسيط الخريطة على هذا المسار",
+    "openGoogleMaps": "🧭 فتح في خرائط جوجل",
+    "openGoogleMapsTitle": "فتح هذا المسار في خرائط جوجل",
+    "share": "🔗 مشاركة",
+    "copied": "✓ تم النسخ!",
+    "shareTitle": "نسخ رابط المشاركة",
+    "via": "عبر {road}",
+    "arriveBy": "الوصول في {time}",
+    "driveLabel": "سيارة",
+    "walkLabel": "مشياً",
+    "bikeLabel": "دراجة",
+    "travelModeAriaLabel": "وسيلة التنقل",
+    "routeOptionsTitle": "خيارات المسار",
+    "routeAltAriaLabel": "مسارات بديلة",
+    "routeOption": "خيار {n}",
+    "fastest": "الأسرع",
+    "balanced": "متوازن",
+    "eco": "اقتصادي"
+  },
+  "gps": {
+    "useCurrentLocation": "استخدام موقعي الحالي",
+    "locating": "جارٍ التحديد...",
+    "errorTitle": "تعذّر تحديد موقعك",
+    "notSupported": "تحديد الموقع غير مدعوم",
+    "accessDenied": "تم رفض الوصول إلى الموقع",
+    "unavailable": "الموقع غير متاح",
+    "timedOut": "انتهت مهلة الطلب",
+    "failed": "تعذّر الحصول على الموقع",
+    "currentLocation": "موقعي الحالي"
+  },
+  "errors": {
+    "enterBoth": "الرجاء إدخال نقطة الانطلاق والوجهة.",
+    "notFoundStart": "لم يتم العثور على \"{name}\". جرّب اسماً أكثر تحديداً.",
+    "notFoundDest": "لم يتم العثور على \"{name}\". جرّب اسماً أكثر تحديداً.",
+    "generic": "حدث خطأ ما. الرجاء المحاولة مجدداً.",
+    "dismiss": "إغلاق التنبيه"
+  },
+  "trips": {
+    "savedTrips": "الرحلات المحفوظة",
+    "loadTrip": "تحميل هذا المسار",
+    "deleteTrip": "حذف الرحلة",
+    "confirmDelete": "انقر مجدداً للتأكيد",
+    "confirmSure": "هل أنت متأكد؟"
+  },
+  "insights": {
+    "title": "تحليلات ذكية",
+    "trafficAdding": "الازدحام يضيف {mins} دقيقة لرحلتك. المغادرة في {bestTime} قد توفّر هذا الوقت.",
+    "trafficLight": "الطريق خالٍ الآن. وقت مناسب للمغادرة!"
+  },
+  "places": {
+    "directions": "🧭 الاتجاهات إلى هنا",
+    "reviews": "({count} تقييم)",
+    "closePlaceDetails": "إغلاق تفاصيل المكان",
+    "noPlaces": "لا توجد أماكن لـ {category} الآن.",
+    "loadingPlaces": "جارٍ تحميل الأماكن",
+    "viewDetails": "عرض تفاصيل {name}"
+  },
+  "categories": {
+    "all": "الكل",
+    "filter": "تصفية الأماكن حسب {category}"
+  },
+  "map": {
+    "fallback": "أضف `NEXT_PUBLIC_MAPBOX_TOKEN` لعرض الخريطة التفاعلية.",
+    "errorFallback": "حدث خطأ أثناء تحميل الخريطة.",
+    "tryAgain": "حاول مجدداً",
+    "routeBadge": "{mins} د · {km} كم"
+  },
+  "ui": {
+    "appTitle": "RiyadhFlow 🚗",
+    "directions": "الاتجاهات",
+    "steps": "{count} خطوات",
+    "droppedPin": "دبوس مثبّت"
+  },
+  "a11y": {
+    "toggleLanguageToAr": "التبديل إلى العربية",
+    "toggleLanguageToEn": "التبديل إلى الإنجليزية"
+  }
+}

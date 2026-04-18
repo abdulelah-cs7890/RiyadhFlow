@@ -1,0 +1,47 @@
+{
+  "name": "riyadhflow-client",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run test:unit",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "test:e2e": "playwright test",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "lighthouse:ci": "lhci autorun",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "mapbox-gl": "^3.20.0",
+    "next": "^13.4.19",
+    "next-intl": "^4.9.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@lhci/cli": "^0.14.0",
+    "@playwright/test": "^1.55.0",
+    "@storybook/addon-a11y": "^7.6.20",
+    "@storybook/addon-essentials": "^7.6.20",
+    "@storybook/nextjs": "^7.6.20",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^13.4.19",
+    "jsdom": "^26.1.0",
+    "start-server-and-test": "^2.0.8",
+    "storybook": "^7.6.20",
+    "typescript": "latest",
+    "vitest": "^3.2.4"
+  }
+}

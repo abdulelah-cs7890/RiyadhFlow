@@ -1,0 +1,94 @@
+{
+  "routing": {
+    "startLabel": "START",
+    "destinationLabel": "DESTINATION",
+    "startPlaceholder": "e.g., King Saud University",
+    "destinationPlaceholder": "e.g., Al Fayha",
+    "swapLocations": "Swap locations",
+    "swapAriaLabel": "Swap Start and Destination",
+    "findRoute": "🚦 Find Best Route",
+    "analyzing": "Analyzing...",
+    "save": "💾 Save",
+    "saved": "✓ Saved!",
+    "reset": "✕ Reset",
+    "clearRoute": "Clear route and inputs",
+    "resetRoute": "Reset route",
+    "recenter": "🎯 Recenter",
+    "recenterTitle": "Recenter map on this route",
+    "openGoogleMaps": "🧭 Open in Google Maps",
+    "openGoogleMapsTitle": "Open this route in Google Maps",
+    "share": "🔗 Share",
+    "copied": "✓ Copied!",
+    "shareTitle": "Copy shareable link",
+    "via": "via {road}",
+    "arriveBy": "Arrive by {time}",
+    "driveLabel": "Drive",
+    "walkLabel": "Walk",
+    "bikeLabel": "Bike",
+    "travelModeAriaLabel": "Travel mode",
+    "routeOptionsTitle": "Route Options",
+    "routeAltAriaLabel": "Route alternatives",
+    "routeOption": "Option {n}",
+    "fastest": "Fastest",
+    "balanced": "Balanced",
+    "eco": "Eco"
+  },
+  "gps": {
+    "useCurrentLocation": "Use my current location",
+    "locating": "Locating...",
+    "errorTitle": "Could not get your location",
+    "notSupported": "Geolocation not supported",
+    "accessDenied": "Location access denied",
+    "unavailable": "Position unavailable",
+    "timedOut": "Request timed out",
+    "failed": "Could not get location",
+    "currentLocation": "Current Location"
+  },
+  "errors": {
+    "enterBoth": "Please enter both a start and destination.",
+    "notFoundStart": "Could not find \"{name}\". Try a more specific location name.",
+    "notFoundDest": "Could not find \"{name}\". Try a more specific location name.",
+    "generic": "Something went wrong. Please try again.",
+    "dismiss": "Dismiss error"
+  },
+  "trips": {
+    "savedTrips": "Saved Trips",
+    "loadTrip": "Load this route",
+    "deleteTrip": "Delete trip",
+    "confirmDelete": "Click again to confirm",
+    "confirmSure": "Sure?"
+  },
+  "insights": {
+    "title": "Smart Insights",
+    "trafficAdding": "Traffic is adding {mins} min to your trip. Leaving at {bestTime} could save you that time.",
+    "trafficLight": "Traffic looks light right now. Great time to leave!"
+  },
+  "places": {
+    "directions": "🧭 Directions to here",
+    "reviews": "({count} reviews)",
+    "closePlaceDetails": "Close place details",
+    "noPlaces": "No places found for {category} right now.",
+    "loadingPlaces": "Loading places",
+    "viewDetails": "View details for {name}"
+  },
+  "categories": {
+    "all": "All",
+    "filter": "Filter places by {category}"
+  },
+  "map": {
+    "fallback": "Add `NEXT_PUBLIC_MAPBOX_TOKEN` to render the interactive map.",
+    "errorFallback": "Something went wrong loading the map.",
+    "tryAgain": "Try Again",
+    "routeBadge": "{mins} min · {km} km"
+  },
+  "ui": {
+    "appTitle": "RiyadhFlow 🚗",
+    "directions": "Directions",
+    "steps": "{count} steps",
+    "droppedPin": "Dropped Pin"
+  },
+  "a11y": {
+    "toggleLanguageToAr": "Switch to Arabic",
+    "toggleLanguageToEn": "Switch to English"
+  }
+}
