@@ -2,6 +2,62 @@ import { Category, PlaceData, mockCategoryData } from '@/app/utils/mockData';
 
 const RIYADH_PROXIMITY = '46.6753,24.7136';
 
+const CATEGORY_TO_ENUM: Record<Category, string> = {
+  'Restaurants': 'RESTAURANTS',
+  'Hotels': 'HOTELS',
+  'Things to do': 'THINGS_TO_DO',
+  'Museums': 'MUSEUMS',
+  'Transit': 'TRANSIT',
+  'Pharmacies': 'PHARMACIES',
+  'Gyms': 'GYMS',
+};
+
+interface DbPlaceRow {
+  name: string;
+  name_ar: string | null;
+  type: string;
+  type_ar: string | null;
+  address: string;
+  address_ar: string | null;
+  about: string | null;
+  about_ar: string | null;
+  image_url: string | null;
+  rating: number | null;
+  reviews: number | null;
+  lng: number;
+  lat: number;
+}
+
+export async function fetchPlacesFromDb(
+  category: Category,
+  opts?: { lat?: number; lng?: number; radius?: number },
+  signal?: AbortSignal,
+): Promise<PlaceData[]> {
+  const params = new URLSearchParams({ category: CATEGORY_TO_ENUM[category] });
+  if (opts?.lat != null && opts?.lng != null) {
+    params.set('lat', String(opts.lat));
+    params.set('lng', String(opts.lng));
+    if (opts.radius) params.set('radius', String(opts.radius));
+  }
+  const res = await fetch(`/api/places?${params.toString()}`, { signal });
+  if (!res.ok) throw new Error(`Places API failed: ${res.status}`);
+  const rows = (await res.json()) as DbPlaceRow[];
+  return rows.map((r) => ({
+    name: r.name,
+    name_ar: r.name_ar ?? undefined,
+    type: r.type,
+    type_ar: r.type_ar ?? undefined,
+    address: r.address,
+    address_ar: r.address_ar ?? undefined,
+    about: r.about ?? undefined,
+    about_ar: r.about_ar ?? undefined,
+    image: r.image_url ?? undefined,
+    rating: r.rating ?? undefined,
+    reviews: r.reviews ?? undefined,
+    coords: [Number(r.lng), Number(r.lat)],
+  }));
+}
+
 const CATEGORY_CANONICAL: Record<Category, string> = {
   'Restaurants': 'restaurant',
   'Hotels': 'hotel',

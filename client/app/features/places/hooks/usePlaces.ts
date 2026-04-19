@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Category, PlaceData } from '@/app/utils/mockData'
-import { fetchPlacesByCategory } from '../services/placesSearch'
+import { fetchPlacesFromDb } from '../services/placesSearch'
 
 interface UsePlacesResult {
   places: PlaceData[];
@@ -22,7 +22,7 @@ export function usePlaces(activeCategory: Category | null): UsePlacesResult {
     const controller = new AbortController();
     setIsLoading(true);
 
-    fetchPlacesByCategory(activeCategory, controller.signal)
+    fetchPlacesFromDb(activeCategory, undefined, controller.signal)
       .then((results) => {
         setPlaces(results);
         setIsLoading(false);

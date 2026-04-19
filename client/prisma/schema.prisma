@@ -1,0 +1,43 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
+}
+
+enum Category {
+  RESTAURANTS
+  HOTELS
+  THINGS_TO_DO
+  MUSEUMS
+  TRANSIT
+  PHARMACIES
+  GYMS
+
+  @@map("category")
+}
+
+model Place {
+  id        String                             @id @default(cuid())
+  name      String
+  nameAr    String?                            @map("name_ar")
+  type      String
+  typeAr    String?                            @map("type_ar")
+  category  Category
+  address   String
+  addressAr String?                            @map("address_ar")
+  about     String?
+  aboutAr   String?                            @map("about_ar")
+  imageUrl  String?                            @map("image_url")
+  rating    Float?
+  reviews   Int?
+  location  Unsupported("geometry(Point, 4326)")
+  createdAt DateTime                           @default(now()) @map("created_at")
+
+  @@index([category])
+  @@map("places")
+}
