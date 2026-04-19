@@ -207,24 +207,31 @@ function AutocompleteInput({
         )}
         {showDropdown && (
           <ul className="autocomplete-dropdown" id={listId} role="listbox">
-            {suggestions.map((s, i) => (
-              <li
-                key={s.mapbox_id}
-                role="option"
-                aria-selected={i === highlightedIndex}
-                className={`autocomplete-item${i === highlightedIndex ? ' highlighted' : ''}`}
-                onMouseEnter={() => setHighlightedIndex(i)}
-                onMouseDown={(e) => {
-                  e.preventDefault(); // prevent input blur before select fires
-                  void handleSelect(s);
-                }}
-              >
-                <span className="autocomplete-item-name">{s.name}</span>
-                <span className="autocomplete-item-address">
-                  {s.place_formatted ?? s.full_address ?? ''}
-                </span>
-              </li>
-            ))}
+            {suggestions.map((s, i) => {
+              const key = s.source === 'db' ? s.id : s.mapbox_id;
+              const address =
+                s.source === 'db'
+                  ? s.place_formatted ?? ''
+                  : s.place_formatted ?? s.full_address ?? '';
+              return (
+                <li
+                  key={key}
+                  role="option"
+                  aria-selected={i === highlightedIndex}
+                  className={`autocomplete-item${i === highlightedIndex ? ' highlighted' : ''}`}
+                  onMouseEnter={() => setHighlightedIndex(i)}
+                  onMouseDown={(e) => {
+                    e.preventDefault(); // prevent input blur before select fires
+                    void handleSelect(s);
+                  }}
+                >
+                  <span className="autocomplete-item-name">
+                    {s.source === 'db' ? `📍 ${s.name}` : s.name}
+                  </span>
+                  <span className="autocomplete-item-address">{address}</span>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>

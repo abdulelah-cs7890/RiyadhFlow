@@ -1,6 +1,22 @@
 const RIYADH_PROXIMITY = '46.6753,24.7136';
 
-export interface Suggestion {
+export type Suggestion =
+  | {
+      source: 'db';
+      id: string;
+      name: string;
+      place_formatted?: string;
+      coords: [number, number];
+    }
+  | {
+      source: 'mapbox';
+      mapbox_id: string;
+      name: string;
+      full_address?: string;
+      place_formatted?: string;
+    };
+
+interface MapboxSuggestion {
   mapbox_id: string;
   name: string;
   full_address?: string;
@@ -8,7 +24,7 @@ export interface Suggestion {
 }
 
 interface SuggestResponse {
-  suggestions?: Suggestion[];
+  suggestions?: MapboxSuggestion[];
 }
 
 interface RetrieveFeature {
@@ -33,7 +49,13 @@ export async function fetchSuggestions(
   try {
     const res = await fetch(url, { signal });
     const data = (await res.json()) as SuggestResponse;
-    return data.suggestions ?? [];
+    return (data.suggestions ?? []).map((s): Suggestion => ({
+      source: 'mapbox',
+      mapbox_id: s.mapbox_id,
+      name: s.name,
+      full_address: s.full_address,
+      place_formatted: s.place_formatted,
+    }));
   } catch (err) {
     // Abort is expected (user kept typing / cleared / reset) — not an error.
     if (err instanceof Error && err.name === 'AbortError') return [];
