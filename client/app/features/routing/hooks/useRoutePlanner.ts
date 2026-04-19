@@ -83,7 +83,7 @@ export function useRoutePlanner(): UseRoutePlannerResult {
   const handleRouteFetched = useCallback((info: RouteInfo) => {
     setRouteInfo(info);
     setIsCalculating(false);
-    setInsights(buildTrafficInsight(new Date(), info.duration, info.duration_typical));
+    setInsights(buildTrafficInsight(info.duration, info.duration_typical));
   }, []);
 
   const resetRoute = useCallback(() => {

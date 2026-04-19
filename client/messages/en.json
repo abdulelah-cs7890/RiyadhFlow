@@ -60,8 +60,20 @@
   },
   "insights": {
     "title": "Smart Insights",
-    "trafficAdding": "Traffic is adding {mins} min to your trip. Leaving at {bestTime} could save you that time.",
+    "trafficAdding": "Traffic is adding {mins} min to your trip right now. Try the departure comparison below to find a faster slot.",
     "trafficLight": "Traffic looks light right now. Great time to leave!"
+  },
+  "bestTime": {
+    "title": "Best time to leave",
+    "compareButton": "Compare departure times",
+    "loading": "Checking the next 4 hours…",
+    "fastest": "Fastest",
+    "leave": "Leave",
+    "etaMins": "{mins} min",
+    "slowerBy": "+{mins} min",
+    "drivingOnly": "Best-time comparison is only available for driving.",
+    "failed": "Couldn't compare departure times.",
+    "retry": "Try again"
   },
   "places": {
     "directions": "🧭 Directions to here",

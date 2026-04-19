@@ -720,6 +720,47 @@ body {
 .insights-title { margin: 0; color: var(--insights-title); font-size: 1.05rem; font-weight: 700; }
 .insights-text { margin: 0; font-size: 0.95rem; color: var(--insights-text); line-height: 1.6; }
 
+/* --- BEST TIME TO LEAVE --- */
+.best-time-pane {
+  background: linear-gradient(135deg, var(--insights-bg-start) 0%, var(--insights-bg-end) 100%);
+  border-radius: 18px;
+  border: 1px solid var(--insights-border);
+  padding: 18px;
+  box-shadow: 0 4px 20px rgba(14, 165, 233, 0.1);
+  animation: fadeIn 0.4s ease-out;
+}
+.best-time-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.best-time-title { margin: 0; color: var(--insights-title); font-size: 1.05rem; font-weight: 700; }
+.best-time-btn {
+  width: 100%; padding: 10px 14px; border: 1px solid var(--insights-border);
+  background: transparent; color: var(--insights-title); border-radius: 10px;
+  font-weight: 600; cursor: pointer; transition: background 150ms ease;
+}
+.best-time-btn:hover { background: rgba(14, 165, 233, 0.08); }
+.best-time-loading, .best-time-error {
+  display: flex; align-items: center; gap: 10px; font-size: 0.95rem; color: var(--insights-text);
+}
+.best-time-error { flex-direction: column; align-items: stretch; }
+.best-time-disabled { font-size: 0.9rem; color: var(--insights-text); opacity: 0.8; text-align: center; }
+.best-time-list {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.best-time-row {
+  display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center;
+  padding: 10px 12px; border-radius: 10px; font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.35);
+  color: var(--insights-text);
+}
+.best-time-row--fastest {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.18), rgba(14, 165, 233, 0.12));
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  font-weight: 600;
+}
+.best-time-depart { font-variant-numeric: tabular-nums; }
+.best-time-eta { font-variant-numeric: tabular-nums; color: var(--insights-title); }
+.best-time-delta { font-size: 0.85rem; opacity: 0.85; }
+
 /* --- SAVED TRIPS --- */
 .saved-trips-pane { display: flex; flex-direction: column; gap: 4px; }
 

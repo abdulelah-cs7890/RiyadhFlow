@@ -20,6 +20,7 @@ import TravelModeSwitcher from './features/routing/components/TravelModeSwitcher
 import ThemeToggle from './features/theme/components/ThemeToggle'
 import { useTheme } from './features/theme/hooks/useTheme'
 import AutocompleteInput from './features/routing/components/AutocompleteInput'
+import BestTimePanel from './features/routing/components/BestTimePanel'
 import TurnByTurnPanel from './features/routing/components/TurnByTurnPanel'
 import { ROUTE_LABEL_KEYS } from './features/routing/types'
 import { buildGoogleMapsUrl } from './features/routing/utils/deeplinks'
@@ -374,12 +375,23 @@ export default function Home() {
                 <h3 className="insights-title">{tInsights('title')}</h3>
               </div>
               <p className="insights-text">
-                {insights.savedMins > 0
-                  ? tInsights('trafficAdding', { mins: insights.savedMins, bestTime: insights.bestTime })
+                {insights.delayMins > 0
+                  ? tInsights('trafficAdding', { mins: insights.delayMins })
                   : tInsights('trafficLight')
                 }
               </p>
             </div>
+            <div className="separator" />
+          </>
+        )}
+
+        {startCoords && destCoords && (
+          <>
+            <BestTimePanel
+              startCoords={startCoords}
+              endCoords={destCoords}
+              travelMode={travelMode}
+            />
             <div className="separator" />
           </>
         )}
