@@ -25,6 +25,7 @@ import { ROUTE_LABEL_KEYS } from './features/routing/types'
 import { buildGoogleMapsUrl } from './features/routing/utils/deeplinks'
 import { parseUrlRouteState, buildUrlWithRouteState } from './features/routing/utils/urlState'
 import LanguageToggle from './components/LanguageToggle'
+import { useGeolocation } from './hooks/useGeolocation'
 
 export default function Home() {
   const tRouting = useTranslations('routing');
@@ -56,7 +57,10 @@ export default function Home() {
     resetRoute,
     clearError,
   } = useRoutePlanner();
-  const { places, isLoading: placesLoading } = usePlaces(activeCategory);
+  const nearMe = useGeolocation();
+  const [nearMeActive, setNearMeActive] = useState(false);
+  const placesUserLocation = nearMeActive ? nearMe.coords : null;
+  const { places, isLoading: placesLoading } = usePlaces(activeCategory, placesUserLocation);
 
   const pathname = usePathname();
   const [selectedPlace, setSelectedPlace] = useState<PlaceData | null>(null);
@@ -84,6 +88,31 @@ export default function Home() {
   useEffect(() => {
     setSelectedPlace(null);
   }, [activeCategory]);
+
+  useEffect(() => {
+    if (!nearMeActive || !nearMe.coords) return;
+    setUserLocation([...nearMe.coords]);
+    setFlyToLocation([...nearMe.coords]);
+  }, [nearMeActive, nearMe.coords]);
+
+  useEffect(() => {
+    if (nearMe.status !== 'error') return;
+    const timer = setTimeout(() => {
+      nearMe.clear();
+      setNearMeActive(false);
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [nearMe.status, nearMe.clear]);
+
+  const handleNearMeToggle = useCallback(() => {
+    if (nearMeActive) {
+      setNearMeActive(false);
+      nearMe.clear();
+    } else {
+      setNearMeActive(true);
+      nearMe.request();
+    }
+  }, [nearMeActive, nearMe]);
 
   const handleSaveTrip = () => {
     const ok = saveTrip(startLocation, destination, startCoords, destCoords);
@@ -162,7 +191,9 @@ export default function Home() {
     setFlyToLocation(null);
     setUserLocation(null);
     setSelectedPlace(null);
-  }, [resetRoute, setStartLocation, setDestination]);
+    setNearMeActive(false);
+    nearMe.clear();
+  }, [resetRoute, setStartLocation, setDestination, nearMe]);
 
   const hasRoutingState = Boolean(
     routeInfo || startLocation || destination || startCoords || destCoords
@@ -390,9 +421,12 @@ export default function Home() {
         activeCategory={activeCategory}
         onCategoryChange={setActiveCategory}
         activePlaceCount={places.length}
+        nearMeActive={nearMeActive}
+        nearMeStatus={nearMe.status}
+        onNearMeToggle={handleNearMeToggle}
       />
 
-      {activeCategory && placesLoading && (
+      {(activeCategory || nearMeActive) && placesLoading && (
         <div className="category-skeleton-container" aria-busy="true" aria-label={tPlaces('loadingPlaces')}>
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="category-skeleton-card">
@@ -403,9 +437,11 @@ export default function Home() {
         </div>
       )}
 
-      {activeCategory && !places.length && !placesLoading && (
+      {(activeCategory || (nearMeActive && nearMe.coords)) && !places.length && !placesLoading && (
         <div className="category-empty-state" role="status" aria-live="polite">
-          {tPlaces('noPlaces', { category: activeCategory })}
+          {activeCategory
+            ? tPlaces('noPlaces', { category: activeCategory })
+            : tPlaces('noPlacesNearby')}
         </div>
       )}
 

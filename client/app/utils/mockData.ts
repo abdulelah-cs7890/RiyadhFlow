@@ -23,6 +23,8 @@ export interface PlaceData {
   type_ar?: string;
   address_ar?: string;
   about_ar?: string;
+  distance_m?: number;
+  category?: Category;
 }
 
 export const mockCategoryData: Record<Category, PlaceData[]> = {

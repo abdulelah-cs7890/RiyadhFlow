@@ -9,12 +9,19 @@ interface UsePlacesResult {
   isLoading: boolean;
 }
 
-export function usePlaces(activeCategory: Category | null): UsePlacesResult {
+export function usePlaces(
+  activeCategory: Category | null,
+  userLocation?: [number, number] | null,
+): UsePlacesResult {
   const [places, setPlaces] = useState<PlaceData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const lng = userLocation?.[0];
+  const lat = userLocation?.[1];
+  const hasLocation = lat != null && lng != null;
+
   useEffect(() => {
-    if (!activeCategory) {
+    if (!activeCategory && !hasLocation) {
       setPlaces([]);
       return;
     }
@@ -22,7 +29,8 @@ export function usePlaces(activeCategory: Category | null): UsePlacesResult {
     const controller = new AbortController();
     setIsLoading(true);
 
-    fetchPlacesFromDb(activeCategory, undefined, controller.signal)
+    const opts = hasLocation ? { lat: lat!, lng: lng! } : undefined;
+    fetchPlacesFromDb(activeCategory, opts, controller.signal)
       .then((results) => {
         setPlaces(results);
         setIsLoading(false);
@@ -37,7 +45,7 @@ export function usePlaces(activeCategory: Category | null): UsePlacesResult {
     return () => {
       controller.abort();
     };
-  }, [activeCategory]);
+  }, [activeCategory, lat, lng, hasLocation]);
 
   return { places, isLoading };
 }

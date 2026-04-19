@@ -55,6 +55,13 @@ function PlaceCard({ place, onClose, onDirections }: PlaceCardProps) {
         )}
         <div className="place-type">{localizedPlace.type} - {localizedPlace.address}</div>
 
+        {localizedPlace.distance_m != null && (
+          <div className="place-distance" aria-label={t('distanceFromYou')}>
+            <span aria-hidden="true">📍</span>
+            <span>{t('km', { km: (localizedPlace.distance_m / 1000).toFixed(localizedPlace.distance_m < 1000 ? 2 : 1) })}</span>
+          </div>
+        )}
+
         {localizedPlace.about && <p className="place-about">{localizedPlace.about}</p>}
 
         <button

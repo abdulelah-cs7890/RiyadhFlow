@@ -69,7 +69,13 @@
     "closePlaceDetails": "إغلاق تفاصيل المكان",
     "noPlaces": "لا توجد أماكن لـ {category} الآن.",
     "loadingPlaces": "جارٍ تحميل الأماكن",
-    "viewDetails": "عرض تفاصيل {name}"
+    "viewDetails": "عرض تفاصيل {name}",
+    "nearMe": "قريب مني",
+    "nearMeLoading": "جارٍ تحديد الموقع…",
+    "nearMeError": "تعذر تحديد الموقع",
+    "km": "{km} كم",
+    "distanceFromYou": "المسافة منك",
+    "noPlacesNearby": "لا توجد أماكن قريبة منك. جرّب نطاقاً أوسع."
   },
   "categories": {
     "all": "الكل",

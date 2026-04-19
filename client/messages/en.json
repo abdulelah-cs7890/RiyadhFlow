@@ -69,7 +69,13 @@
     "closePlaceDetails": "Close place details",
     "noPlaces": "No places found for {category} right now.",
     "loadingPlaces": "Loading places",
-    "viewDetails": "View details for {name}"
+    "viewDetails": "View details for {name}",
+    "nearMe": "Near Me",
+    "nearMeLoading": "Locating…",
+    "nearMeError": "Location unavailable",
+    "km": "{km} km",
+    "distanceFromYou": "Distance from you",
+    "noPlacesNearby": "No places found near you. Try a wider radius."
   },
   "categories": {
     "all": "All",

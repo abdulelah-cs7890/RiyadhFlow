@@ -557,13 +557,14 @@ export default function Map({
     markersRef.current = [];
     markerElementsRef.current = [];
 
-    if (!activeCategory || !places.length) return;
+    if (!places.length) return;
 
-    const emoji = activeCategory ? CATEGORY_EMOJIS[activeCategory] : undefined;
+    const activeEmoji = activeCategory ? CATEGORY_EMOJIS[activeCategory] : undefined;
 
     places.forEach((loc) => {
       const markerEl = document.createElement('div');
       markerEl.className = 'custom-marker custom-marker--place';
+      const emoji = activeEmoji ?? (loc.category ? CATEGORY_EMOJIS[loc.category] : undefined);
       if (emoji) {
         markerEl.textContent = emoji;
         markerEl.classList.add('custom-marker--emoji');

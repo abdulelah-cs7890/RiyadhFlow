@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { Suggestion } from '../services/searchSuggestions'
 import { useSearchSuggestions } from '../hooks/useSearchSuggestions'
 import { reverseGeocode } from '../services/geocoding'
+import { useGeolocation } from '@/app/hooks/useGeolocation'
 
 interface AutocompleteInputProps {
   value: string;
@@ -34,8 +35,8 @@ function AutocompleteInput({
   const listId = useId();
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [isOpen, setIsOpen] = useState(false);
-  const [locatingState, setLocatingState] = useState<'idle' | 'loading' | 'error'>('idle');
-  const [gpsErrorMessage, setGpsErrorMessage] = useState<string | null>(null);
+  const geo = useGeolocation();
+  const lastHandledCoordsRef = useRef<[number, number] | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown on outside click
@@ -49,6 +50,38 @@ function AutocompleteInput({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [clear]);
+
+  // When geolocation returns coords, reverse-geocode and notify parent.
+  useEffect(() => {
+    if (!geo.coords) return;
+    if (lastHandledCoordsRef.current === geo.coords) return;
+    lastHandledCoordsRef.current = geo.coords;
+    const coords = geo.coords;
+    let cancelled = false;
+    (async () => {
+      try {
+        const name = await reverseGeocode(coords);
+        if (cancelled) return;
+        const resolvedName = name ?? t('currentLocation');
+        onChange(resolvedName);
+        onSelect(resolvedName, coords);
+        onCurrentLocation?.(coords);
+      } catch {
+        if (cancelled) return;
+        onChange(t('currentLocation'));
+        onSelect(t('currentLocation'), coords);
+        onCurrentLocation?.(coords);
+      }
+    })();
+    return () => { cancelled = true };
+  }, [geo.coords, onChange, onSelect, onCurrentLocation, t]);
+
+  // Auto-dismiss the error toast after 2.5s.
+  useEffect(() => {
+    if (geo.status !== 'error') return;
+    const timer = setTimeout(() => geo.clear(), 2500);
+    return () => clearTimeout(timer);
+  }, [geo.status, geo.clear]);
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,46 +106,6 @@ function AutocompleteInput({
     },
     [select, onChange, onSelect],
   );
-
-  const handleUseCurrentLocation = useCallback(() => {
-    if (!navigator.geolocation) {
-      setLocatingState('error');
-      setGpsErrorMessage(t('notSupported'));
-      setTimeout(() => { setLocatingState('idle'); setGpsErrorMessage(null); }, 2500);
-      return;
-    }
-
-    setLocatingState('loading');
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const coords: [number, number] = [position.coords.longitude, position.coords.latitude];
-        try {
-          const name = await reverseGeocode(coords);
-          const resolvedName = name ?? t('currentLocation');
-          onChange(resolvedName);
-          onSelect(resolvedName, coords);
-          onCurrentLocation?.(coords);
-          setLocatingState('idle');
-        } catch {
-          onChange(t('currentLocation'));
-          onSelect(t('currentLocation'), coords);
-          onCurrentLocation?.(coords);
-          setLocatingState('idle');
-        }
-      },
-      (posError) => {
-        const messages: Record<number, string> = {
-          1: t('accessDenied'),
-          2: t('unavailable'),
-          3: t('timedOut'),
-        };
-        setLocatingState('error');
-        setGpsErrorMessage(messages[posError.code] ?? t('failed'));
-        setTimeout(() => { setLocatingState('idle'); setGpsErrorMessage(null); }, 2500);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
-    );
-  }, [onChange, onSelect, onCurrentLocation, t]);
 
   const handleFocus = useCallback(() => {
     if (suggestions.length > 0) {
@@ -158,6 +151,13 @@ function AutocompleteInput({
 
   const showDropdown = isOpen && suggestions.length > 0;
 
+  const gpsErrorMessage = geo.status === 'error'
+    ? geo.errorCode === 1 ? t('accessDenied')
+      : geo.errorCode === 2 ? t('unavailable')
+      : geo.errorCode === 3 ? t('timedOut')
+      : t('notSupported')
+    : null;
+
   return (
     <div className="input-group" ref={wrapperRef}>
       <div className="input-label-row">
@@ -181,17 +181,17 @@ function AutocompleteInput({
         {showCurrentLocation && (
           <button
             type="button"
-            className={`gps-btn gps-btn--${locatingState}`}
-            onClick={handleUseCurrentLocation}
-            disabled={locatingState === 'loading'}
+            className={`gps-btn gps-btn--${geo.status}`}
+            onClick={geo.request}
+            disabled={geo.status === 'loading'}
             title={
-              locatingState === 'error'
+              geo.status === 'error'
                 ? t('errorTitle')
                 : t('useCurrentLocation')
             }
             aria-label={t('useCurrentLocation')}
           >
-            {locatingState === 'loading' ? (
+            {geo.status === 'loading' ? (
               <span className="gps-spinner" aria-hidden="true" />
             ) : (
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">

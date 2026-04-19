@@ -18,7 +18,8 @@
     "db:migrate": "dotenv -e .env.local -- prisma migrate dev",
     "db:seed": "dotenv -e .env.local -- prisma db seed",
     "db:studio": "dotenv -e .env.local -- prisma studio",
-    "db:generate": "dotenv -e .env.local -- prisma generate"
+    "db:generate": "dotenv -e .env.local -- prisma generate",
+    "db:import:osm": "dotenv -e .env.local -- tsx prisma/import-osm.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
