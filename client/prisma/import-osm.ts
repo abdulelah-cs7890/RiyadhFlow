@@ -20,6 +20,10 @@ interface OsmTags {
   'name:ar'?: string
   'name:en'?: string
   'addr:street'?: string
+  'addr:suburb'?: string
+  'addr:neighbourhood'?: string
+  'addr:district'?: string
+  'addr:city_district'?: string
   amenity?: string
   tourism?: string
   leisure?: string
@@ -256,9 +260,91 @@ async function resolveImageUrls(rows: Array<{ image_url: string | null; _tags: O
 }
 
 function pickAddress(tags: OsmTags): { address: string; address_ar: string } {
+  const area =
+    tags['addr:suburb'] ??
+    tags['addr:neighbourhood'] ??
+    tags['addr:district'] ??
+    tags['addr:city_district'] ??
+    null
   const street = tags['addr:street']
-  if (street) return { address: `${street}, Riyadh`, address_ar: `${street}، الرياض` }
+  if (area && street) {
+    return {
+      address: `${street}, ${area}, Riyadh`,
+      address_ar: `${street}، ${area}، الرياض`,
+    }
+  }
+  if (area) {
+    return { address: `${area}, Riyadh`, address_ar: `${area}، الرياض` }
+  }
+  if (street) {
+    return { address: `${street}, Riyadh`, address_ar: `${street}، الرياض` }
+  }
   return { address: 'Riyadh', address_ar: 'الرياض' }
+}
+
+interface NominatimAddress {
+  suburb?: string
+  neighbourhood?: string
+  city_district?: string
+  quarter?: string
+  residential?: string
+}
+
+async function reverseGeocodeNeighborhood(
+  lng: number,
+  lat: number,
+  lang: 'en' | 'ar',
+): Promise<string | null> {
+  const url =
+    `https://nominatim.openstreetmap.org/reverse` +
+    `?lat=${lat}&lon=${lng}&format=jsonv2&zoom=16&addressdetails=1&accept-language=${lang}`
+  try {
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'RiyadhFlow-POI-Import/1.0 (portfolio project; contact: abdulallah7981@gmail.com)',
+        Accept: 'application/json',
+      },
+    })
+    if (!res.ok) return null
+    const data = (await res.json()) as { address?: NominatimAddress }
+    const a = data.address ?? {}
+    return (
+      a.suburb ??
+      a.neighbourhood ??
+      a.city_district ??
+      a.quarter ??
+      a.residential ??
+      null
+    )
+  } catch {
+    return null
+  }
+}
+
+async function resolveMissingAddresses(
+  rows: Array<{ address: string; address_ar: string; lng: number; lat: number }>,
+): Promise<void> {
+  const needsFill = rows.filter(
+    (r) => r.address === 'Riyadh' && r.address_ar === 'الرياض',
+  )
+  if (needsFill.length === 0) return
+  console.log(`  reverse-geocoding ${needsFill.length} row(s) via Nominatim (serialized, ~1 rps)…`)
+  let done = 0
+  let filled = 0
+  for (const r of needsFill) {
+    const en = await reverseGeocodeNeighborhood(r.lng, r.lat, 'en')
+    await new Promise((res) => setTimeout(res, 1100))
+    const ar = await reverseGeocodeNeighborhood(r.lng, r.lat, 'ar')
+    await new Promise((res) => setTimeout(res, 1100))
+    if (en) r.address = `${en}, Riyadh`
+    if (ar) r.address_ar = `${ar}، الرياض`
+    if (en || ar) filled++
+    done++
+    if (done % 25 === 0) {
+      process.stdout.write(`    ${done}/${needsFill.length} (${filled} filled)…\n`)
+    }
+  }
+  console.log(`  ${filled}/${needsFill.length} rows got a neighborhood`)
 }
 
 async function main() {
@@ -317,6 +403,9 @@ async function main() {
   await resolveImageUrls(rows)
   const withImages = rows.filter((r) => r.image_url).length
   console.log(`  ${withImages} row(s) got a real image; ${rows.length - withImages} will use category fallback`)
+
+  console.log('Resolving missing addresses…')
+  await resolveMissingAddresses(rows)
 
   console.log('Truncating places…')
   await prisma.$executeRaw`TRUNCATE TABLE places RESTART IDENTITY`

@@ -17,6 +17,7 @@ interface AutocompleteInputProps {
   showCurrentLocation?: boolean;
   onCurrentLocation?: (coords: [number, number]) => void;
   onSubmit?: () => void;
+  anchorCoords?: [number, number] | null;
 }
 
 function AutocompleteInput({
@@ -29,9 +30,10 @@ function AutocompleteInput({
   showCurrentLocation = false,
   onCurrentLocation,
   onSubmit,
+  anchorCoords = null,
 }: AutocompleteInputProps) {
   const t = useTranslations('gps');
-  const { suggestions, search, select, clear } = useSearchSuggestions();
+  const { suggestions, search, select, clear } = useSearchSuggestions(anchorCoords);
   const listId = useId();
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [isOpen, setIsOpen] = useState(false);

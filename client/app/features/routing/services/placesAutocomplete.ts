@@ -14,11 +14,15 @@ export async function fetchDbSuggestions(
   query: string,
   lang: 'en' | 'ar',
   signal?: AbortSignal,
+  anchor?: [number, number] | null,
 ): Promise<Suggestion[]> {
   if (query.length < 2) return []
   try {
+    const anchorQs = anchor
+      ? `&lng=${encodeURIComponent(anchor[0])}&lat=${encodeURIComponent(anchor[1])}`
+      : ''
     const res = await fetch(
-      `/api/places/search?q=${encodeURIComponent(query)}`,
+      `/api/places/search?q=${encodeURIComponent(query)}${anchorQs}`,
       { signal },
     )
     if (!res.ok) return []

@@ -238,6 +238,7 @@ export default function Home() {
               setFlyToLocation([...coords]);
             }}
             onSubmit={() => void handleFindRoute()}
+            anchorCoords={userLocation ?? destCoords}
           />
 
           <button
@@ -260,6 +261,7 @@ export default function Home() {
             label={tRouting('destinationLabel')}
             icon="📍"
             onSubmit={() => void handleFindRoute()}
+            anchorCoords={userLocation ?? startCoords}
           />
         </div>
 

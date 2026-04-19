@@ -17,7 +17,9 @@ interface UseSearchSuggestionsResult {
   clear: () => void;
 }
 
-export function useSearchSuggestions(): UseSearchSuggestionsResult {
+export function useSearchSuggestions(
+  anchor?: [number, number] | null,
+): UseSearchSuggestionsResult {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
@@ -25,6 +27,8 @@ export function useSearchSuggestions(): UseSearchSuggestionsResult {
   const sessionTokenRef = useRef(crypto.randomUUID());
   const locale = useLocale();
   const lang: 'en' | 'ar' = locale === 'ar' ? 'ar' : 'en';
+  const anchorRef = useRef(anchor);
+  anchorRef.current = anchor;
 
   const search = useCallback((query: string) => {
     clearTimeout(debounceRef.current);
@@ -42,7 +46,7 @@ export function useSearchSuggestions(): UseSearchSuggestionsResult {
       abortRef.current = controller;
 
       Promise.allSettled([
-        fetchDbSuggestions(query, lang, controller.signal),
+        fetchDbSuggestions(query, lang, controller.signal, anchorRef.current),
         fetchSuggestions(query, sessionTokenRef.current, controller.signal),
       ])
         .then(([dbRes, mbRes]) => {
