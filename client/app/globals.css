@@ -720,6 +720,76 @@ body {
 .insights-title { margin: 0; color: var(--insights-title); font-size: 1.05rem; font-weight: 700; }
 .insights-text { margin: 0; font-size: 0.95rem; color: var(--insights-text); line-height: 1.6; }
 
+/* --- METRO / TRANSIT SUMMARY --- */
+.transit-summary {
+  background: linear-gradient(135deg, var(--insights-bg-start) 0%, var(--insights-bg-end) 100%);
+  border-radius: 18px;
+  border: 1px solid var(--insights-border);
+  padding: 18px;
+  box-shadow: 0 4px 20px rgba(14, 165, 233, 0.1);
+  animation: fadeIn 0.4s ease-out;
+}
+.transit-summary-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+}
+.transit-summary-icon { font-size: 1.15rem; }
+.transit-summary-title {
+  margin: 0; color: var(--insights-title); font-size: 1.05rem; font-weight: 700;
+}
+.transit-summary-total {
+  margin-inline-start: auto;
+  font-size: 0.9rem; font-weight: 600;
+  color: var(--insights-title);
+  font-variant-numeric: tabular-nums;
+}
+.transit-legs {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.transit-leg {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 10px;
+  background: rgba(255, 255, 255, 0.35);
+  font-size: 0.92rem;
+  color: var(--insights-text);
+}
+.transit-leg--walk { opacity: 0.88; }
+.transit-leg-icon { font-size: 1rem; flex: 0 0 auto; }
+.transit-leg-stripe {
+  display: inline-block;
+  width: 4px; height: 22px;
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+.transit-leg-text { line-height: 1.4; }
+.transit-transfer-note {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+.transit-no-route {
+  background: var(--insights-bg-start);
+  border: 1px solid var(--insights-border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 10px;
+  animation: fadeIn 0.4s ease-out;
+}
+.transit-no-route p { margin: 0; font-size: 0.92rem; color: var(--insights-text); line-height: 1.5; }
+.transit-switch-btn {
+  align-self: flex-start;
+  padding: 8px 14px;
+  border: 1px solid var(--insights-border);
+  background: transparent;
+  color: var(--insights-title);
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+.transit-switch-btn:hover { background: rgba(14, 165, 233, 0.08); }
+
 /* --- BEST TIME TO LEAVE --- */
 .best-time-pane {
   background: linear-gradient(135deg, var(--insights-bg-start) 0%, var(--insights-bg-end) 100%);

@@ -21,6 +21,7 @@ import ThemeToggle from './features/theme/components/ThemeToggle'
 import { useTheme } from './features/theme/hooks/useTheme'
 import AutocompleteInput from './features/routing/components/AutocompleteInput'
 import BestTimePanel from './features/routing/components/BestTimePanel'
+import TransitSummaryCard from './features/routing/components/TransitSummaryCard'
 import TurnByTurnPanel from './features/routing/components/TurnByTurnPanel'
 import { ROUTE_LABEL_KEYS } from './features/routing/types'
 import { buildGoogleMapsUrl } from './features/routing/utils/deeplinks'
@@ -51,6 +52,7 @@ export default function Home() {
     routeCoords,
     routeInfo,
     insights,
+    transit,
     isCalculating,
     error,
     findRoute,
@@ -169,8 +171,9 @@ export default function Home() {
     await findRoute(startLocation, resolvedDestination, {
       start: startCoords ?? undefined,
       end: endCoords,
+      travelMode,
     });
-  }, [destination, destCoords, findRoute, startCoords, startLocation, setDestination]);
+  }, [destination, destCoords, findRoute, startCoords, startLocation, setDestination, travelMode]);
 
   const handleSwap = useCallback(() => {
     setIsSwapping(true);
@@ -308,7 +311,36 @@ export default function Home() {
 
         <div className="separator" />
 
-        {routeInfo && (
+        {travelMode === 'metro' && transit.kind === 'ready' && (
+          <>
+            <TransitSummaryCard plan={transit.plan} />
+            <div className="separator" />
+          </>
+        )}
+
+        {travelMode === 'metro' && transit.kind === 'no-route' && (
+          <>
+            <div className="transit-no-route">
+              <p>
+                {tRouting('metro.noRoute', {
+                  km: transit.nearestStationKm !== null
+                    ? transit.nearestStationKm.toFixed(1)
+                    : '—',
+                })}
+              </p>
+              <button
+                type="button"
+                className="transit-switch-btn"
+                onClick={() => setTravelMode('driving')}
+              >
+                {tRouting('metro.switchToDriving')}
+              </button>
+            </div>
+            <div className="separator" />
+          </>
+        )}
+
+        {routeInfo && travelMode !== 'metro' && (
           <>
             <RouteSummaryCard
               startLocation={startLocation}
@@ -367,7 +399,7 @@ export default function Home() {
           </>
         )}
 
-        {insights && (
+        {insights && travelMode !== 'metro' && (
           <>
             <div className="insights-pane">
               <div className="insights-header">
@@ -385,7 +417,7 @@ export default function Home() {
           </>
         )}
 
-        {startCoords && destCoords && (
+        {startCoords && destCoords && travelMode !== 'metro' && (
           <>
             <BestTimePanel
               startCoords={startCoords}
@@ -498,6 +530,7 @@ export default function Home() {
           onMapClick={handleMapClick}
           destPinCoords={destCoords}
           trafficVisible={trafficVisible}
+          transitPlan={transit.kind === 'ready' ? transit.plan : null}
         />
       </ErrorBoundary>
     </main>

@@ -4,6 +4,7 @@ const GOOGLE_MODE: Record<TravelMode, string> = {
   driving: 'driving',
   walking: 'walking',
   cycling: 'bicycling',
+  metro: 'transit',
 };
 
 function formatEndpoint(endpoint: [number, number] | string): string {

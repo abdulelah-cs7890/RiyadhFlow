@@ -25,13 +25,25 @@
     "driveLabel": "سيارة",
     "walkLabel": "مشياً",
     "bikeLabel": "دراجة",
+    "metroLabel": "مترو",
     "travelModeAriaLabel": "وسيلة التنقل",
     "routeOptionsTitle": "خيارات المسار",
     "routeAltAriaLabel": "مسارات بديلة",
     "routeOption": "خيار {n}",
     "fastest": "الأسرع",
     "balanced": "متوازن",
-    "eco": "اقتصادي"
+    "eco": "اقتصادي",
+    "metro": {
+      "summaryTitle": "مسار المترو",
+      "totalTime": "{mins} دقيقة إجمالاً",
+      "walk": "امشِ {mins} دقيقة",
+      "walkTo": "امشِ {mins} دقيقة إلى {station}",
+      "walkFrom": "امشِ {mins} دقيقة من {station}",
+      "takeLine": "{line} · {stops} محطات · {mins} دقيقة",
+      "transferCount": "{count, plural, zero {لا تحويلات} one {تحويل واحد} two {تحويلان} few {# تحويلات} many {# تحويلاً} other {# تحويل}}",
+      "noRoute": "لا يوجد مسار مترو من هنا — أقرب محطة تبعد {km} كم.",
+      "switchToDriving": "التبديل إلى القيادة"
+    }
   },
   "gps": {
     "useCurrentLocation": "استخدام موقعي الحالي",

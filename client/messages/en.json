@@ -25,13 +25,25 @@
     "driveLabel": "Drive",
     "walkLabel": "Walk",
     "bikeLabel": "Bike",
+    "metroLabel": "Metro",
     "travelModeAriaLabel": "Travel mode",
     "routeOptionsTitle": "Route Options",
     "routeAltAriaLabel": "Route alternatives",
     "routeOption": "Option {n}",
     "fastest": "Fastest",
     "balanced": "Balanced",
-    "eco": "Eco"
+    "eco": "Eco",
+    "metro": {
+      "summaryTitle": "Metro route",
+      "totalTime": "{mins} min total",
+      "walk": "Walk {mins} min",
+      "walkTo": "Walk {mins} min to {station}",
+      "walkFrom": "Walk {mins} min from {station}",
+      "takeLine": "{line} · {stops} stops · {mins} min",
+      "transferCount": "{count, plural, one {# transfer} other {# transfers}}",
+      "noRoute": "No metro route from here — nearest station is {km} km away.",
+      "switchToDriving": "Switch to driving"
+    }
   },
   "gps": {
     "useCurrentLocation": "Use my current location",

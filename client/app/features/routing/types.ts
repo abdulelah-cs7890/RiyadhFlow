@@ -1,4 +1,4 @@
-export type TravelMode = 'driving' | 'walking' | 'cycling';
+export type TravelMode = 'driving' | 'walking' | 'cycling' | 'metro';
 
 export interface RouteAlternative {
   index: number;

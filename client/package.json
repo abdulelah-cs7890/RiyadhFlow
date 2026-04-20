@@ -19,7 +19,8 @@
     "db:seed": "dotenv -e .env.local -- prisma db seed",
     "db:studio": "dotenv -e .env.local -- prisma studio",
     "db:generate": "dotenv -e .env.local -- prisma generate",
-    "db:import:osm": "dotenv -e .env.local -- tsx prisma/import-osm.ts"
+    "db:import:osm": "dotenv -e .env.local -- tsx prisma/import-osm.ts",
+    "import:metro": "tsx prisma/import-metro.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
