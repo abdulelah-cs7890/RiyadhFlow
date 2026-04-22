@@ -109,7 +109,11 @@
     "nearMeError": "تعذر تحديد الموقع",
     "km": "{km} كم",
     "distanceFromYou": "المسافة منك",
-    "noPlacesNearby": "لا توجد أماكن قريبة منك. جرّب نطاقاً أوسع."
+    "noPlacesNearby": "لا توجد أماكن قريبة منك. جرّب نطاقاً أوسع.",
+    "searchPlaceholder": "ابحث عن الأماكن في الرياض",
+    "searchClear": "مسح البحث",
+    "searchNoResults": "لا توجد نتائج",
+    "searchResultType": "مكان"
   },
   "categories": {
     "all": "الكل",

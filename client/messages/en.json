@@ -109,7 +109,11 @@
     "nearMeError": "Location unavailable",
     "km": "{km} km",
     "distanceFromYou": "Distance from you",
-    "noPlacesNearby": "No places found near you. Try a wider radius."
+    "noPlacesNearby": "No places found near you. Try a wider radius.",
+    "searchPlaceholder": "Search places in Riyadh",
+    "searchClear": "Clear search",
+    "searchNoResults": "No places found",
+    "searchResultType": "Place"
   },
   "categories": {
     "all": "All",

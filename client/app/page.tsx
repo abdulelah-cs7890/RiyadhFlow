@@ -13,6 +13,7 @@ import { useRecentTrips } from './features/trips/hooks/useRecentTrips'
 import { usePlaces } from './features/places/hooks/usePlaces'
 import CategoryBar from './features/places/components/CategoryBar'
 import PlaceCard from './features/places/components/PlaceCard'
+import PlaceSearchBar from './features/places/components/PlaceSearchBar'
 import { categoryPills } from './features/places/constants/categoryPills'
 import { RouteAlternative } from './features/routing/types'
 import RouteAlternativesPanel from './features/routing/components/RouteAlternativesPanel'
@@ -267,6 +268,16 @@ export default function Home() {
               <ThemeToggle theme={theme} onToggle={toggleTheme} />
             </span>
           </h2>
+        </div>
+
+        <div className="place-search-section">
+          <PlaceSearchBar
+            anchorCoords={userLocation ?? startCoords}
+            onSelect={(place) => {
+              setSelectedPlace(place);
+              setFlyToLocation(place.coords);
+            }}
+          />
         </div>
 
         <div className={`routing-container${isSwapping ? ' is-swapping' : ''}`}>

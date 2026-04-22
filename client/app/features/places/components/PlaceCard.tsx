@@ -1,13 +1,12 @@
 'use client'
 
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import { PlaceData } from '@/app/utils/mockData'
 import { useLocale } from '@/app/i18n/LocaleProvider'
 import { getLocalizedPlace } from '@/app/i18n/helpers'
-
-const FALLBACK_PLACE_IMAGE = 'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?w=800&q=80';
+import { CATEGORY_EMOJIS } from '../constants/categoryPills'
 
 export interface PrayerWarning {
   prayer: string;
@@ -26,6 +25,10 @@ function PlaceCard({ place, onClose, onDirections, prayerWarning }: PlaceCardPro
   const tPrayer = useTranslations('prayer');
   const { locale } = useLocale();
   const localizedPlace = getLocalizedPlace(place, locale);
+  const [imageFailed, setImageFailed] = useState(false);
+
+  const hasImage = Boolean(localizedPlace.image) && !imageFailed;
+  const emoji = place.category ? CATEGORY_EMOJIS[place.category] : '📍';
 
   return (
     <div className="place-card">
@@ -36,19 +39,21 @@ function PlaceCard({ place, onClose, onDirections, prayerWarning }: PlaceCardPro
       >
         ✕
       </button>
-      <Image
-        src={localizedPlace.image ?? FALLBACK_PLACE_IMAGE}
-        alt={localizedPlace.name}
-        className="place-image"
-        width={720}
-        height={400}
-        sizes="(max-width: 900px) 100vw, 360px"
-        onError={(event) => {
-          const image = event.currentTarget as HTMLImageElement;
-          image.onerror = null;
-          image.src = FALLBACK_PLACE_IMAGE;
-        }}
-      />
+      {hasImage ? (
+        <Image
+          src={localizedPlace.image as string}
+          alt={localizedPlace.name}
+          className="place-image"
+          width={720}
+          height={400}
+          sizes="(max-width: 900px) 100vw, 360px"
+          onError={() => setImageFailed(true)}
+        />
+      ) : (
+        <div className="place-image-fallback" aria-hidden="true">
+          <span className="place-image-fallback-emoji">{emoji}</span>
+        </div>
+      )}
 
       <div className="place-content">
         <h2 className="place-title">{localizedPlace.name}</h2>
