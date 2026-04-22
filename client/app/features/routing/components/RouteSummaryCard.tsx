@@ -10,6 +10,7 @@ interface RouteSummaryCardProps {
   duration: number;
   via?: string;
   label: string;
+  cameraCount?: number;
 }
 
 function RouteSummaryCard({
@@ -19,6 +20,7 @@ function RouteSummaryCard({
   duration,
   via,
   label,
+  cameraCount,
 }: RouteSummaryCardProps) {
   const t = useTranslations('routing');
   const km = (distance / 1000).toFixed(1);
@@ -47,6 +49,14 @@ function RouteSummaryCard({
         <div className="route-summary-tags">
           <span className="route-tag">{label}</span>
           <span className="route-tag route-tag--eta">{t('arriveBy', { time: eta })}</span>
+          {cameraCount !== undefined && cameraCount > 0 && (
+            <span
+              className="route-tag route-tag--cameras"
+              title={t('cameraTooltip')}
+            >
+              {t('camerasOnRoute', { count: cameraCount })}
+            </span>
+          )}
         </div>
       </div>
     </div>

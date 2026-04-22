@@ -9,6 +9,7 @@ import { PlaceData } from './utils/mockData'
 import { useRoutePlanner } from './features/routing/hooks/useRoutePlanner'
 import { useUrlSyncedRouteState } from './features/routing/hooks/useUrlSyncedRouteState'
 import { useSavedTrips } from './features/trips/hooks/useSavedTrips'
+import { useRecentTrips } from './features/trips/hooks/useRecentTrips'
 import { usePlaces } from './features/places/hooks/usePlaces'
 import CategoryBar from './features/places/components/CategoryBar'
 import PlaceCard from './features/places/components/PlaceCard'
@@ -23,11 +24,26 @@ import AutocompleteInput from './features/routing/components/AutocompleteInput'
 import BestTimePanel from './features/routing/components/BestTimePanel'
 import TransitSummaryCard from './features/routing/components/TransitSummaryCard'
 import TurnByTurnPanel from './features/routing/components/TurnByTurnPanel'
+import WaypointsList from './features/routing/components/WaypointsList'
 import { ROUTE_LABEL_KEYS } from './features/routing/types'
 import { buildGoogleMapsUrl } from './features/routing/utils/deeplinks'
 import { parseUrlRouteState, buildUrlWithRouteState } from './features/routing/utils/urlState'
 import LanguageToggle from './components/LanguageToggle'
 import { useGeolocation } from './hooks/useGeolocation'
+import PrayerStatusPill from './features/prayer/components/PrayerStatusPill'
+import { usePrayerTimes } from './features/prayer/hooks/usePrayerTimes'
+import type { PrayerWarning } from './features/places/components/PlaceCard'
+
+const PRAYER_CLOSURE_CATEGORIES = new Set(['Restaurants', 'Hotels', 'Museums', 'Pharmacies'])
+const PRAYER_WARNING_WINDOW_MINS = 20
+
+const PRAYER_NAME_KEY: Record<string, string> = {
+  Fajr: 'fajr',
+  Dhuhr: 'dhuhr',
+  Asr: 'asr',
+  Maghrib: 'maghrib',
+  Isha: 'isha',
+}
 
 export default function Home() {
   const tRouting = useTranslations('routing');
@@ -45,11 +61,17 @@ export default function Home() {
     setActiveCategory,
     travelMode,
     setTravelMode,
+    waypoints,
+    setWaypoints,
   } = useUrlSyncedRouteState();
   const { theme, toggleTheme } = useTheme();
   const { trips: savedTrips, saveTrip, deleteTrip } = useSavedTrips();
+  const { recents, recordRecent, clearRecents } = useRecentTrips();
+  const tPrayer = useTranslations('prayer');
+  const { next: nextPrayer } = usePrayerTimes();
   const {
     routeCoords,
+    waypointCoords,
     routeInfo,
     insights,
     transit,
@@ -107,6 +129,21 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [nearMe.status, nearMe.clear]);
 
+  useEffect(() => {
+    if (!routeInfo || travelMode === 'metro') return;
+    if (!startLocation || !destination) return;
+    recordRecent(startLocation, destination, startCoords, destCoords);
+    // deps intentionally narrow: only fire on new route completion
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routeInfo]);
+
+  useEffect(() => {
+    if (travelMode !== 'metro' || transit.kind !== 'ready') return;
+    if (!startLocation || !destination) return;
+    recordRecent(startLocation, destination, startCoords, destCoords);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transit.kind]);
+
   const handleNearMeToggle = useCallback(() => {
     if (nearMeActive) {
       setNearMeActive(false);
@@ -133,6 +170,7 @@ export default function Home() {
       mode: travelMode,
       startCoords: startCoords ?? undefined,
       destCoords: destCoords ?? undefined,
+      ...(waypoints.length > 0 ? { waypoints } : {}),
     });
     try {
       await navigator.clipboard.writeText(shareUrl);
@@ -172,8 +210,9 @@ export default function Home() {
       start: startCoords ?? undefined,
       end: endCoords,
       travelMode,
+      waypoints,
     });
-  }, [destination, destCoords, findRoute, startCoords, startLocation, setDestination, travelMode]);
+  }, [destination, destCoords, findRoute, startCoords, startLocation, setDestination, travelMode, waypoints]);
 
   const handleSwap = useCallback(() => {
     setIsSwapping(true);
@@ -190,6 +229,7 @@ export default function Home() {
     setDestination('');
     setStartCoords(null);
     setDestCoords(null);
+    setWaypoints([]);
     setRouteAlternatives([]);
     setSelectedRouteIndex(0);
     setFlyToLocation(null);
@@ -197,7 +237,7 @@ export default function Home() {
     setSelectedPlace(null);
     setNearMeActive(false);
     nearMe.clear();
-  }, [resetRoute, setStartLocation, setDestination, nearMe]);
+  }, [resetRoute, setStartLocation, setDestination, setWaypoints, nearMe]);
 
   const hasRoutingState = Boolean(
     routeInfo || startLocation || destination || startCoords || destCoords
@@ -221,7 +261,8 @@ export default function Home() {
         <div className="glass-pane-header">
           <h2 className="title">
             {tUi('appTitle')}
-            <span style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
+            <span style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <PrayerStatusPill />
               <LanguageToggle />
               <ThemeToggle theme={theme} onToggle={toggleTheme} />
             </span>
@@ -257,6 +298,14 @@ export default function Home() {
             </svg>
           </button>
 
+          <WaypointsList
+            waypoints={waypoints}
+            onChange={setWaypoints}
+            disabled={travelMode === 'metro'}
+            anchorCoords={userLocation ?? startCoords ?? destCoords}
+            onSubmit={() => void handleFindRoute()}
+          />
+
           <AutocompleteInput
             value={destination}
             onChange={(v) => { setDestination(v); setDestCoords(null); }}
@@ -268,6 +317,12 @@ export default function Home() {
             anchorCoords={userLocation ?? startCoords}
           />
         </div>
+
+        {travelMode === 'metro' && waypoints.length > 0 && (
+          <div className="multi-stop-metro-note" role="note">
+            {tRouting('multiStopMetroUnavailable')}
+          </div>
+        )}
 
         <TravelModeSwitcher mode={travelMode} onModeChange={setTravelMode} />
 
@@ -349,6 +404,7 @@ export default function Home() {
               duration={routeInfo.duration}
               via={routeAlternatives[selectedRouteIndex]?.summary}
               label={ROUTE_LABEL_KEYS[selectedRouteIndex] ? tRouting(ROUTE_LABEL_KEYS[selectedRouteIndex]) : tRouting('routeOption', { n: selectedRouteIndex + 1 })}
+              cameraCount={travelMode === 'driving' ? routeInfo.cameraCount : undefined}
             />
             <div className="route-actions">
               <button
@@ -366,6 +422,7 @@ export default function Home() {
                     startCoords ?? startLocation,
                     destCoords ?? destination,
                     travelMode,
+                    waypointCoords.length > 0 ? waypointCoords : undefined,
                   )}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -427,6 +484,39 @@ export default function Home() {
             <div className="separator" />
           </>
         )}
+
+        {(() => {
+          const savedKeys = new Set(savedTrips.map((t) => `${t.start}→${t.dest}`));
+          const visibleRecents = recents.filter((r) => !savedKeys.has(`${r.start}→${r.dest}`));
+          if (visibleRecents.length === 0) return null;
+          return (
+            <div className="saved-trips-pane recent-trips-pane">
+              <div className="recent-trips-header">
+                <h3 className="saved-trips-title">{tTrips('recent')}</h3>
+                <button
+                  type="button"
+                  className="recent-clear-btn"
+                  onClick={clearRecents}
+                  aria-label={tTrips('recentAriaLabel')}
+                >
+                  {tTrips('clearRecent')}
+                </button>
+              </div>
+              {visibleRecents.map((trip) => (
+                <div key={trip.id} className="trip-card trip-card--recent">
+                  <button
+                    className="trip-load-btn"
+                    onClick={() => handleLoadTrip(trip)}
+                    title={tTrips('loadTrip')}
+                  >
+                    <span>🕘</span>
+                    <span>{trip.start} → {trip.dest}</span>
+                  </button>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
 
         {savedTrips.length > 0 && (
           <div className="saved-trips-pane">
@@ -491,16 +581,31 @@ export default function Home() {
         </div>
       )}
 
-      {selectedPlace && (
-        <PlaceCard
-          place={selectedPlace}
-          onClose={() => setSelectedPlace(null)}
-          onDirections={(placeName, coords) => {
-            void handleFindRoute(placeName, coords);
-            setSelectedPlace(null);
-          }}
-        />
-      )}
+      {selectedPlace && (() => {
+        let prayerWarning: PrayerWarning | null = null;
+        if (
+          nextPrayer
+          && nextPrayer.minutesUntil <= PRAYER_WARNING_WINDOW_MINS
+          && selectedPlace.category
+          && PRAYER_CLOSURE_CATEGORIES.has(selectedPlace.category)
+        ) {
+          prayerWarning = {
+            prayer: tPrayer(PRAYER_NAME_KEY[nextPrayer.name]),
+            inMinutes: nextPrayer.minutesUntil,
+          };
+        }
+        return (
+          <PlaceCard
+            place={selectedPlace}
+            onClose={() => setSelectedPlace(null)}
+            onDirections={(placeName, coords) => {
+              void handleFindRoute(placeName, coords);
+              setSelectedPlace(null);
+            }}
+            prayerWarning={prayerWarning}
+          />
+        );
+      })()}
 
       <button
         type="button"
@@ -516,6 +621,7 @@ export default function Home() {
       <ErrorBoundary>
         <Map
           routeCoords={routeCoords}
+          waypointCoords={waypointCoords}
           onRouteFetched={handleRouteFetched}
           onRouteAlternativesFetched={handleRouteAlternativesFetched}
           selectedRouteIndex={selectedRouteIndex}

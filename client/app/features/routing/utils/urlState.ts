@@ -1,5 +1,5 @@
 import { Category, CATEGORY_LABELS } from '@/app/utils/mockData';
-import { TravelMode } from '../types';
+import { TravelMode, Waypoint } from '../types';
 
 export interface UrlRouteState {
   start: string;
@@ -8,6 +8,7 @@ export interface UrlRouteState {
   mode: TravelMode;
   startCoords?: [number, number];
   destCoords?: [number, number];
+  waypoints?: Waypoint[];
 }
 
 function parseCoords(raw: string | null): [number, number] | undefined {
@@ -17,7 +18,7 @@ function parseCoords(raw: string | null): [number, number] | undefined {
   return [parts[0], parts[1]];
 }
 
-const VALID_MODES: TravelMode[] = ['driving', 'walking', 'cycling'];
+const VALID_MODES: TravelMode[] = ['driving', 'walking', 'cycling', 'metro'];
 
 export function isCategory(value: string | null): value is Category {
   return !!value && CATEGORY_LABELS.includes(value as Category);
@@ -32,6 +33,15 @@ export function parseUrlRouteState(search: string): UrlRouteState {
   const categoryValue = params.get('category');
   const modeValue = params.get('mode');
 
+  const waypoints: Waypoint[] = [];
+  for (const i of [1, 2]) {
+    const name = params.get(`wp${i}`);
+    const coords = parseCoords(params.get(`wp${i}c`));
+    if (name) {
+      waypoints.push({ name, coords: coords ?? null });
+    }
+  }
+
   return {
     start: params.get('start') ?? '',
     destination: params.get('destination') ?? '',
@@ -39,6 +49,7 @@ export function parseUrlRouteState(search: string): UrlRouteState {
     mode: isTravelMode(modeValue) ? modeValue : 'driving',
     startCoords: parseCoords(params.get('sc')),
     destCoords: parseCoords(params.get('dc')),
+    ...(waypoints.length > 0 ? { waypoints } : {}),
   };
 }
 
@@ -52,6 +63,14 @@ export function buildUrlWithRouteState(pathname: string, state: UrlRouteState): 
 
   if (state.startCoords) params.set('sc', `${state.startCoords[0]},${state.startCoords[1]}`);
   if (state.destCoords) params.set('dc', `${state.destCoords[0]},${state.destCoords[1]}`);
+
+  if (state.waypoints) {
+    state.waypoints.slice(0, 2).forEach((wp, i) => {
+      if (!wp.name) return;
+      params.set(`wp${i + 1}`, wp.name);
+      if (wp.coords) params.set(`wp${i + 1}c`, `${wp.coords[0]},${wp.coords[1]}`);
+    });
+  }
 
   const query = params.toString();
   return query ? `${pathname}?${query}` : pathname;

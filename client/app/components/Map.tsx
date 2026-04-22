@@ -8,6 +8,8 @@ import { Category, PlaceData } from '../utils/mockData'
 import { RouteAlternative, RouteInfo, TravelMode } from '../features/routing/types'
 import type { TransitPlan } from '../features/routing/services/transitRouting'
 import { reverseGeocode } from '../features/routing/services/geocoding'
+import { camerasOnRoute, SpeedCamera } from '../features/routing/utils/speedCameras'
+import speedCamerasData from '../features/routing/data/riyadh-speed-cameras.json'
 import { CATEGORY_EMOJIS } from '../features/places/constants/categoryPills'
 import { useLocale } from '../i18n/LocaleProvider'
 import { useTranslations } from 'next-intl'
@@ -39,6 +41,7 @@ interface MapProps {
   destPinCoords?: [number, number] | null;
   trafficVisible?: boolean;
   transitPlan?: TransitPlan | null;
+  waypointCoords?: [number, number][];
 }
 
 interface MapboxStep {
@@ -77,6 +80,11 @@ const TRANSIT_TRAIN_SOURCE_ID = 'transit-train';
 const TRANSIT_TRAIN_LAYER_ID = 'transit-train';
 const TRANSIT_STOPS_SOURCE_ID = 'transit-stops';
 const TRANSIT_STOPS_LAYER_ID = 'transit-stops';
+
+const SPEED_CAMERAS_SOURCE_ID = 'speed-cameras';
+const SPEED_CAMERAS_LAYER_ID = 'speed-cameras';
+
+const ALL_SPEED_CAMERAS = speedCamerasData as SpeedCamera[];
 
 const SELECTED_ROUTE_COLOR = { light: '#0070f3', dark: '#38bdf8' };
 const ALT_ROUTE_COLOR = { light: '#94a3b8', dark: '#64748b' };
@@ -219,6 +227,39 @@ function getRouteBounds(coordinates: [number, number][]) {
   return bounds;
 }
 
+function clearCameraLayer(map: mapboxgl.Map) {
+  try {
+    if (map.getLayer(SPEED_CAMERAS_LAYER_ID)) map.removeLayer(SPEED_CAMERAS_LAYER_ID);
+    if (map.getSource(SPEED_CAMERAS_SOURCE_ID)) map.removeSource(SPEED_CAMERAS_SOURCE_ID);
+  } catch { /* already gone */ }
+}
+
+function drawCameras(map: mapboxgl.Map, cameras: SpeedCamera[]) {
+  clearCameraLayer(map);
+  if (cameras.length === 0) return;
+  const features = cameras.map((c) => ({
+    type: 'Feature' as const,
+    properties: { id: c.id, maxspeed: c.maxspeed ?? null },
+    geometry: { type: 'Point' as const, coordinates: [c.lng, c.lat] },
+  }));
+  map.addSource(SPEED_CAMERAS_SOURCE_ID, {
+    type: 'geojson',
+    data: { type: 'FeatureCollection', features },
+  });
+  map.addLayer({
+    id: SPEED_CAMERAS_LAYER_ID,
+    type: 'circle',
+    source: SPEED_CAMERAS_SOURCE_ID,
+    paint: {
+      'circle-radius': 5,
+      'circle-color': '#ef4444',
+      'circle-stroke-color': '#ffffff',
+      'circle-stroke-width': 2,
+      'circle-opacity': 0.95,
+    },
+  });
+}
+
 function clearTransitLayers(map: mapboxgl.Map) {
   const ids = [
     [TRANSIT_STOPS_LAYER_ID, TRANSIT_STOPS_SOURCE_ID],
@@ -335,6 +376,7 @@ export default function Map({
   destPinCoords,
   trafficVisible = false,
   transitPlan = null,
+  waypointCoords = [],
 }: MapProps) {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -359,6 +401,8 @@ export default function Map({
   themeRef.current = theme;
   const localeRef = useRef<'en' | 'ar'>(locale);
   localeRef.current = locale;
+  const travelModeRef = useRef<TravelMode>(travelMode);
+  travelModeRef.current = travelMode;
   const hasToken = Boolean(process.env.NEXT_PUBLIC_MAPBOX_TOKEN);
   // Track map style load so markers aren't skipped when places arrive before the map is ready
   const [mapReady, setMapReady] = useState(false);
@@ -370,6 +414,10 @@ export default function Map({
     const maxIndex = routeAlternativesRef.current.length - 1;
     const safeIndex = Math.min(Math.max(index, 0), maxIndex);
     const route = routeAlternativesRef.current[safeIndex];
+
+    const matchedCameras = travelModeRef.current === 'driving'
+      ? camerasOnRoute(route.geometry.coordinates, ALL_SPEED_CAMERAS)
+      : [];
 
     if (onRouteFetched) {
       const rawSteps = route.legs?.[0]?.steps;
@@ -386,6 +434,7 @@ export default function Map({
           roadName: s.name,
           location: s.maneuver.location,
         })),
+        cameraCount: matchedCameras.length,
       });
     }
 
@@ -411,6 +460,7 @@ export default function Map({
     const render = () => {
       upsertAltRoutesLayer(map, altCollection, themeRef.current);
       upsertRouteLayer(map, geojson, themeRef.current);
+      drawCameras(map, matchedCameras);
     };
     if (map.isStyleLoaded()) {
       render();
@@ -609,6 +659,7 @@ export default function Map({
           if (map.getSource(ROUTE_SOURCE_ID)) map.removeSource(ROUTE_SOURCE_ID);
           if (map.getLayer(ALT_ROUTE_LAYER_ID)) map.removeLayer(ALT_ROUTE_LAYER_ID);
           if (map.getSource(ALT_ROUTE_SOURCE_ID)) map.removeSource(ALT_ROUTE_SOURCE_ID);
+          clearCameraLayer(map);
         } catch { /* style swapping — layer already gone */ }
       };
       if (map.isStyleLoaded()) clearLayer();
@@ -626,6 +677,7 @@ export default function Map({
           if (map.getSource(ROUTE_SOURCE_ID)) map.removeSource(ROUTE_SOURCE_ID);
           if (map.getLayer(ALT_ROUTE_LAYER_ID)) map.removeLayer(ALT_ROUTE_LAYER_ID);
           if (map.getSource(ALT_ROUTE_SOURCE_ID)) map.removeSource(ALT_ROUTE_SOURCE_ID);
+          clearCameraLayer(map);
         } catch { /* ignore */ }
       };
       if (map.isStyleLoaded()) clearDirections();
@@ -638,8 +690,12 @@ export default function Map({
     if (onRouteAlternativesFetched) onRouteAlternativesFetched([]);
 
     async function getRouteAlternatives() {
-      const altParam = travelMode === 'driving' ? '&alternatives=true' : '';
-      const url = `https://api.mapbox.com/directions/v5/mapbox/${travelMode}/${start[0]},${start[1]};${end[0]},${end[1]}?overview=full&geometries=geojson&steps=true${altParam}&access_token=${mapboxgl.accessToken}`;
+      const altParam = travelMode === 'driving' && waypointCoords.length === 0 ? '&alternatives=true' : '';
+      const waypointsSegment = waypointCoords.map((c) => `${c[0]},${c[1]}`).join(';');
+      const pathCoords = waypointsSegment
+        ? `${start[0]},${start[1]};${waypointsSegment};${end[0]},${end[1]}`
+        : `${start[0]},${start[1]};${end[0]},${end[1]}`;
+      const url = `https://api.mapbox.com/directions/v5/mapbox/${travelMode}/${pathCoords}?overview=full&geometries=geojson&steps=true${altParam}&access_token=${mapboxgl.accessToken}`;
 
       try {
         const query = await fetch(url);
@@ -666,7 +722,7 @@ export default function Map({
     }
 
     void getRouteAlternatives();
-  }, [drawRouteByIndex, onRouteAlternativesFetched, routeCoords, travelMode]);
+  }, [drawRouteByIndex, onRouteAlternativesFetched, routeCoords, travelMode, waypointCoords]);
 
   useEffect(() => {
     if (!routeAlternativesRef.current.length) return;

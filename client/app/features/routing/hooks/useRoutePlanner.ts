@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl'
 import { getCoordinates } from '../services/geocoding'
 import { buildTrafficInsight, TrafficInsight } from '../utils/trafficInsights'
 import { planTransitTrip, TransitPlan } from '../services/transitRouting'
-import { RouteInfo, TravelMode } from '../types'
+import { RouteInfo, TravelMode, Waypoint } from '../types'
 
 type RouteCoordinates = { start: number[]; end: number[] } | null;
 
@@ -18,10 +18,12 @@ interface FindRouteOptions {
   start?: [number, number];
   end?: [number, number];
   travelMode?: TravelMode;
+  waypoints?: Waypoint[];
 }
 
 interface UseRoutePlannerResult {
   routeCoords: RouteCoordinates;
+  waypointCoords: [number, number][];
   routeInfo: RouteInfo | null;
   insights: TrafficInsight | null;
   transit: TransitStatus;
@@ -36,6 +38,7 @@ interface UseRoutePlannerResult {
 export function useRoutePlanner(): UseRoutePlannerResult {
   const t = useTranslations('errors');
   const [routeCoords, setRouteCoords] = useState<RouteCoordinates>(null);
+  const [waypointCoords, setWaypointCoords] = useState<[number, number][]>([]);
   const [routeInfo, setRouteInfo] = useState<RouteInfo | null>(null);
   const [insights, setInsights] = useState<TrafficInsight | null>(null);
   const [transit, setTransit] = useState<TransitStatus>({ kind: 'none' });
@@ -62,6 +65,7 @@ export function useRoutePlanner(): UseRoutePlannerResult {
     setInsights(null);
     setRouteInfo(null);
     setTransit({ kind: 'none' });
+    setWaypointCoords([]);
 
     try {
       const [startCoords, destinationCoords] = await Promise.all([
@@ -86,6 +90,20 @@ export function useRoutePlanner(): UseRoutePlannerResult {
       }
 
       setRouteCoords({ start: startCoords, end: destinationCoords });
+
+      // Resolve waypoint coords (ignored in metro mode — Dijkstra is point-to-point)
+      if (preResolved?.travelMode !== 'metro' && preResolved?.waypoints && preResolved.waypoints.length > 0) {
+        const resolved = await Promise.all(
+          preResolved.waypoints.map(async (wp) => {
+            if (wp.coords) return wp.coords;
+            if (!wp.name) return null;
+            const c = await getCoordinates(wp.name, controller.signal);
+            return c ? ([c[0], c[1]] as [number, number]) : null;
+          }),
+        );
+        const valid = resolved.filter((c): c is [number, number] => c !== null);
+        setWaypointCoords(valid);
+      }
 
       if (preResolved?.travelMode === 'metro') {
         const result = planTransitTrip(
@@ -119,6 +137,7 @@ export function useRoutePlanner(): UseRoutePlannerResult {
   const resetRoute = useCallback(() => {
     abortControllerRef.current?.abort();
     setRouteCoords(null);
+    setWaypointCoords([]);
     setRouteInfo(null);
     setInsights(null);
     setTransit({ kind: 'none' });
@@ -130,6 +149,7 @@ export function useRoutePlanner(): UseRoutePlannerResult {
 
   return {
     routeCoords,
+    waypointCoords,
     routeInfo,
     insights,
     transit,

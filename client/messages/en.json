@@ -33,6 +33,13 @@
     "fastest": "Fastest",
     "balanced": "Balanced",
     "eco": "Eco",
+    "addStop": "Add stop",
+    "removeStop": "Remove stop",
+    "stopLabel": "STOP {n}",
+    "stopPlaceholder": "e.g., Kingdom Tower",
+    "multiStopMetroUnavailable": "Multi-stop is not supported on metro — stops will be ignored.",
+    "camerasOnRoute": "⚠ {count, plural, one {# camera} other {# cameras}} on route",
+    "cameraTooltip": "Fixed speed-enforcement cameras along this route",
     "metro": {
       "summaryTitle": "Metro route",
       "totalTime": "{mins} min total",
@@ -68,7 +75,10 @@
     "loadTrip": "Load this route",
     "deleteTrip": "Delete trip",
     "confirmDelete": "Click again to confirm",
-    "confirmSure": "Sure?"
+    "confirmSure": "Sure?",
+    "recent": "Recent",
+    "clearRecent": "Clear",
+    "recentAriaLabel": "Clear recent trips"
   },
   "insights": {
     "title": "Smart Insights",
@@ -110,6 +120,17 @@
     "errorFallback": "Something went wrong loading the map.",
     "tryAgain": "Try Again",
     "routeBadge": "{mins} min · {km} km"
+  },
+  "prayer": {
+    "nextPrayer": "Next prayer: {name}",
+    "minutesLabel": "{mins} min",
+    "hoursLabel": "{hours}h {mins}m",
+    "mayClose": "May close soon for {prayer} in {mins} min",
+    "fajr": "Fajr",
+    "dhuhr": "Dhuhr",
+    "asr": "Asr",
+    "maghrib": "Maghrib",
+    "isha": "Isha"
   },
   "ui": {
     "appTitle": "RiyadhFlow 🚗",

@@ -20,7 +20,8 @@
     "db:studio": "dotenv -e .env.local -- prisma studio",
     "db:generate": "dotenv -e .env.local -- prisma generate",
     "db:import:osm": "dotenv -e .env.local -- tsx prisma/import-osm.ts",
-    "import:metro": "tsx prisma/import-metro.ts"
+    "import:metro": "tsx prisma/import-metro.ts",
+    "import:cameras": "tsx prisma/import-speed-cameras.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

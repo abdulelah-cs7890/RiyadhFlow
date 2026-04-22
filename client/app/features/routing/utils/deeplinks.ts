@@ -18,9 +18,14 @@ export function buildGoogleMapsUrl(
   origin: [number, number] | string,
   destination: [number, number] | string,
   travelMode: TravelMode,
+  waypoints?: Array<[number, number] | string>,
 ): string {
+  const waypointsSegment = waypoints && waypoints.length > 0
+    ? `&waypoints=${waypoints.map(formatEndpoint).join('|')}`
+    : '';
   return 'https://www.google.com/maps/dir/?api=1'
     + `&origin=${formatEndpoint(origin)}`
     + `&destination=${formatEndpoint(destination)}`
-    + `&travelmode=${GOOGLE_MODE[travelMode]}`;
+    + `&travelmode=${GOOGLE_MODE[travelMode]}`
+    + waypointsSegment;
 }

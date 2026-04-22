@@ -9,14 +9,21 @@ import { getLocalizedPlace } from '@/app/i18n/helpers'
 
 const FALLBACK_PLACE_IMAGE = 'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?w=800&q=80';
 
+export interface PrayerWarning {
+  prayer: string;
+  inMinutes: number;
+}
+
 interface PlaceCardProps {
   place: PlaceData;
   onClose: () => void;
   onDirections: (placeName: string, coords: [number, number]) => void;
+  prayerWarning?: PrayerWarning | null;
 }
 
-function PlaceCard({ place, onClose, onDirections }: PlaceCardProps) {
+function PlaceCard({ place, onClose, onDirections, prayerWarning }: PlaceCardProps) {
   const t = useTranslations('places');
+  const tPrayer = useTranslations('prayer');
   const { locale } = useLocale();
   const localizedPlace = getLocalizedPlace(place, locale);
 
@@ -63,6 +70,12 @@ function PlaceCard({ place, onClose, onDirections }: PlaceCardProps) {
         )}
 
         {localizedPlace.about && <p className="place-about">{localizedPlace.about}</p>}
+
+        {prayerWarning && (
+          <div className="prayer-warning" role="note">
+            🕌 {tPrayer('mayClose', { prayer: prayerWarning.prayer, mins: prayerWarning.inMinutes })}
+          </div>
+        )}
 
         <button
           className="go-btn"

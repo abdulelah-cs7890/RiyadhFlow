@@ -25,4 +25,12 @@ export interface RouteInfo {
   duration: number;
   duration_typical?: number;
   steps?: RouteStep[];
+  cameraCount?: number;
 }
+
+export interface Waypoint {
+  name: string;
+  coords: [number, number] | null;
+}
+
+export const MAX_WAYPOINTS = 2;
