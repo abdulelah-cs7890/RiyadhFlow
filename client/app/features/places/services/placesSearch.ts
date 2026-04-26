@@ -2,6 +2,88 @@ import { Category, PlaceData, mockCategoryData } from '@/app/utils/mockData';
 
 const RIYADH_PROXIMITY = '46.6753,24.7136';
 
+const CATEGORY_TO_ENUM: Record<Category, string> = {
+  'Restaurants': 'RESTAURANTS',
+  'Hotels': 'HOTELS',
+  'Things to do': 'THINGS_TO_DO',
+  'Museums': 'MUSEUMS',
+  'Transit': 'TRANSIT',
+  'Pharmacies': 'PHARMACIES',
+  'Gyms': 'GYMS',
+  'Mosques': 'MOSQUES',
+  'Parking': 'PARKING',
+  'Gas Stations': 'GAS_STATIONS',
+  'Malls': 'MALLS',
+};
+
+const ENUM_TO_CATEGORY: Record<string, Category> = {
+  RESTAURANTS: 'Restaurants',
+  HOTELS: 'Hotels',
+  THINGS_TO_DO: 'Things to do',
+  MUSEUMS: 'Museums',
+  TRANSIT: 'Transit',
+  PHARMACIES: 'Pharmacies',
+  GYMS: 'Gyms',
+  MOSQUES: 'Mosques',
+  PARKING: 'Parking',
+  GAS_STATIONS: 'Gas Stations',
+  MALLS: 'Malls',
+};
+
+interface DbPlaceRow {
+  name: string;
+  name_ar: string | null;
+  type: string;
+  type_ar: string | null;
+  category: string;
+  address: string;
+  address_ar: string | null;
+  about: string | null;
+  about_ar: string | null;
+  image_url: string | null;
+  rating: number | null;
+  reviews: number | null;
+  lng: number;
+  lat: number;
+  distance_m: number | null;
+}
+
+export async function fetchPlacesFromDb(
+  category: Category | null,
+  opts?: { lat?: number; lng?: number; radius?: number },
+  signal?: AbortSignal,
+): Promise<PlaceData[]> {
+  const params = new URLSearchParams();
+  if (category) params.set('category', CATEGORY_TO_ENUM[category]);
+  if (opts?.lat != null && opts?.lng != null) {
+    params.set('lat', String(opts.lat));
+    params.set('lng', String(opts.lng));
+    if (opts.radius) params.set('radius', String(opts.radius));
+  }
+  const res = await fetch(`/api/places?${params.toString()}`, { signal });
+  if (!res.ok) throw new Error(`Places API failed: ${res.status}`);
+  const rows = (await res.json()) as DbPlaceRow[];
+  return rows.map((r) => {
+    const cat = ENUM_TO_CATEGORY[r.category];
+    return {
+      name: r.name,
+      name_ar: r.name_ar ?? undefined,
+      type: r.type,
+      type_ar: r.type_ar ?? undefined,
+      address: r.address,
+      address_ar: r.address_ar ?? undefined,
+      about: r.about ?? undefined,
+      about_ar: r.about_ar ?? undefined,
+      image: r.image_url ?? (cat ? CATEGORY_DEFAULT_IMAGES[cat] : undefined),
+      rating: r.rating ?? undefined,
+      reviews: r.reviews ?? undefined,
+      coords: [Number(r.lng), Number(r.lat)],
+      distance_m: r.distance_m ?? undefined,
+      category: cat,
+    };
+  });
+}
+
 const CATEGORY_CANONICAL: Record<Category, string> = {
   'Restaurants': 'restaurant',
   'Hotels': 'hotel',
@@ -10,16 +92,24 @@ const CATEGORY_CANONICAL: Record<Category, string> = {
   'Transit': 'transit_station',
   'Pharmacies': 'pharmacy',
   'Gyms': 'gym',
+  'Mosques': 'mosque',
+  'Parking': 'parking_lot',
+  'Gas Stations': 'gas_station',
+  'Malls': 'shopping_mall',
 };
 
 const CATEGORY_DEFAULT_IMAGES: Record<Category, string> = {
-  'Restaurants': 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80',
-  'Hotels': 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80',
-  'Things to do': 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=800&q=80',
-  'Museums': 'https://images.unsplash.com/photo-1580674285054-bed31e145f59?w=800&q=80',
-  'Transit': 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80',
-  'Pharmacies': 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=800&q=80',
-  'Gyms': 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80',
+  'Restaurants': 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80',
+  'Hotels': 'https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800&q=80',
+  'Things to do': 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
+  'Museums': 'https://images.unsplash.com/photo-1554907984-15263bfd63bd?w=800&q=80',
+  'Transit': 'https://commons.wikimedia.org/wiki/Special:FilePath/Riyadh%20Metro%20%282024%29.jpg?width=800',
+  'Pharmacies': 'https://images.unsplash.com/photo-1576602976047-174e57a47881?w=800&q=80',
+  'Gyms': 'https://images.unsplash.com/photo-1534258936925-c58bed479fcb?w=800&q=80',
+  'Mosques': 'https://images.unsplash.com/photo-1542816417-0983c9c9ad53?w=800&q=80',
+  'Parking': 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=800&q=80',
+  'Gas Stations': 'https://images.unsplash.com/photo-1545459720-aac8509eb02c?w=800&q=80',
+  'Malls': 'https://images.unsplash.com/photo-1481437156560-3205f6a55735?w=800&q=80',
 };
 
 interface SearchboxFeature {

@@ -1,11 +1,13 @@
 'use client'
 
 import { useCallback, useRef, useState } from 'react'
+import { useLocale } from 'next-intl'
 import {
   Suggestion,
   fetchSuggestions,
   retrieveSuggestion,
 } from '../services/searchSuggestions'
+import { fetchDbSuggestions } from '../services/placesAutocomplete'
 
 interface UseSearchSuggestionsResult {
   suggestions: Suggestion[];
@@ -15,12 +17,18 @@ interface UseSearchSuggestionsResult {
   clear: () => void;
 }
 
-export function useSearchSuggestions(): UseSearchSuggestionsResult {
+export function useSearchSuggestions(
+  anchor?: [number, number] | null,
+): UseSearchSuggestionsResult {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const abortRef = useRef<AbortController>();
   const sessionTokenRef = useRef(crypto.randomUUID());
+  const locale = useLocale();
+  const lang: 'en' | 'ar' = locale === 'ar' ? 'ar' : 'en';
+  const anchorRef = useRef(anchor);
+  anchorRef.current = anchor;
 
   const search = useCallback((query: string) => {
     clearTimeout(debounceRef.current);
@@ -37,24 +45,30 @@ export function useSearchSuggestions(): UseSearchSuggestionsResult {
       const controller = new AbortController();
       abortRef.current = controller;
 
-      fetchSuggestions(query, sessionTokenRef.current, controller.signal)
-        .then((results) => {
-          // Drop stale responses — a newer request has already superseded this one.
+      Promise.allSettled([
+        fetchDbSuggestions(query, lang, controller.signal, anchorRef.current),
+        fetchSuggestions(query, sessionTokenRef.current, controller.signal),
+      ])
+        .then(([dbRes, mbRes]) => {
           if (controller.signal.aborted) return;
-          setSuggestions(results);
+          const db = dbRes.status === 'fulfilled' ? dbRes.value : [];
+          const mb = mbRes.status === 'fulfilled' ? mbRes.value : [];
+          const taken = new Set(db.map((s) => s.name.toLowerCase()));
+          const merged = [
+            ...db,
+            ...mb.filter((s) => !taken.has(s.name.toLowerCase())),
+          ].slice(0, 8);
+          setSuggestions(merged);
           setIsLoading(false);
-        })
-        .catch((err: unknown) => {
-          if (controller.signal.aborted) return;
-          if (err instanceof Error && err.name !== 'AbortError') {
-            setIsLoading(false);
-          }
         });
     }, 300);
-  }, []);
+  }, [lang]);
 
   const select = useCallback(async (suggestion: Suggestion) => {
     setSuggestions([]);
+    if (suggestion.source === 'db') {
+      return { name: suggestion.name, coords: suggestion.coords };
+    }
     const result = await retrieveSuggestion(suggestion.mapbox_id, sessionTokenRef.current);
     // Reset session token after a complete suggest→retrieve cycle
     sessionTokenRef.current = crypto.randomUUID();

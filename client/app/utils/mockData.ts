@@ -6,6 +6,10 @@ export const CATEGORY_LABELS = [
   'Transit',
   'Pharmacies',
   'Gyms',
+  'Mosques',
+  'Parking',
+  'Gas Stations',
+  'Malls',
 ] as const;
 
 export type Category = (typeof CATEGORY_LABELS)[number];
@@ -23,6 +27,8 @@ export interface PlaceData {
   type_ar?: string;
   address_ar?: string;
   about_ar?: string;
+  distance_m?: number;
+  category?: Category;
 }
 
 export const mockCategoryData: Record<Category, PlaceData[]> = {
@@ -236,4 +242,8 @@ export const mockCategoryData: Record<Category, PlaceData[]> = {
       about_ar: 'أجهزة حديثة ومناطق تقوية وخيارات اشتراك مرنة.',
     },
   ],
+  Mosques: [],
+  Parking: [],
+  'Gas Stations': [],
+  Malls: [],
 };

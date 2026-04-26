@@ -6,7 +6,10 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 import type { Feature, LineString } from 'geojson'
 import { Category, PlaceData } from '../utils/mockData'
 import { RouteAlternative, RouteInfo, TravelMode } from '../features/routing/types'
+import type { TransitPlan } from '../features/routing/services/transitRouting'
 import { reverseGeocode } from '../features/routing/services/geocoding'
+import { camerasOnRoute, SpeedCamera } from '../features/routing/utils/speedCameras'
+import speedCamerasData from '../features/routing/data/riyadh-speed-cameras.json'
 import { CATEGORY_EMOJIS } from '../features/places/constants/categoryPills'
 import { useLocale } from '../i18n/LocaleProvider'
 import { useTranslations } from 'next-intl'
@@ -37,6 +40,8 @@ interface MapProps {
   onMapClick?: (coords: [number, number], placeName: string | null) => void;
   destPinCoords?: [number, number] | null;
   trafficVisible?: boolean;
+  transitPlan?: TransitPlan | null;
+  waypointCoords?: [number, number][];
 }
 
 interface MapboxStep {
@@ -68,6 +73,18 @@ const ALT_ROUTE_LAYER_ID = 'route-alternatives';
 
 const TRAFFIC_SOURCE_ID = 'mapbox-traffic';
 const TRAFFIC_LAYER_ID = 'traffic-flow';
+
+const TRANSIT_WALK_SOURCE_ID = 'transit-walk';
+const TRANSIT_WALK_LAYER_ID = 'transit-walk';
+const TRANSIT_TRAIN_SOURCE_ID = 'transit-train';
+const TRANSIT_TRAIN_LAYER_ID = 'transit-train';
+const TRANSIT_STOPS_SOURCE_ID = 'transit-stops';
+const TRANSIT_STOPS_LAYER_ID = 'transit-stops';
+
+const SPEED_CAMERAS_SOURCE_ID = 'speed-cameras';
+const SPEED_CAMERAS_LAYER_ID = 'speed-cameras';
+
+const ALL_SPEED_CAMERAS = speedCamerasData as SpeedCamera[];
 
 const SELECTED_ROUTE_COLOR = { light: '#0070f3', dark: '#38bdf8' };
 const ALT_ROUTE_COLOR = { light: '#94a3b8', dark: '#64748b' };
@@ -210,6 +227,138 @@ function getRouteBounds(coordinates: [number, number][]) {
   return bounds;
 }
 
+function clearCameraLayer(map: mapboxgl.Map) {
+  try {
+    if (map.getLayer(SPEED_CAMERAS_LAYER_ID)) map.removeLayer(SPEED_CAMERAS_LAYER_ID);
+    if (map.getSource(SPEED_CAMERAS_SOURCE_ID)) map.removeSource(SPEED_CAMERAS_SOURCE_ID);
+  } catch { /* already gone */ }
+}
+
+function drawCameras(map: mapboxgl.Map, cameras: SpeedCamera[]) {
+  clearCameraLayer(map);
+  if (cameras.length === 0) return;
+  const features = cameras.map((c) => ({
+    type: 'Feature' as const,
+    properties: { id: c.id, maxspeed: c.maxspeed ?? null },
+    geometry: { type: 'Point' as const, coordinates: [c.lng, c.lat] },
+  }));
+  map.addSource(SPEED_CAMERAS_SOURCE_ID, {
+    type: 'geojson',
+    data: { type: 'FeatureCollection', features },
+  });
+  map.addLayer({
+    id: SPEED_CAMERAS_LAYER_ID,
+    type: 'circle',
+    source: SPEED_CAMERAS_SOURCE_ID,
+    paint: {
+      'circle-radius': 5,
+      'circle-color': '#ef4444',
+      'circle-stroke-color': '#ffffff',
+      'circle-stroke-width': 2,
+      'circle-opacity': 0.95,
+    },
+  });
+}
+
+function clearTransitLayers(map: mapboxgl.Map) {
+  const ids = [
+    [TRANSIT_STOPS_LAYER_ID, TRANSIT_STOPS_SOURCE_ID],
+    [TRANSIT_WALK_LAYER_ID, TRANSIT_WALK_SOURCE_ID],
+    [TRANSIT_TRAIN_LAYER_ID, TRANSIT_TRAIN_SOURCE_ID],
+  ] as const;
+  for (const [layer, source] of ids) {
+    try {
+      if (map.getLayer(layer)) map.removeLayer(layer);
+      if (map.getSource(source)) map.removeSource(source);
+    } catch { /* already gone */ }
+  }
+}
+
+function drawTransitPlan(map: mapboxgl.Map, plan: TransitPlan) {
+  clearTransitLayers(map);
+
+  const walkFeatures: Feature<LineString>[] = [];
+  const trainFeatures: Feature<LineString>[] = [];
+  const stopCoords: [number, number][] = [];
+
+  for (const leg of plan.legs) {
+    if (leg.kind === 'walk') {
+      walkFeatures.push({
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'LineString',
+          coordinates: [leg.from, leg.to],
+        },
+      });
+    } else {
+      trainFeatures.push({
+        type: 'Feature',
+        properties: { color: leg.lineColor },
+        geometry: leg.geometry,
+      });
+      const first = leg.geometry.coordinates[0];
+      const last = leg.geometry.coordinates[leg.geometry.coordinates.length - 1];
+      if (first) stopCoords.push([first[0], first[1]]);
+      if (last) stopCoords.push([last[0], last[1]]);
+    }
+  }
+
+  map.addSource(TRANSIT_WALK_SOURCE_ID, {
+    type: 'geojson',
+    data: { type: 'FeatureCollection', features: walkFeatures },
+  });
+  map.addLayer({
+    id: TRANSIT_WALK_LAYER_ID,
+    type: 'line',
+    source: TRANSIT_WALK_SOURCE_ID,
+    layout: { 'line-join': 'round', 'line-cap': 'round' },
+    paint: {
+      'line-color': '#64748b',
+      'line-width': 3,
+      'line-dasharray': [1.5, 1.5],
+      'line-opacity': 0.85,
+    },
+  });
+
+  map.addSource(TRANSIT_TRAIN_SOURCE_ID, {
+    type: 'geojson',
+    data: { type: 'FeatureCollection', features: trainFeatures },
+  });
+  map.addLayer({
+    id: TRANSIT_TRAIN_LAYER_ID,
+    type: 'line',
+    source: TRANSIT_TRAIN_SOURCE_ID,
+    layout: { 'line-join': 'round', 'line-cap': 'round' },
+    paint: {
+      'line-color': ['coalesce', ['get', 'color'], '#0ea5e9'],
+      'line-width': 5,
+      'line-opacity': 0.95,
+    },
+  });
+
+  const stopFeatures = stopCoords.map((c) => ({
+    type: 'Feature' as const,
+    properties: {},
+    geometry: { type: 'Point' as const, coordinates: c },
+  }));
+  map.addSource(TRANSIT_STOPS_SOURCE_ID, {
+    type: 'geojson',
+    data: { type: 'FeatureCollection', features: stopFeatures },
+  });
+  map.addLayer({
+    id: TRANSIT_STOPS_LAYER_ID,
+    type: 'circle',
+    source: TRANSIT_STOPS_SOURCE_ID,
+    paint: {
+      'circle-radius': 6,
+      'circle-color': '#ffffff',
+      'circle-stroke-width': 2.5,
+      'circle-stroke-color': '#111827',
+    },
+  });
+}
+
 export default function Map({
   routeCoords,
   onRouteFetched,
@@ -226,6 +375,8 @@ export default function Map({
   onMapClick,
   destPinCoords,
   trafficVisible = false,
+  transitPlan = null,
+  waypointCoords = [],
 }: MapProps) {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -250,6 +401,8 @@ export default function Map({
   themeRef.current = theme;
   const localeRef = useRef<'en' | 'ar'>(locale);
   localeRef.current = locale;
+  const travelModeRef = useRef<TravelMode>(travelMode);
+  travelModeRef.current = travelMode;
   const hasToken = Boolean(process.env.NEXT_PUBLIC_MAPBOX_TOKEN);
   // Track map style load so markers aren't skipped when places arrive before the map is ready
   const [mapReady, setMapReady] = useState(false);
@@ -261,6 +414,10 @@ export default function Map({
     const maxIndex = routeAlternativesRef.current.length - 1;
     const safeIndex = Math.min(Math.max(index, 0), maxIndex);
     const route = routeAlternativesRef.current[safeIndex];
+
+    const matchedCameras = travelModeRef.current === 'driving'
+      ? camerasOnRoute(route.geometry.coordinates, ALL_SPEED_CAMERAS)
+      : [];
 
     if (onRouteFetched) {
       const rawSteps = route.legs?.[0]?.steps;
@@ -277,6 +434,7 @@ export default function Map({
           roadName: s.name,
           location: s.maneuver.location,
         })),
+        cameraCount: matchedCameras.length,
       });
     }
 
@@ -302,6 +460,7 @@ export default function Map({
     const render = () => {
       upsertAltRoutesLayer(map, altCollection, themeRef.current);
       upsertRouteLayer(map, geojson, themeRef.current);
+      drawCameras(map, matchedCameras);
     };
     if (map.isStyleLoaded()) {
       render();
@@ -500,10 +659,29 @@ export default function Map({
           if (map.getSource(ROUTE_SOURCE_ID)) map.removeSource(ROUTE_SOURCE_ID);
           if (map.getLayer(ALT_ROUTE_LAYER_ID)) map.removeLayer(ALT_ROUTE_LAYER_ID);
           if (map.getSource(ALT_ROUTE_SOURCE_ID)) map.removeSource(ALT_ROUTE_SOURCE_ID);
+          clearCameraLayer(map);
         } catch { /* style swapping — layer already gone */ }
       };
       if (map.isStyleLoaded()) clearLayer();
       else map.once('style.load', clearLayer);
+      return;
+    }
+
+    // Metro mode: render transit plan via its own GeoJSON layers; skip Directions.
+    if (travelMode === 'metro') {
+      routeAlternativesRef.current = [];
+      if (onRouteAlternativesFetched) onRouteAlternativesFetched([]);
+      const clearDirections = () => {
+        try {
+          if (map.getLayer(ROUTE_LAYER_ID)) map.removeLayer(ROUTE_LAYER_ID);
+          if (map.getSource(ROUTE_SOURCE_ID)) map.removeSource(ROUTE_SOURCE_ID);
+          if (map.getLayer(ALT_ROUTE_LAYER_ID)) map.removeLayer(ALT_ROUTE_LAYER_ID);
+          if (map.getSource(ALT_ROUTE_SOURCE_ID)) map.removeSource(ALT_ROUTE_SOURCE_ID);
+          clearCameraLayer(map);
+        } catch { /* ignore */ }
+      };
+      if (map.isStyleLoaded()) clearDirections();
+      else map.once('style.load', clearDirections);
       return;
     }
 
@@ -512,8 +690,12 @@ export default function Map({
     if (onRouteAlternativesFetched) onRouteAlternativesFetched([]);
 
     async function getRouteAlternatives() {
-      const altParam = travelMode === 'driving' ? '&alternatives=true' : '';
-      const url = `https://api.mapbox.com/directions/v5/mapbox/${travelMode}/${start[0]},${start[1]};${end[0]},${end[1]}?overview=full&geometries=geojson&steps=true${altParam}&access_token=${mapboxgl.accessToken}`;
+      const altParam = travelMode === 'driving' && waypointCoords.length === 0 ? '&alternatives=true' : '';
+      const waypointsSegment = waypointCoords.map((c) => `${c[0]},${c[1]}`).join(';');
+      const pathCoords = waypointsSegment
+        ? `${start[0]},${start[1]};${waypointsSegment};${end[0]},${end[1]}`
+        : `${start[0]},${start[1]};${end[0]},${end[1]}`;
+      const url = `https://api.mapbox.com/directions/v5/mapbox/${travelMode}/${pathCoords}?overview=full&geometries=geojson&steps=true${altParam}&access_token=${mapboxgl.accessToken}`;
 
       try {
         const query = await fetch(url);
@@ -540,12 +722,41 @@ export default function Map({
     }
 
     void getRouteAlternatives();
-  }, [drawRouteByIndex, onRouteAlternativesFetched, routeCoords, travelMode]);
+  }, [drawRouteByIndex, onRouteAlternativesFetched, routeCoords, travelMode, waypointCoords]);
 
   useEffect(() => {
     if (!routeAlternativesRef.current.length) return;
     drawRouteByIndex(selectedRouteIndex);
   }, [drawRouteByIndex, selectedRouteIndex]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const render = () => {
+      if (!transitPlan || travelMode !== 'metro') {
+        clearTransitLayers(map);
+        return;
+      }
+      drawTransitPlan(map, transitPlan);
+
+      const allCoords: [number, number][] = [];
+      for (const leg of transitPlan.legs) {
+        if (leg.kind === 'walk') {
+          allCoords.push(leg.from, leg.to);
+        } else {
+          for (const c of leg.geometry.coordinates) allCoords.push(c as [number, number]);
+        }
+      }
+      if (allCoords.length >= 2) {
+        const bounds = getRouteBounds(allCoords);
+        map.fitBounds(bounds, { padding: 80, duration: 600, maxZoom: 14 });
+      }
+    };
+
+    if (map.isStyleLoaded()) render();
+    else map.once('style.load', render);
+  }, [transitPlan, travelMode, mapReady]);
 
   // mapReady in deps ensures this re-runs once the map style is loaded,
   // so markers added before the map was ready get a second chance.
@@ -557,13 +768,14 @@ export default function Map({
     markersRef.current = [];
     markerElementsRef.current = [];
 
-    if (!activeCategory || !places.length) return;
+    if (!places.length) return;
 
-    const emoji = activeCategory ? CATEGORY_EMOJIS[activeCategory] : undefined;
+    const activeEmoji = activeCategory ? CATEGORY_EMOJIS[activeCategory] : undefined;
 
     places.forEach((loc) => {
       const markerEl = document.createElement('div');
       markerEl.className = 'custom-marker custom-marker--place';
+      const emoji = activeEmoji ?? (loc.category ? CATEGORY_EMOJIS[loc.category] : undefined);
       if (emoji) {
         markerEl.textContent = emoji;
         markerEl.classList.add('custom-marker--emoji');

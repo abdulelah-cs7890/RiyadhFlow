@@ -25,13 +25,32 @@
     "driveLabel": "سيارة",
     "walkLabel": "مشياً",
     "bikeLabel": "دراجة",
+    "metroLabel": "مترو",
     "travelModeAriaLabel": "وسيلة التنقل",
     "routeOptionsTitle": "خيارات المسار",
     "routeAltAriaLabel": "مسارات بديلة",
     "routeOption": "خيار {n}",
     "fastest": "الأسرع",
     "balanced": "متوازن",
-    "eco": "اقتصادي"
+    "eco": "اقتصادي",
+    "addStop": "إضافة توقف",
+    "removeStop": "حذف التوقف",
+    "stopLabel": "توقف {n}",
+    "stopPlaceholder": "مثال: برج المملكة",
+    "multiStopMetroUnavailable": "التوقفات المتعددة غير مدعومة في المترو — سيتم تجاهلها.",
+    "camerasOnRoute": "⚠ {count, plural, zero {لا رادارات} one {رادار واحد} two {رادارَان} few {# رادارات} many {# راداراً} other {# رادار}} على المسار",
+    "cameraTooltip": "رادارات ثابتة لقياس السرعة على هذا المسار",
+    "metro": {
+      "summaryTitle": "مسار المترو",
+      "totalTime": "{mins} دقيقة إجمالاً",
+      "walk": "امشِ {mins} دقيقة",
+      "walkTo": "امشِ {mins} دقيقة إلى {station}",
+      "walkFrom": "امشِ {mins} دقيقة من {station}",
+      "takeLine": "{line} · {stops} محطات · {mins} دقيقة",
+      "transferCount": "{count, plural, zero {لا تحويلات} one {تحويل واحد} two {تحويلان} few {# تحويلات} many {# تحويلاً} other {# تحويل}}",
+      "noRoute": "لا يوجد مسار مترو من هنا — أقرب محطة تبعد {km} كم.",
+      "switchToDriving": "التبديل إلى القيادة"
+    }
   },
   "gps": {
     "useCurrentLocation": "استخدام موقعي الحالي",
@@ -56,12 +75,27 @@
     "loadTrip": "تحميل هذا المسار",
     "deleteTrip": "حذف الرحلة",
     "confirmDelete": "انقر مجدداً للتأكيد",
-    "confirmSure": "هل أنت متأكد؟"
+    "confirmSure": "هل أنت متأكد؟",
+    "recent": "الأخيرة",
+    "clearRecent": "مسح",
+    "recentAriaLabel": "مسح الرحلات الأخيرة"
   },
   "insights": {
     "title": "تحليلات ذكية",
-    "trafficAdding": "الازدحام يضيف {mins} دقيقة لرحلتك. المغادرة في {bestTime} قد توفّر هذا الوقت.",
+    "trafficAdding": "الازدحام يضيف {mins} دقيقة لرحلتك الآن. جرّب مقارنة أوقات المغادرة أدناه لإيجاد وقت أسرع.",
     "trafficLight": "الطريق خالٍ الآن. وقت مناسب للمغادرة!"
+  },
+  "bestTime": {
+    "title": "أفضل وقت للمغادرة",
+    "compareButton": "قارن أوقات المغادرة",
+    "loading": "جارٍ فحص الساعات الأربع القادمة…",
+    "fastest": "الأسرع",
+    "leave": "المغادرة",
+    "etaMins": "{mins} دقيقة",
+    "slowerBy": "+{mins} دقيقة",
+    "drivingOnly": "المقارنة متاحة لوضع القيادة فقط.",
+    "failed": "تعذّرت مقارنة الأوقات.",
+    "retry": "حاول مرة أخرى"
   },
   "places": {
     "directions": "🧭 الاتجاهات إلى هنا",
@@ -69,7 +103,18 @@
     "closePlaceDetails": "إغلاق تفاصيل المكان",
     "noPlaces": "لا توجد أماكن لـ {category} الآن.",
     "loadingPlaces": "جارٍ تحميل الأماكن",
-    "viewDetails": "عرض تفاصيل {name}"
+    "viewDetails": "عرض تفاصيل {name}",
+    "nearMe": "قريب مني",
+    "nearMeLoading": "جارٍ تحديد الموقع…",
+    "nearMeError": "تعذر تحديد الموقع",
+    "km": "{km} كم",
+    "distanceFromYou": "المسافة منك",
+    "noPlacesNearby": "لا توجد أماكن قريبة منك. جرّب نطاقاً أوسع.",
+    "searchLabel": "بحث",
+    "searchPlaceholder": "ابحث عن الأماكن في الرياض",
+    "searchClear": "مسح البحث",
+    "searchNoResults": "لا توجد نتائج",
+    "searchResultType": "مكان"
   },
   "categories": {
     "all": "الكل",
@@ -80,6 +125,19 @@
     "errorFallback": "حدث خطأ أثناء تحميل الخريطة.",
     "tryAgain": "حاول مجدداً",
     "routeBadge": "{mins} د · {km} كم"
+  },
+  "prayer": {
+    "nextPrayer": "الصلاة القادمة: {name}",
+    "minutesLabel": "{mins} دقيقة",
+    "hoursLabel": "{hours} س {mins} د",
+    "mayClose": "قد يُغلق قريباً لصلاة {prayer} بعد {mins} دقيقة",
+    "fajr": "الفجر",
+    "dhuhr": "الظهر",
+    "asr": "العصر",
+    "maghrib": "المغرب",
+    "isha": "العشاء",
+    "nearestMosque": "أقرب مسجد",
+    "nearestMosqueError": "لم يُعثر على مسجد قريب. فعّل الموقع وحاول مجدداً."
   },
   "ui": {
     "appTitle": "RiyadhFlow 🚗",

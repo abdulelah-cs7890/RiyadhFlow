@@ -198,7 +198,7 @@ body {
   position: sticky;
   top: -24px;
   z-index: 5;
-  background: linear-gradient(135deg, var(--glass-bg-start) 0%, var(--glass-bg-end) 100%);
+  background: transparent;
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   margin: -24px -24px 0;
@@ -640,6 +640,13 @@ body {
   background: var(--tag-eta-bg);
 }
 
+.route-tag--cameras {
+  border-color: rgba(239, 68, 68, 0.45);
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.1);
+  font-weight: 600;
+}
+
 .route-alternatives {
   margin-top: 16px;
 }
@@ -720,12 +727,289 @@ body {
 .insights-title { margin: 0; color: var(--insights-title); font-size: 1.05rem; font-weight: 700; }
 .insights-text { margin: 0; font-size: 0.95rem; color: var(--insights-text); line-height: 1.6; }
 
+/* --- METRO / TRANSIT SUMMARY --- */
+.transit-summary {
+  background: linear-gradient(135deg, var(--insights-bg-start) 0%, var(--insights-bg-end) 100%);
+  border-radius: 18px;
+  border: 1px solid var(--insights-border);
+  padding: 18px;
+  box-shadow: 0 4px 20px rgba(14, 165, 233, 0.1);
+  animation: fadeIn 0.4s ease-out;
+}
+.transit-summary-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+}
+.transit-summary-icon { font-size: 1.15rem; }
+.transit-summary-title {
+  margin: 0; color: var(--insights-title); font-size: 1.05rem; font-weight: 700;
+}
+.transit-summary-total {
+  margin-inline-start: auto;
+  font-size: 0.9rem; font-weight: 600;
+  color: var(--insights-title);
+  font-variant-numeric: tabular-nums;
+}
+.transit-legs {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.transit-leg {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 10px;
+  background: rgba(255, 255, 255, 0.35);
+  font-size: 0.92rem;
+  color: var(--insights-text);
+}
+.transit-leg--walk { opacity: 0.88; }
+.transit-leg-icon { font-size: 1rem; flex: 0 0 auto; }
+.transit-leg-stripe {
+  display: inline-block;
+  width: 4px; height: 22px;
+  border-radius: 2px;
+  flex: 0 0 auto;
+}
+.transit-leg-text { line-height: 1.4; }
+.transit-transfer-note {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+.transit-no-route {
+  background: var(--insights-bg-start);
+  border: 1px solid var(--insights-border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 10px;
+  animation: fadeIn 0.4s ease-out;
+}
+.transit-no-route p { margin: 0; font-size: 0.92rem; color: var(--insights-text); line-height: 1.5; }
+.transit-switch-btn {
+  align-self: flex-start;
+  padding: 8px 14px;
+  border: 1px solid var(--insights-border);
+  background: transparent;
+  color: var(--insights-title);
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+.transit-switch-btn:hover { background: rgba(14, 165, 233, 0.08); }
+
+/* --- BEST TIME TO LEAVE --- */
+.best-time-pane {
+  background: linear-gradient(135deg, var(--insights-bg-start) 0%, var(--insights-bg-end) 100%);
+  border-radius: 18px;
+  border: 1px solid var(--insights-border);
+  padding: 18px;
+  box-shadow: 0 4px 20px rgba(14, 165, 233, 0.1);
+  animation: fadeIn 0.4s ease-out;
+}
+.best-time-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.best-time-title { margin: 0; color: var(--insights-title); font-size: 1.05rem; font-weight: 700; }
+.best-time-btn {
+  width: 100%; padding: 10px 14px; border: 1px solid var(--insights-border);
+  background: transparent; color: var(--insights-title); border-radius: 10px;
+  font-weight: 600; cursor: pointer; transition: background 150ms ease;
+}
+.best-time-btn:hover { background: rgba(14, 165, 233, 0.08); }
+.best-time-loading, .best-time-error {
+  display: flex; align-items: center; gap: 10px; font-size: 0.95rem; color: var(--insights-text);
+}
+.best-time-error { flex-direction: column; align-items: stretch; }
+.best-time-disabled { font-size: 0.9rem; color: var(--insights-text); opacity: 0.8; text-align: center; }
+.best-time-list {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.best-time-row {
+  display: grid; grid-template-columns: 1fr auto auto; gap: 12px; align-items: center;
+  padding: 10px 12px; border-radius: 10px; font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.35);
+  color: var(--insights-text);
+}
+.best-time-row--fastest {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.18), rgba(14, 165, 233, 0.12));
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  font-weight: 600;
+}
+.best-time-depart { font-variant-numeric: tabular-nums; }
+.best-time-eta { font-variant-numeric: tabular-nums; color: var(--insights-title); }
+.best-time-delta { font-size: 0.85rem; opacity: 0.85; }
+
 /* --- SAVED TRIPS --- */
 .saved-trips-pane { display: flex; flex-direction: column; gap: 4px; }
+.recent-trips-pane { margin-bottom: 12px; }
 
 .saved-trips-title {
   font-size: 0.85rem; font-weight: 700; color: var(--text-brand);
   text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0; margin-bottom: 12px;
+}
+.recent-trips-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+.recent-trips-header .saved-trips-title {
+  margin-bottom: 0; opacity: 0.75;
+}
+.recent-clear-btn {
+  background: transparent; border: none; cursor: pointer;
+  font-size: 0.78rem; color: var(--text-muted);
+  padding: 2px 8px; border-radius: 8px;
+}
+.recent-clear-btn:hover { color: var(--text-brand); background: var(--hover-bg); }
+.trip-card--recent { opacity: 0.9; }
+
+/* --- MULTI-STOP WAYPOINTS --- */
+.waypoints-list { display: flex; flex-direction: column; gap: 8px; margin: 4px 0; }
+.waypoint-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  align-items: end;
+}
+.waypoint-remove-btn {
+  background: transparent; border: 1px solid var(--trip-border);
+  border-radius: 10px; cursor: pointer; color: var(--text-muted);
+  width: 32px; height: 32px; align-self: end;
+  font-size: 0.85rem; line-height: 1;
+  display: inline-flex; align-items: center; justify-content: center;
+  margin-bottom: 4px;
+  transition: all 0.15s ease;
+}
+.waypoint-remove-btn:hover { color: #ef4444; border-color: #ef4444; background: rgba(239, 68, 68, 0.08); }
+.waypoint-add-btn {
+  background: transparent; border: 1px dashed var(--trip-border);
+  border-radius: 10px; cursor: pointer; color: var(--text-muted);
+  padding: 6px 12px; font-size: 0.82rem; font-weight: 500;
+  align-self: flex-start; transition: all 0.15s ease;
+}
+.waypoint-add-btn:hover { color: var(--text-brand); border-color: var(--text-brand); background: var(--hover-bg); }
+.multi-stop-metro-note {
+  font-size: 0.8rem; color: var(--text-muted);
+  background: rgba(234, 179, 8, 0.12);
+  border: 1px solid rgba(234, 179, 8, 0.3);
+  padding: 6px 10px; border-radius: 8px; margin: 6px 0;
+}
+
+/* --- PRAYER TIMES --- */
+.prayer-pill-wrap { position: relative; }
+.prayer-pill {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #047857;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.prayer-pill:hover { background: rgba(16, 185, 129, 0.2); }
+.prayer-pill-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 160px;
+  padding: 8px;
+  background: var(--trip-bg);
+  border: 1px solid var(--trip-border);
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 20;
+}
+.prayer-pill-row {
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 4px 6px; border-radius: 6px;
+  font-size: 0.82rem;
+}
+.prayer-pill-row.is-next {
+  background: rgba(16, 185, 129, 0.12);
+  font-weight: 600;
+}
+.prayer-pill-name { color: var(--text-muted); }
+.prayer-pill-time { font-variant-numeric: tabular-nums; }
+.prayer-warning {
+  font-size: 0.82rem; color: #b45309;
+  background: rgba(234, 179, 8, 0.15);
+  border: 1px solid rgba(234, 179, 8, 0.4);
+  padding: 6px 10px; border-radius: 8px; margin: 6px 0 10px;
+}
+
+.prayer-nearest-mosque-btn {
+  margin-top: 6px;
+  width: 100%;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #047857;
+  border-radius: 10px;
+  padding: 6px 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.prayer-nearest-mosque-btn:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.22);
+}
+.prayer-nearest-mosque-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.prayer-nearest-mosque-error {
+  margin-top: 4px;
+  font-size: 0.78rem;
+  color: #b91c1c;
+  text-align: center;
+}
+
+/* --- PLACE SEARCH BAR --- */
+.place-search-section { margin-top: 16px; margin-bottom: 12px; }
+.place-search-wrap { position: relative; }
+.place-search-input-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.place-search-icon {
+  position: absolute;
+  inset-inline-start: 14px;
+  pointer-events: none;
+  font-size: 1rem;
+  line-height: 1;
+}
+.place-search-input.glass-input {
+  padding-inline-start: 40px;
+  padding-inline-end: 40px;
+}
+.place-search-clear-btn {
+  position: absolute;
+  inset-inline-end: 10px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.place-search-clear-btn:hover {
+  background: var(--hover-bg);
+  color: var(--text-brand);
+}
+.place-search-dropdown {
+  left: 0;
+  right: 0;
 }
 
 .trip-card {
@@ -848,6 +1132,21 @@ body {
   border-color: var(--pill-active-bg);
 }
 
+.category-pill--nearme {
+  border-color: rgba(45, 126, 247, 0.55);
+}
+
+.category-pill--nearme.active {
+  background: #2d7ef7;
+  color: #fff;
+  border-color: #2d7ef7;
+}
+
+.category-pill--nearme:disabled {
+  opacity: 0.75;
+  cursor: progress;
+}
+
 .category-pill-count {
   display: inline-flex;
   align-items: center;
@@ -943,6 +1242,31 @@ body {
   object-fit: cover;
 }
 
+.place-image-fallback {
+  width: 100%;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+  position: relative;
+  overflow: hidden;
+}
+.place-image-fallback::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.25), transparent 60%);
+  pointer-events: none;
+}
+.place-image-fallback-emoji {
+  font-size: 5rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.25));
+  position: relative;
+  z-index: 1;
+}
+
 .place-content {
   padding: 20px;
 }
@@ -986,6 +1310,19 @@ body {
 .place-type {
   font-size: 0.85rem;
   color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.place-distance {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #2d7ef7;
+  background: rgba(45, 126, 247, 0.12);
+  padding: 3px 10px;
+  border-radius: 999px;
   margin-bottom: 16px;
 }
 

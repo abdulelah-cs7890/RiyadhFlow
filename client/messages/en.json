@@ -25,13 +25,32 @@
     "driveLabel": "Drive",
     "walkLabel": "Walk",
     "bikeLabel": "Bike",
+    "metroLabel": "Metro",
     "travelModeAriaLabel": "Travel mode",
     "routeOptionsTitle": "Route Options",
     "routeAltAriaLabel": "Route alternatives",
     "routeOption": "Option {n}",
     "fastest": "Fastest",
     "balanced": "Balanced",
-    "eco": "Eco"
+    "eco": "Eco",
+    "addStop": "Add stop",
+    "removeStop": "Remove stop",
+    "stopLabel": "STOP {n}",
+    "stopPlaceholder": "e.g., Kingdom Tower",
+    "multiStopMetroUnavailable": "Multi-stop is not supported on metro — stops will be ignored.",
+    "camerasOnRoute": "⚠ {count, plural, one {# camera} other {# cameras}} on route",
+    "cameraTooltip": "Fixed speed-enforcement cameras along this route",
+    "metro": {
+      "summaryTitle": "Metro route",
+      "totalTime": "{mins} min total",
+      "walk": "Walk {mins} min",
+      "walkTo": "Walk {mins} min to {station}",
+      "walkFrom": "Walk {mins} min from {station}",
+      "takeLine": "{line} · {stops} stops · {mins} min",
+      "transferCount": "{count, plural, one {# transfer} other {# transfers}}",
+      "noRoute": "No metro route from here — nearest station is {km} km away.",
+      "switchToDriving": "Switch to driving"
+    }
   },
   "gps": {
     "useCurrentLocation": "Use my current location",
@@ -56,12 +75,27 @@
     "loadTrip": "Load this route",
     "deleteTrip": "Delete trip",
     "confirmDelete": "Click again to confirm",
-    "confirmSure": "Sure?"
+    "confirmSure": "Sure?",
+    "recent": "Recent",
+    "clearRecent": "Clear",
+    "recentAriaLabel": "Clear recent trips"
   },
   "insights": {
     "title": "Smart Insights",
-    "trafficAdding": "Traffic is adding {mins} min to your trip. Leaving at {bestTime} could save you that time.",
+    "trafficAdding": "Traffic is adding {mins} min to your trip right now. Try the departure comparison below to find a faster slot.",
     "trafficLight": "Traffic looks light right now. Great time to leave!"
+  },
+  "bestTime": {
+    "title": "Best time to leave",
+    "compareButton": "Compare departure times",
+    "loading": "Checking the next 4 hours…",
+    "fastest": "Fastest",
+    "leave": "Leave",
+    "etaMins": "{mins} min",
+    "slowerBy": "+{mins} min",
+    "drivingOnly": "Best-time comparison is only available for driving.",
+    "failed": "Couldn't compare departure times.",
+    "retry": "Try again"
   },
   "places": {
     "directions": "🧭 Directions to here",
@@ -69,7 +103,18 @@
     "closePlaceDetails": "Close place details",
     "noPlaces": "No places found for {category} right now.",
     "loadingPlaces": "Loading places",
-    "viewDetails": "View details for {name}"
+    "viewDetails": "View details for {name}",
+    "nearMe": "Near Me",
+    "nearMeLoading": "Locating…",
+    "nearMeError": "Location unavailable",
+    "km": "{km} km",
+    "distanceFromYou": "Distance from you",
+    "noPlacesNearby": "No places found near you. Try a wider radius.",
+    "searchLabel": "SEARCH",
+    "searchPlaceholder": "Search places in Riyadh",
+    "searchClear": "Clear search",
+    "searchNoResults": "No places found",
+    "searchResultType": "Place"
   },
   "categories": {
     "all": "All",
@@ -80,6 +125,19 @@
     "errorFallback": "Something went wrong loading the map.",
     "tryAgain": "Try Again",
     "routeBadge": "{mins} min · {km} km"
+  },
+  "prayer": {
+    "nextPrayer": "Next prayer: {name}",
+    "minutesLabel": "{mins} min",
+    "hoursLabel": "{hours}h {mins}m",
+    "mayClose": "May close soon for {prayer} in {mins} min",
+    "fajr": "Fajr",
+    "dhuhr": "Dhuhr",
+    "asr": "Asr",
+    "maghrib": "Maghrib",
+    "isha": "Isha",
+    "nearestMosque": "Nearest mosque",
+    "nearestMosqueError": "No mosque found nearby. Try enabling location."
   },
   "ui": {
     "appTitle": "RiyadhFlow 🚗",

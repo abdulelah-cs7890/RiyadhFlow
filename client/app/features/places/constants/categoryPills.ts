@@ -10,6 +10,10 @@ export const CATEGORY_EMOJIS: Record<Category, string> = {
   'Transit': '🚇',
   'Pharmacies': '💊',
   'Gyms': '🏋️',
+  'Mosques': '🕌',
+  'Parking': '🅿️',
+  'Gas Stations': '⛽',
+  'Malls': '🛍️',
 };
 
 export const CATEGORY_LABELS_AR: Record<Category, string> = {
@@ -20,6 +24,10 @@ export const CATEGORY_LABELS_AR: Record<Category, string> = {
   'Transit': 'مواصلات',
   'Pharmacies': 'صيدليات',
   'Gyms': 'نوادي',
+  'Mosques': 'مساجد',
+  'Parking': 'مواقف',
+  'Gas Stations': 'محطات وقود',
+  'Malls': 'مولات',
 };
 
 export const getCategoryLabel = (cat: Category | 'All', locale: 'en' | 'ar'): string => {

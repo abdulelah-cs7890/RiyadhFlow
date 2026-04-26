@@ -29,9 +29,18 @@ const MODE_ICONS: Record<TravelMode, JSX.Element> = {
       <path d="M6 17l4-8h4l2 4h2M12 9l-2 4h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
+  metro: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="5" y="3" width="14" height="14" rx="3" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M8 8h8M8 12h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <circle cx="9" cy="15" r="0.8" fill="currentColor"/>
+      <circle cx="15" cy="15" r="0.8" fill="currentColor"/>
+      <path d="M8 17l-1 3M16 17l1 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  ),
 };
 
-const TRAVEL_MODES: TravelMode[] = ['driving', 'walking', 'cycling'];
+const TRAVEL_MODES: TravelMode[] = ['driving', 'walking', 'cycling', 'metro'];
 
 function TravelModeSwitcher({ mode, onModeChange }: TravelModeSwitcherProps) {
   const t = useTranslations('routing');
@@ -40,6 +49,7 @@ function TravelModeSwitcher({ mode, onModeChange }: TravelModeSwitcherProps) {
     driving: t('driveLabel'),
     walking: t('walkLabel'),
     cycling: t('bikeLabel'),
+    metro: t('metroLabel'),
   };
 
   return (

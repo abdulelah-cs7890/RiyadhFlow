@@ -1,4 +1,4 @@
-export type TravelMode = 'driving' | 'walking' | 'cycling';
+export type TravelMode = 'driving' | 'walking' | 'cycling' | 'metro';
 
 export interface RouteAlternative {
   index: number;
@@ -25,4 +25,12 @@ export interface RouteInfo {
   duration: number;
   duration_typical?: number;
   steps?: RouteStep[];
+  cameraCount?: number;
 }
+
+export interface Waypoint {
+  name: string;
+  coords: [number, number] | null;
+}
+
+export const MAX_WAYPOINTS = 2;
