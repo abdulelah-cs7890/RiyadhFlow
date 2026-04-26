@@ -21,6 +21,12 @@ interface FindRouteOptions {
   waypoints?: Waypoint[];
 }
 
+interface LastAttempt {
+  start: string;
+  destination: string;
+  preResolved?: FindRouteOptions;
+}
+
 interface UseRoutePlannerResult {
   routeCoords: RouteCoordinates;
   waypointCoords: [number, number][];
@@ -30,6 +36,8 @@ interface UseRoutePlannerResult {
   isCalculating: boolean;
   error: string | null;
   findRoute: (start: string, destination: string, preResolved?: FindRouteOptions) => Promise<void>;
+  retry: () => void;
+  canRetry: boolean;
   handleRouteFetched: (info: RouteInfo) => void;
   resetRoute: () => void;
   clearError: () => void;
@@ -44,7 +52,9 @@ export function useRoutePlanner(): UseRoutePlannerResult {
   const [transit, setTransit] = useState<TransitStatus>({ kind: 'none' });
   const [isCalculating, setIsCalculating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [canRetry, setCanRetry] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const lastAttemptRef = useRef<LastAttempt | null>(null);
 
   const findRoute = async (
     start: string,
@@ -53,8 +63,12 @@ export function useRoutePlanner(): UseRoutePlannerResult {
   ) => {
     if (!start || !destination) {
       setError(t('enterBoth'));
+      setCanRetry(false);
       return;
     }
+
+    lastAttemptRef.current = { start, destination, preResolved };
+    setCanRetry(true);
 
     abortControllerRef.current?.abort();
     const controller = new AbortController();
@@ -136,6 +150,8 @@ export function useRoutePlanner(): UseRoutePlannerResult {
 
   const resetRoute = useCallback(() => {
     abortControllerRef.current?.abort();
+    lastAttemptRef.current = null;
+    setCanRetry(false);
     setRouteCoords(null);
     setWaypointCoords([]);
     setRouteInfo(null);
@@ -147,6 +163,15 @@ export function useRoutePlanner(): UseRoutePlannerResult {
 
   const clearError = useCallback(() => setError(null), []);
 
+  const retry = useCallback(() => {
+    const last = lastAttemptRef.current;
+    if (!last) return;
+    void findRoute(last.start, last.destination, last.preResolved);
+    // findRoute is intentionally not in deps — its closure captures setState
+    // setters that are stable, and we always want the latest lastAttemptRef.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return {
     routeCoords,
     waypointCoords,
@@ -156,6 +181,8 @@ export function useRoutePlanner(): UseRoutePlannerResult {
     isCalculating,
     error,
     findRoute,
+    retry,
+    canRetry,
     handleRouteFetched,
     resetRoute,
     clearError,

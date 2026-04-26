@@ -79,6 +79,8 @@ export default function Home() {
     isCalculating,
     error,
     findRoute,
+    retry,
+    canRetry,
     handleRouteFetched,
     resetRoute,
     clearError,
@@ -377,7 +379,18 @@ export default function Home() {
         {error && (
           <div className="route-error" role="alert">
             <span>{error}</span>
-            <button onClick={clearError} aria-label={tErrors('dismiss')}>×</button>
+            <span className="route-error-actions">
+              {canRetry && (
+                <button
+                  type="button"
+                  className="route-error-retry-btn"
+                  onClick={() => { clearError(); retry(); }}
+                >
+                  {tErrors('retry')}
+                </button>
+              )}
+              <button onClick={clearError} aria-label={tErrors('dismiss')}>×</button>
+            </span>
           </div>
         )}
 

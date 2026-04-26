@@ -68,7 +68,11 @@
     "notFoundStart": "Could not find \"{name}\". Try a more specific location name.",
     "notFoundDest": "Could not find \"{name}\". Try a more specific location name.",
     "generic": "Something went wrong. Please try again.",
-    "dismiss": "Dismiss error"
+    "dismiss": "Dismiss error",
+    "retry": "Try again",
+    "notFoundTitle": "Lost your way?",
+    "notFoundBody": "The page you're looking for doesn't exist on RiyadhFlow.",
+    "notFoundCta": "Back to the map"
   },
   "trips": {
     "savedTrips": "Saved Trips",
