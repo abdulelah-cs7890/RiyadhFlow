@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
 import { Cairo } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/react'
 import './globals.css'
 import { LocaleProvider } from './i18n/LocaleProvider'
 
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className={cairo.variable}>
         <LocaleProvider>{children}</LocaleProvider>
+        <Analytics />
       </body>
     </html>
   )
