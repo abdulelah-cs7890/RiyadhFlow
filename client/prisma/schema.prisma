@@ -17,6 +17,10 @@ enum Category {
   TRANSIT
   PHARMACIES
   GYMS
+  MOSQUES
+  PARKING
+  GAS_STATIONS
+  MALLS
 
   @@map("category")
 }

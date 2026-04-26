@@ -35,7 +35,7 @@ import PrayerStatusPill from './features/prayer/components/PrayerStatusPill'
 import { usePrayerTimes } from './features/prayer/hooks/usePrayerTimes'
 import type { PrayerWarning } from './features/places/components/PlaceCard'
 
-const PRAYER_CLOSURE_CATEGORIES = new Set(['Restaurants', 'Hotels', 'Museums', 'Pharmacies'])
+const PRAYER_CLOSURE_CATEGORIES = new Set(['Restaurants', 'Hotels', 'Museums', 'Pharmacies', 'Malls'])
 const PRAYER_WARNING_WINDOW_MINS = 20
 
 const PRAYER_NAME_KEY: Record<string, string> = {
@@ -263,7 +263,13 @@ export default function Home() {
           <h2 className="title">
             {tUi('appTitle')}
             <span style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <PrayerStatusPill />
+              <PrayerStatusPill
+                userCoords={userLocation ?? startCoords}
+                onShowNearestMosque={(place) => {
+                  setSelectedPlace(place);
+                  setFlyToLocation(place.coords);
+                }}
+              />
               <LanguageToggle />
               <ThemeToggle theme={theme} onToggle={toggleTheme} />
             </span>

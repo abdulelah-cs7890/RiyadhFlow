@@ -6,6 +6,10 @@ export const CATEGORY_LABELS = [
   'Transit',
   'Pharmacies',
   'Gyms',
+  'Mosques',
+  'Parking',
+  'Gas Stations',
+  'Malls',
 ] as const;
 
 export type Category = (typeof CATEGORY_LABELS)[number];
@@ -238,4 +242,8 @@ export const mockCategoryData: Record<Category, PlaceData[]> = {
       about_ar: 'أجهزة حديثة ومناطق تقوية وخيارات اشتراك مرنة.',
     },
   ],
+  Mosques: [],
+  Parking: [],
+  'Gas Stations': [],
+  Malls: [],
 };

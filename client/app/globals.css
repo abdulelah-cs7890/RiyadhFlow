@@ -941,6 +941,33 @@ body {
   padding: 6px 10px; border-radius: 8px; margin: 6px 0 10px;
 }
 
+.prayer-nearest-mosque-btn {
+  margin-top: 6px;
+  width: 100%;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #047857;
+  border-radius: 10px;
+  padding: 6px 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.prayer-nearest-mosque-btn:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.22);
+}
+.prayer-nearest-mosque-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.prayer-nearest-mosque-error {
+  margin-top: 4px;
+  font-size: 0.78rem;
+  color: #b91c1c;
+  text-align: center;
+}
+
 /* --- PLACE SEARCH BAR --- */
 .place-search-section { margin-top: 16px; margin-bottom: 12px; }
 .place-search-wrap { position: relative; }

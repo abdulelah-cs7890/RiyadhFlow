@@ -11,6 +11,10 @@ const CATEGORY_ENUM: Record<Category, string> = {
   'Transit': 'TRANSIT',
   'Pharmacies': 'PHARMACIES',
   'Gyms': 'GYMS',
+  'Mosques': 'MOSQUES',
+  'Parking': 'PARKING',
+  'Gas Stations': 'GAS_STATIONS',
+  'Malls': 'MALLS',
 }
 
 async function main() {

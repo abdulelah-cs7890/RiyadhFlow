@@ -10,6 +10,10 @@ const CATEGORY_TO_ENUM: Record<Category, string> = {
   'Transit': 'TRANSIT',
   'Pharmacies': 'PHARMACIES',
   'Gyms': 'GYMS',
+  'Mosques': 'MOSQUES',
+  'Parking': 'PARKING',
+  'Gas Stations': 'GAS_STATIONS',
+  'Malls': 'MALLS',
 };
 
 const ENUM_TO_CATEGORY: Record<string, Category> = {
@@ -20,6 +24,10 @@ const ENUM_TO_CATEGORY: Record<string, Category> = {
   TRANSIT: 'Transit',
   PHARMACIES: 'Pharmacies',
   GYMS: 'Gyms',
+  MOSQUES: 'Mosques',
+  PARKING: 'Parking',
+  GAS_STATIONS: 'Gas Stations',
+  MALLS: 'Malls',
 };
 
 interface DbPlaceRow {
@@ -84,6 +92,10 @@ const CATEGORY_CANONICAL: Record<Category, string> = {
   'Transit': 'transit_station',
   'Pharmacies': 'pharmacy',
   'Gyms': 'gym',
+  'Mosques': 'mosque',
+  'Parking': 'parking_lot',
+  'Gas Stations': 'gas_station',
+  'Malls': 'shopping_mall',
 };
 
 const CATEGORY_DEFAULT_IMAGES: Record<Category, string> = {
@@ -94,6 +106,10 @@ const CATEGORY_DEFAULT_IMAGES: Record<Category, string> = {
   'Transit': 'https://commons.wikimedia.org/wiki/Special:FilePath/Riyadh%20Metro%20%282024%29.jpg?width=800',
   'Pharmacies': 'https://images.unsplash.com/photo-1576602976047-174e57a47881?w=800&q=80',
   'Gyms': 'https://images.unsplash.com/photo-1534258936925-c58bed479fcb?w=800&q=80',
+  'Mosques': 'https://images.unsplash.com/photo-1542816417-0983c9c9ad53?w=800&q=80',
+  'Parking': 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=800&q=80',
+  'Gas Stations': 'https://images.unsplash.com/photo-1545459720-aac8509eb02c?w=800&q=80',
+  'Malls': 'https://images.unsplash.com/photo-1481437156560-3205f6a55735?w=800&q=80',
 };
 
 interface SearchboxFeature {

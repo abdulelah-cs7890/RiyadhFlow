@@ -110,6 +110,7 @@
     "km": "{km} km",
     "distanceFromYou": "Distance from you",
     "noPlacesNearby": "No places found near you. Try a wider radius.",
+    "searchLabel": "SEARCH",
     "searchPlaceholder": "Search places in Riyadh",
     "searchClear": "Clear search",
     "searchNoResults": "No places found",
@@ -134,7 +135,9 @@
     "dhuhr": "Dhuhr",
     "asr": "Asr",
     "maghrib": "Maghrib",
-    "isha": "Isha"
+    "isha": "Isha",
+    "nearestMosque": "Nearest mosque",
+    "nearestMosqueError": "No mosque found nearby. Try enabling location."
   },
   "ui": {
     "appTitle": "RiyadhFlow 🚗",

@@ -24,6 +24,7 @@ interface PlaceRow {
 const VALID_CATEGORIES = new Set([
   'RESTAURANTS', 'HOTELS', 'THINGS_TO_DO', 'MUSEUMS',
   'TRANSIT', 'PHARMACIES', 'GYMS',
+  'MOSQUES', 'PARKING', 'GAS_STATIONS', 'MALLS',
 ])
 
 export async function GET(req: NextRequest) {

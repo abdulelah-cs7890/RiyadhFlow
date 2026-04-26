@@ -4,6 +4,8 @@ import { memo, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { usePrayerTimes } from '../hooks/usePrayerTimes'
 import { PRAYER_ORDER, type PrayerName } from '../utils/prayerTimes'
+import { fetchPlacesFromDb } from '@/app/features/places/services/placesSearch'
+import type { PlaceData } from '@/app/utils/mockData'
 
 const NAME_KEY: Record<PrayerName, string> = {
   Fajr: 'fajr',
@@ -13,10 +15,17 @@ const NAME_KEY: Record<PrayerName, string> = {
   Isha: 'isha',
 }
 
-function PrayerStatusPill() {
+interface PrayerStatusPillProps {
+  userCoords?: [number, number] | null;
+  onShowNearestMosque?: (place: PlaceData) => void;
+}
+
+function PrayerStatusPill({ userCoords = null, onShowNearestMosque }: PrayerStatusPillProps) {
   const t = useTranslations('prayer')
   const { times, next, isLoading, error } = usePrayerTimes()
   const [expanded, setExpanded] = useState(false)
+  const [mosqueLoading, setMosqueLoading] = useState(false)
+  const [mosqueError, setMosqueError] = useState(false)
   const wrapRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -70,6 +79,42 @@ function PrayerStatusPill() {
               <span className="prayer-pill-time">{times[name]}</span>
             </div>
           ))}
+          {onShowNearestMosque && (
+            <button
+              type="button"
+              className="prayer-nearest-mosque-btn"
+              disabled={!userCoords || mosqueLoading}
+              onClick={async () => {
+                if (!userCoords) return;
+                setMosqueLoading(true);
+                setMosqueError(false);
+                try {
+                  const results = await fetchPlacesFromDb('Mosques', {
+                    lat: userCoords[1],
+                    lng: userCoords[0],
+                    radius: 5000,
+                  });
+                  if (results.length === 0) {
+                    setMosqueError(true);
+                    return;
+                  }
+                  onShowNearestMosque(results[0]);
+                  setExpanded(false);
+                } catch {
+                  setMosqueError(true);
+                } finally {
+                  setMosqueLoading(false);
+                }
+              }}
+            >
+              {mosqueLoading ? '…' : `🕌 ${t('nearestMosque')}`}
+            </button>
+          )}
+          {mosqueError && (
+            <div className="prayer-nearest-mosque-error" role="alert">
+              {t('nearestMosqueError')}
+            </div>
+          )}
         </div>
       )}
     </div>

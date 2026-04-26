@@ -102,6 +102,10 @@ function PlaceSearchBar({ onSelect, anchorCoords = null }: PlaceSearchBarProps) 
 
   return (
     <div className="place-search-wrap" ref={wrapperRef}>
+      <div className="input-label-row">
+        <span className="input-label">{t('searchLabel')}</span>
+        <span className="input-icon" aria-hidden="true">🔎</span>
+      </div>
       <div className="place-search-input-row">
         <span className="place-search-icon" aria-hidden="true">🔎</span>
         <input

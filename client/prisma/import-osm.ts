@@ -14,6 +14,7 @@ const OVERPASS_URLS = [
 type CategoryEnum =
   | 'RESTAURANTS' | 'HOTELS' | 'THINGS_TO_DO' | 'MUSEUMS'
   | 'TRANSIT' | 'PHARMACIES' | 'GYMS'
+  | 'MOSQUES' | 'PARKING' | 'GAS_STATIONS' | 'MALLS'
 
 interface OsmTags {
   name?: string
@@ -120,6 +121,29 @@ const CATEGORIES: CategorySpec[] = [
       fitness_centre: { en: 'Gym', ar: 'نادي رياضي' },
       sports_centre: { en: 'Sports Centre', ar: 'مركز رياضي' },
     },
+  },
+  {
+    // Riyadh's bbox makes nearly every place_of_worship a mosque; we don't
+    // filter by religion=muslim because the importer's query builder is
+    // single-tag only and it would over-engineer for a near-empty edge case.
+    category: 'MOSQUES',
+    filters: ['amenity=place_of_worship'],
+    defaultType: { en: 'Mosque', ar: 'مسجد' },
+  },
+  {
+    category: 'PARKING',
+    filters: ['amenity=parking'],
+    defaultType: { en: 'Parking', ar: 'موقف سيارات' },
+  },
+  {
+    category: 'GAS_STATIONS',
+    filters: ['amenity=fuel'],
+    defaultType: { en: 'Gas Station', ar: 'محطة وقود' },
+  },
+  {
+    category: 'MALLS',
+    filters: ['shop=mall'],
+    defaultType: { en: 'Mall', ar: 'مول' },
   },
 ]
 
