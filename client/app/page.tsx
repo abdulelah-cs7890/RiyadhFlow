@@ -282,10 +282,13 @@ export default function Home() {
     if (dragStartYRef.current === null) return;
     const delta = e.clientY - dragStartYRef.current;
     dragStartYRef.current = null;
-    const SNAP = 80;
+    // Asymmetric thresholds: collapsing requires a clear downward intent,
+    // expanding is generous so a quick upward tug always wins.
+    const COLLAPSE_THRESHOLD = 80;
+    const EXPAND_THRESHOLD = 30;
     if (wasDragRef.current) {
-      if (!sheetCollapsed && delta > SNAP) setSheetCollapsed(true);
-      else if (sheetCollapsed && delta < -SNAP) setSheetCollapsed(false);
+      if (!sheetCollapsed && delta > COLLAPSE_THRESHOLD) setSheetCollapsed(true);
+      else if (sheetCollapsed && delta < -EXPAND_THRESHOLD) setSheetCollapsed(false);
     } else {
       // Tap on handle: toggle.
       setSheetCollapsed((c) => !c);
@@ -304,6 +307,15 @@ export default function Home() {
       <div
         className={`glass-pane${sheetCollapsed ? ' is-collapsed' : ''}`}
         style={sheetStyle}
+        onClick={(e) => {
+          // When collapsed, tapping anywhere on the visible peek expands.
+          // The handle already has its own pointerup → toggle handler; let it
+          // win and bail out if it was the target.
+          if (!sheetCollapsed) return;
+          const target = e.target as HTMLElement;
+          if (target.closest('.sheet-handle')) return;
+          setSheetCollapsed(false);
+        }}
       >
         <div
           className="sheet-handle"
