@@ -65,7 +65,13 @@ interface DirectionsResponse {
   routes: MapboxRoute[];
 }
 
-const INITIAL_CENTER: [number, number] = [46.6753, 24.7136];
+// Riyadh metro bounding box (matches the OSM importer bbox). Used as the
+// initial map view so Mapbox auto-fits to the viewport — wider screens get
+// more detail, mobile naturally zooms further out to fit the same area.
+const RIYADH_BOUNDS: [[number, number], [number, number]] = [
+  [46.4, 24.5],   // SW
+  [47.0, 24.95],  // NE
+];
 const ROUTE_SOURCE_ID = 'route';
 const ROUTE_LAYER_ID = 'route';
 const ALT_ROUTE_SOURCE_ID = 'route-alternatives';
@@ -490,8 +496,8 @@ export default function Map({
     const map = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/streets-v11',
-      center: INITIAL_CENTER,
-      zoom: 10,
+      bounds: RIYADH_BOUNDS,
+      fitBoundsOptions: { padding: 40 },
     });
 
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right');

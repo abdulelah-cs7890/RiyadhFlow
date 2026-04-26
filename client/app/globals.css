@@ -136,10 +136,13 @@ body,
   transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
 }
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   font-family: var(--font-cairo), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  box-sizing: border-box;
   background-color: var(--bg-body);
 }
 
@@ -186,6 +189,20 @@ body {
   max-height: calc(100vh - 48px);
   overflow-y: auto;
   overflow-x: hidden;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Drag handle — hidden on desktop, visible on mobile via the @media block below */
+.sheet-handle {
+  display: none;
+}
+.sheet-handle-bar {
+  display: block;
+  width: 44px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--text-muted);
+  opacity: 0.4;
 }
 
 /* Custom sleek scrollbar */
@@ -1462,6 +1479,45 @@ body {
     right: 16px;
     width: auto;
     max-height: 48vh;
+    touch-action: pan-y;
+  }
+  .glass-pane.is-collapsed {
+    transform: translateY(calc(100% - 72px));
+  }
+  .sheet-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 28px;
+    margin: -16px -16px 8px;
+    padding-top: 8px;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .sheet-handle:active {
+    cursor: grabbing;
+  }
+  .sheet-handle-bar {
+    width: 48px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--text-muted);
+    opacity: 0.7;
+  }
+  .sheet-handle:active .sheet-handle-bar {
+    opacity: 1;
+    background: var(--text-brand);
+  }
+  /* Mobile traffic-toggle: just below the category pills, on the right edge. */
+  .traffic-toggle {
+    top: 72px;
+    bottom: auto;
+    inset-inline-end: 16px;
+    width: 40px;
+    height: 40px;
+    z-index: 11;
   }
 
   .category-bar-container {
@@ -1942,6 +1998,12 @@ body {
   .title {
     font-size: 1.4rem;
     margin-bottom: 16px;
+    flex-wrap: wrap;
+    row-gap: 8px;
+    min-width: 0;
+  }
+  .title > span:last-child {
+    flex-shrink: 0;
   }
 
   .category-bar-container {
@@ -2026,10 +2088,6 @@ body {
     max-height: 180px;
   }
 
-  .traffic-toggle {
-    bottom: calc(45vh + 16px);
-    inset-inline-end: 12px;
-  }
 }
 
 /* ── RTL overrides ── */

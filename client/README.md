@@ -5,6 +5,7 @@ This project demonstrates frontend architecture, map interactions, state synchro
 
 ## Highlights
 
+- 🌐 **Deployed on Vercel** at <https://riyadhflow2.vercel.app/> with Vercel Analytics (pageviews + Web Vitals)
 - Hyper-glass UI with responsive desktop/mobile behavior
 - Interactive Mapbox map with category-based place pins and traffic overlay
 - Four travel modes: **drive / walk / bike / metro** (metro routed via a local Dijkstra over OSM-imported Riyadh Metro data)

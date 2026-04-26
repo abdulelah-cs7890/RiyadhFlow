@@ -147,7 +147,8 @@
     "appTitle": "RiyadhFlow 🚗",
     "directions": "Directions",
     "steps": "{count} steps",
-    "droppedPin": "Dropped Pin"
+    "droppedPin": "Dropped Pin",
+    "toggleSheet": "Toggle panel"
   },
   "a11y": {
     "toggleLanguageToAr": "Switch to Arabic",
