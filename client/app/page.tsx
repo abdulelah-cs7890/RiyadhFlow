@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import Map from './components/Map'
@@ -258,9 +258,66 @@ export default function Home() {
     setDestCoords(coords);
   }, [setDestination, tUi]);
 
+  // Bottom-sheet drag (mobile only). Desktop ignores the handle (display: none in CSS).
+  const [sheetCollapsed, setSheetCollapsed] = useState(false);
+  const [dragDelta, setDragDelta] = useState(0);
+  const dragStartYRef = useRef<number | null>(null);
+  const wasDragRef = useRef(false);
+
+  const onSheetPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    dragStartYRef.current = e.clientY;
+    wasDragRef.current = false;
+    e.currentTarget.setPointerCapture(e.pointerId);
+  }, []);
+
+  const onSheetPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (dragStartYRef.current === null) return;
+    const delta = e.clientY - dragStartYRef.current;
+    if (Math.abs(delta) > 4) wasDragRef.current = true;
+    // Clamp: only allow downward drag from expanded, only upward from collapsed.
+    setDragDelta(sheetCollapsed ? Math.min(0, delta) : Math.max(0, delta));
+  }, [sheetCollapsed]);
+
+  const onSheetPointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (dragStartYRef.current === null) return;
+    const delta = e.clientY - dragStartYRef.current;
+    dragStartYRef.current = null;
+    const SNAP = 80;
+    if (wasDragRef.current) {
+      if (!sheetCollapsed && delta > SNAP) setSheetCollapsed(true);
+      else if (sheetCollapsed && delta < -SNAP) setSheetCollapsed(false);
+    } else {
+      // Tap on handle: toggle.
+      setSheetCollapsed((c) => !c);
+    }
+    setDragDelta(0);
+  }, [sheetCollapsed]);
+
+  const sheetStyle: React.CSSProperties | undefined = dragDelta !== 0
+    ? sheetCollapsed
+      ? { transform: `translateY(calc(100% - 64px + ${dragDelta}px))`, transition: 'none' }
+      : { transform: `translateY(${dragDelta}px)`, transition: 'none' }
+    : undefined;
+
   return (
     <main className="app-container">
-      <div className="glass-pane">
+      <div
+        className={`glass-pane${sheetCollapsed ? ' is-collapsed' : ''}`}
+        style={sheetStyle}
+      >
+        <div
+          className="sheet-handle"
+          onPointerDown={onSheetPointerDown}
+          onPointerMove={onSheetPointerMove}
+          onPointerUp={onSheetPointerUp}
+          onPointerCancel={onSheetPointerUp}
+          role="button"
+          tabIndex={0}
+          aria-label={tUi('toggleSheet')}
+          aria-expanded={!sheetCollapsed}
+        >
+          <span className="sheet-handle-bar" />
+        </div>
         <div className="glass-pane-header">
           <h2 className="title">
             {tUi('appTitle')}

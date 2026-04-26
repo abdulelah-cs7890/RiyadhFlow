@@ -147,7 +147,8 @@
     "appTitle": "RiyadhFlow 🚗",
     "directions": "الاتجاهات",
     "steps": "{count} خطوات",
-    "droppedPin": "دبوس مثبّت"
+    "droppedPin": "دبوس مثبّت",
+    "toggleSheet": "تبديل حالة اللوحة"
   },
   "a11y": {
     "toggleLanguageToAr": "التبديل إلى العربية",

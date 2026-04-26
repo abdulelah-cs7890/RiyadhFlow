@@ -2,7 +2,9 @@
 
 A Riyadh-first map & routing app. Plan drive / walk / bike / metro routes, browse places by category, get speed-camera and prayer-time awareness, and share a single URL that restores everything.
 
-> **Status:** actively developed. All code currently lives under [`client/`](client/) — it's a Next.js app that doubles as the backend (API routes + Prisma). The top-level [`server/`](server/) directory is reserved for future expansion and is empty today.
+> 🌐 **Live:** <https://riyadhflow2.vercel.app/>
+>
+> All code currently lives under [`client/`](client/) — it's a Next.js app that doubles as the backend (API routes + Prisma). The top-level [`server/`](server/) directory is reserved for future expansion and is empty today.
 
 ---
 
