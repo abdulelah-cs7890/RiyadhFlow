@@ -49,7 +49,8 @@
       "takeLine": "{line} · {stops} stops · {mins} min",
       "transferCount": "{count, plural, one {# transfer} other {# transfers}}",
       "noRoute": "No metro route from here — nearest station is {km} km away.",
-      "switchToDriving": "Switch to driving"
+      "switchToDriving": "Switch to driving",
+      "walkTotal": "🚶 {km, number, ::.0} km walk total"
     }
   },
   "gps": {
@@ -72,7 +73,11 @@
     "retry": "Try again",
     "notFoundTitle": "Lost your way?",
     "notFoundBody": "The page you're looking for doesn't exist on RiyadhFlow.",
-    "notFoundCta": "Back to the map"
+    "notFoundCta": "Back to the map",
+    "startPromptTitle": "Where are you starting from?",
+    "startPromptBody": "Pick your starting point to get directions.",
+    "startPromptUseLocation": "📍 Use my current location",
+    "startPromptCancel": "Cancel"
   },
   "trips": {
     "savedTrips": "Saved Trips",

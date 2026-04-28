@@ -13,6 +13,12 @@ function TransitSummaryCard({ plan }: TransitSummaryCardProps) {
   const t = useTranslations('routing.metro')
   const { locale } = useLocale()
 
+  const walkMeters = plan.legs.reduce(
+    (sum, leg) => sum + (leg.kind === 'walk' ? leg.meters : 0),
+    0,
+  )
+  const showWalkPill = walkMeters > 500
+
   return (
     <div className="transit-summary">
       <div className="transit-summary-header">
@@ -22,6 +28,12 @@ function TransitSummaryCard({ plan }: TransitSummaryCardProps) {
           {t('totalTime', { mins: Math.round(plan.totalMinutes) })}
         </span>
       </div>
+
+      {showWalkPill && (
+        <div className="transit-walk-pill" role="note">
+          {t('walkTotal', { km: walkMeters / 1000 })}
+        </div>
+      )}
 
       <ol className="transit-legs">
         {plan.legs.map((leg, i) => {

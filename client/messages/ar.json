@@ -49,7 +49,8 @@
       "takeLine": "{line} · {stops} محطات · {mins} دقيقة",
       "transferCount": "{count, plural, zero {لا تحويلات} one {تحويل واحد} two {تحويلان} few {# تحويلات} many {# تحويلاً} other {# تحويل}}",
       "noRoute": "لا يوجد مسار مترو من هنا — أقرب محطة تبعد {km} كم.",
-      "switchToDriving": "التبديل إلى القيادة"
+      "switchToDriving": "التبديل إلى القيادة",
+      "walkTotal": "🚶 {km, number, ::.0} كم مشي إجمالاً"
     }
   },
   "gps": {
@@ -72,7 +73,11 @@
     "retry": "حاول مجدداً",
     "notFoundTitle": "هل ضللت الطريق؟",
     "notFoundBody": "الصفحة التي تبحث عنها غير موجودة في RiyadhFlow.",
-    "notFoundCta": "العودة إلى الخريطة"
+    "notFoundCta": "العودة إلى الخريطة",
+    "startPromptTitle": "من أين تبدأ؟",
+    "startPromptBody": "اختر نقطة البداية للحصول على الاتجاهات.",
+    "startPromptUseLocation": "📍 استخدم موقعي الحالي",
+    "startPromptCancel": "إلغاء"
   },
   "trips": {
     "savedTrips": "الرحلات المحفوظة",

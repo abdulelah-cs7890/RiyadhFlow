@@ -7,6 +7,7 @@ import { TravelMode } from '../types'
 interface TravelModeSwitcherProps {
   mode: TravelMode;
   onModeChange: (mode: TravelMode) => void;
+  isCalculating?: boolean;
 }
 
 const MODE_ICONS: Record<TravelMode, JSX.Element> = {
@@ -42,7 +43,7 @@ const MODE_ICONS: Record<TravelMode, JSX.Element> = {
 
 const TRAVEL_MODES: TravelMode[] = ['driving', 'walking', 'cycling', 'metro'];
 
-function TravelModeSwitcher({ mode, onModeChange }: TravelModeSwitcherProps) {
+function TravelModeSwitcher({ mode, onModeChange, isCalculating = false }: TravelModeSwitcherProps) {
   const t = useTranslations('routing');
 
   const modeLabels: Record<TravelMode, string> = {
@@ -54,20 +55,28 @@ function TravelModeSwitcher({ mode, onModeChange }: TravelModeSwitcherProps) {
 
   return (
     <div className="travel-mode-switcher" role="radiogroup" aria-label={t('travelModeAriaLabel')}>
-      {TRAVEL_MODES.map((value) => (
-        <button
-          key={value}
-          type="button"
-          role="radio"
-          aria-checked={mode === value}
-          aria-label={modeLabels[value]}
-          className={`travel-mode-btn${mode === value ? ' active' : ''}`}
-          onClick={() => onModeChange(value)}
-        >
-          {MODE_ICONS[value]}
-          <span>{modeLabels[value]}</span>
-        </button>
-      ))}
+      {TRAVEL_MODES.map((value) => {
+        const isActive = mode === value;
+        return (
+          <button
+            key={value}
+            type="button"
+            role="radio"
+            aria-checked={isActive}
+            aria-label={modeLabels[value]}
+            className={`travel-mode-btn${isActive ? ' active' : ''}${isCalculating ? ' is-calculating' : ''}`}
+            onClick={() => onModeChange(value)}
+            disabled={isCalculating}
+          >
+            {isActive && isCalculating ? (
+              <span className="spinner travel-mode-spinner" aria-hidden="true" />
+            ) : (
+              MODE_ICONS[value]
+            )}
+            <span>{modeLabels[value]}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }

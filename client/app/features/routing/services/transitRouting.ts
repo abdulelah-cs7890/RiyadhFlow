@@ -45,7 +45,7 @@ const WALK_SPEED_KMH = 5
 const WALK_DETOUR = 1.3
 const PER_STOP_MIN = 2
 const TRANSFER_MIN = 3
-const MAX_WALK_KM = 2.0
+const MAX_WALK_KM = 1.0
 const CANDIDATE_STATIONS = 3
 
 interface Station {

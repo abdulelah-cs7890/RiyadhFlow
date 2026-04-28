@@ -23,11 +23,13 @@ import ThemeToggle from './features/theme/components/ThemeToggle'
 import { useTheme } from './features/theme/hooks/useTheme'
 import AutocompleteInput from './features/routing/components/AutocompleteInput'
 import BestTimePanel from './features/routing/components/BestTimePanel'
+import StartLocationPrompt from './features/routing/components/StartLocationPrompt'
 import TransitSummaryCard from './features/routing/components/TransitSummaryCard'
 import TurnByTurnPanel from './features/routing/components/TurnByTurnPanel'
 import WaypointsList from './features/routing/components/WaypointsList'
 import { ROUTE_LABEL_KEYS } from './features/routing/types'
 import { buildGoogleMapsUrl } from './features/routing/utils/deeplinks'
+import { reverseGeocode } from './features/routing/services/geocoding'
 import { parseUrlRouteState, buildUrlWithRouteState } from './features/routing/utils/urlState'
 import LanguageToggle from './components/LanguageToggle'
 import { useGeolocation } from './hooks/useGeolocation'
@@ -53,6 +55,7 @@ export default function Home() {
   const tPlaces = useTranslations('places');
   const tUi = useTranslations('ui');
   const tErrors = useTranslations('errors');
+  const tGps = useTranslations('gps');
   const {
     startLocation,
     setStartLocation,
@@ -196,11 +199,24 @@ export default function Home() {
     setDestCoords(trip.destCoords ?? null);
   };
 
+  const [startPromptOpen, setStartPromptOpen] = useState(false);
+  const pendingDestinationRef = useRef<{ name: string; coords: [number, number] } | null>(null);
+
   const handleFindRoute = useCallback(async (
     destinationOverride?: string,
     destinationCoordsOverride?: [number, number],
   ) => {
     const resolvedDestination = destinationOverride ?? destination;
+
+    // Guard for the place-card path: if the user tapped Directions on a place
+    // but never picked a starting location, surface a styled prompt instead of
+    // the inline "enterBoth" toast hidden behind the open PlaceCard.
+    if (destinationOverride && destinationCoordsOverride && !startLocation && !startCoords) {
+      pendingDestinationRef.current = { name: destinationOverride, coords: destinationCoordsOverride };
+      setStartPromptOpen(true);
+      return;
+    }
+
     if (destinationOverride) setDestination(destinationOverride);
     if (destinationCoordsOverride) setDestCoords(destinationCoordsOverride);
     setRouteAlternatives([]);
@@ -216,6 +232,80 @@ export default function Home() {
       waypoints,
     });
   }, [destination, destCoords, findRoute, startCoords, startLocation, setDestination, travelMode, waypoints]);
+
+  // When the start-prompt's "Use my current location" path resolves coordinates,
+  // reverse-geocode them, fill the start input, then resume the deferred route.
+  const promptGeoActiveRef = useRef(false);
+  useEffect(() => {
+    if (!promptGeoActiveRef.current) return;
+    if (!nearMe.coords) return;
+    promptGeoActiveRef.current = false;
+    const coords = nearMe.coords;
+    const pending = pendingDestinationRef.current;
+    pendingDestinationRef.current = null;
+    setStartPromptOpen(false);
+    void (async () => {
+      const resolvedName = (await reverseGeocode(coords).catch(() => null)) ?? tGps('currentLocation');
+      setStartLocation(resolvedName);
+      setStartCoords(coords);
+      setUserLocation([...coords]);
+      if (pending) {
+        await handleFindRoute(pending.name, pending.coords);
+      }
+    })();
+    // handleFindRoute / setters are stable enough; we only want this on coords change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nearMe.coords]);
+
+  const handleStartPromptUseLocation = useCallback(() => {
+    if (nearMe.coords) {
+      // Coords already cached — short-circuit through the same effect.
+      promptGeoActiveRef.current = true;
+      // Trigger the effect by toggling: clear + set will re-fire it.
+      // Simpler: just inline the resume here.
+      const coords = nearMe.coords;
+      const pending = pendingDestinationRef.current;
+      pendingDestinationRef.current = null;
+      setStartPromptOpen(false);
+      promptGeoActiveRef.current = false;
+      void (async () => {
+        const resolvedName = (await reverseGeocode(coords).catch(() => null)) ?? tGps('currentLocation');
+        setStartLocation(resolvedName);
+        setStartCoords(coords);
+        setUserLocation([...coords]);
+        if (pending) {
+          await handleFindRoute(pending.name, pending.coords);
+        }
+      })();
+      return;
+    }
+    promptGeoActiveRef.current = true;
+    nearMe.request();
+  }, [nearMe, handleFindRoute, setStartLocation, tGps]);
+
+  const handleStartPromptClose = useCallback(() => {
+    promptGeoActiveRef.current = false;
+    pendingDestinationRef.current = null;
+    setStartPromptOpen(false);
+  }, []);
+
+  // Auto-recompute the route when the user switches travel modes mid-route.
+  const prevTravelModeRef = useRef(travelMode);
+  useEffect(() => {
+    if (prevTravelModeRef.current === travelMode) return;
+    prevTravelModeRef.current = travelMode;
+
+    const hasShownRoute = routeCoords != null || transit.kind === 'ready';
+    if (!hasShownRoute) return;
+    if (!startLocation || !destination) return;
+    if (!startCoords || !destCoords) return;
+
+    void handleFindRoute();
+    // handleFindRoute is intentionally omitted from deps — its identity changes
+    // every render via inline-state deps; we only want this effect to fire on
+    // travelMode transitions.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [travelMode]);
 
   const handleSwap = useCallback(() => {
     setIsSwapping(true);
@@ -412,7 +502,7 @@ export default function Home() {
           </div>
         )}
 
-        <TravelModeSwitcher mode={travelMode} onModeChange={setTravelMode} />
+        <TravelModeSwitcher mode={travelMode} onModeChange={setTravelMode} isCalculating={isCalculating} />
 
         <div className="button-group">
           <button
@@ -705,6 +795,12 @@ export default function Home() {
           />
         );
       })()}
+
+      <StartLocationPrompt
+        open={startPromptOpen}
+        onClose={handleStartPromptClose}
+        onUseCurrentLocation={handleStartPromptUseLocation}
+      />
 
       <button
         type="button"
