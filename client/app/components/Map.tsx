@@ -38,6 +38,7 @@ interface MapProps {
   userLocation?: [number, number] | null;
   fitRouteSignal?: number;
   onMapClick?: (coords: [number, number], placeName: string | null) => void;
+  onMapLongPress?: (coords: [number, number], placeName: string | null) => void;
   destPinCoords?: [number, number] | null;
   trafficVisible?: boolean;
   transitPlan?: TransitPlan | null;
@@ -123,8 +124,15 @@ function upsertRouteLayer(
     paint: {
       'line-color': color,
       'line-width': 5,
-      'line-opacity': 0.9,
+      'line-opacity': 0,
+      'line-opacity-transition': { duration: 600, delay: 0 },
     },
+  });
+  // Kick off the fade-in next tick so the transition fires.
+  requestAnimationFrame(() => {
+    if (map.getLayer(ROUTE_LAYER_ID)) {
+      map.setPaintProperty(ROUTE_LAYER_ID, 'line-opacity', 0.9);
+    }
   });
 }
 
@@ -379,6 +387,7 @@ export default function Map({
   userLocation,
   fitRouteSignal,
   onMapClick,
+  onMapLongPress,
   destPinCoords,
   trafficVisible = false,
   transitPlan = null,
@@ -401,6 +410,8 @@ export default function Map({
   tPlacesRef.current = tPlaces;
   const onMapClickRef = useRef(onMapClick);
   onMapClickRef.current = onMapClick;
+  const onMapLongPressRef = useRef(onMapLongPress);
+  onMapLongPressRef.current = onMapLongPress;
   const trafficVisibleRef = useRef(trafficVisible);
   trafficVisibleRef.current = trafficVisible;
   const themeRef = useRef<'light' | 'dark'>(theme);
@@ -525,6 +536,95 @@ export default function Map({
 
       const name = await reverseGeocode(coords);
       onMapClickRef.current?.(coords, name);
+    });
+
+    // Long-press support: 500 ms touchstart hold without significant movement
+    // fires onMapLongPress. Desktop right-click (contextmenu) maps to the same
+    // handler so it's reachable on both inputs.
+    let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+    let longPressStart: { x: number; y: number; coords: [number, number] } | null = null;
+    const cancelLongPress = () => {
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+      longPressStart = null;
+    };
+    map.on('touchstart', (e) => {
+      if (e.points.length !== 1 || !onMapLongPressRef.current) return;
+      const target = (e.originalEvent as TouchEvent).target as HTMLElement;
+      if (target?.closest?.('.custom-marker')) return;
+      const point = e.points[0];
+      const coords: [number, number] = [e.lngLat.lng, e.lngLat.lat];
+      longPressStart = { x: point.x, y: point.y, coords };
+      longPressTimer = setTimeout(async () => {
+        if (!longPressStart) return;
+        const fired = longPressStart;
+        cancelLongPress();
+        if (destPinRef.current) {
+          destPinRef.current.setLngLat(fired.coords);
+        } else {
+          const el = document.createElement('div');
+          el.className = 'custom-marker custom-marker--dest-pin';
+          destPinRef.current = new mapboxgl.Marker({ element: el })
+            .setLngLat(fired.coords)
+            .addTo(map);
+        }
+        const name = await reverseGeocode(fired.coords);
+        onMapLongPressRef.current?.(fired.coords, name);
+      }, 500);
+    });
+    map.on('touchmove', (e) => {
+      if (!longPressStart) return;
+      const point = e.points[0];
+      if (!point) return;
+      const dx = point.x - longPressStart.x;
+      const dy = point.y - longPressStart.y;
+      if (dx * dx + dy * dy > 100) cancelLongPress();
+    });
+    map.on('touchend', cancelLongPress);
+    map.on('touchcancel', cancelLongPress);
+    map.on('contextmenu', async (e) => {
+      if (!onMapLongPressRef.current) return;
+      const target = e.originalEvent.target as HTMLElement;
+      if (target.closest('.custom-marker')) return;
+      e.preventDefault();
+      const coords: [number, number] = [e.lngLat.lng, e.lngLat.lat];
+      if (destPinRef.current) {
+        destPinRef.current.setLngLat(coords);
+      } else {
+        const el = document.createElement('div');
+        el.className = 'custom-marker custom-marker--dest-pin';
+        destPinRef.current = new mapboxgl.Marker({ element: el })
+          .setLngLat(coords)
+          .addTo(map);
+      }
+      const name = await reverseGeocode(coords);
+      onMapLongPressRef.current?.(coords, name);
+    });
+
+    // Speed-camera click → popup with maxspeed details. Filtered to the
+    // SPEED_CAMERAS_LAYER_ID so this only fires when the user actually taps
+    // a red dot, not anywhere else on the map.
+    map.on('click', SPEED_CAMERAS_LAYER_ID, (e) => {
+      const feature = e.features?.[0];
+      if (!feature || feature.geometry.type !== 'Point') return;
+      const [lng, lat] = feature.geometry.coordinates as [number, number];
+      const maxspeed = feature.properties?.maxspeed as number | null | undefined;
+      const titleText = tMapRef.current('cameraPopupTitle');
+      const speedText = maxspeed != null
+        ? tMapRef.current('cameraPopupMaxspeed', { speed: maxspeed })
+        : tMapRef.current('cameraPopupNoSpeed');
+      new mapboxgl.Popup({ offset: 12, closeButton: true, className: 'speed-camera-popup' })
+        .setLngLat([lng, lat])
+        .setHTML(`<strong>📷 ${titleText}</strong><br/><span>${speedText}</span>`)
+        .addTo(map);
+    });
+    map.on('mouseenter', SPEED_CAMERAS_LAYER_ID, () => {
+      map.getCanvas().style.cursor = 'pointer';
+    });
+    map.on('mouseleave', SPEED_CAMERAS_LAYER_ID, () => {
+      map.getCanvas().style.cursor = '';
     });
 
     mapRef.current = map;

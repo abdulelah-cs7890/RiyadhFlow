@@ -666,6 +666,23 @@ body {
   animation: spin 0.7s linear infinite;
   display: inline-block;
 }
+.travel-mode-label {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+  gap: 2px;
+}
+.travel-mode-eta {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.travel-mode-btn.active .travel-mode-eta {
+  color: var(--text-brand);
+  font-weight: 600;
+}
 
 .route-tag--eta {
   border-color: var(--tag-eta-border);
@@ -679,6 +696,16 @@ body {
   background: rgba(239, 68, 68, 0.1);
   font-weight: 600;
 }
+
+/* Speed-camera Mapbox popup */
+.speed-camera-popup .mapboxgl-popup-content {
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+}
+.speed-camera-popup .mapboxgl-popup-content strong { color: #b91c1c; }
 
 .route-alternatives {
   margin-top: 16px;
@@ -1054,6 +1081,60 @@ body {
 .place-search-dropdown {
   left: 0;
   right: 0;
+}
+
+/* --- Search history & recent-destination chips --- */
+.search-history-chips,
+.recent-destination-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.search-history-chip,
+.recent-destination-chip {
+  display: inline-flex;
+  align-items: center;
+  background: var(--pill-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  overflow: hidden;
+  max-width: 100%;
+  transition: background 0.15s ease;
+}
+.search-history-chip:hover,
+.recent-destination-chip:hover {
+  background: var(--hover-bg);
+}
+.search-history-chip-text,
+.recent-destination-chip-text {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px 4px 6px 10px;
+  color: var(--text-brand);
+  font-size: inherit;
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.search-history-chip-remove {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px 4px 4px;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  line-height: 1;
+}
+.search-history-chip-remove:hover {
+  color: #b91c1c;
+}
+.recent-destination-chips {
+  margin-top: 0;
+  margin-bottom: 8px;
 }
 
 .trip-card {
@@ -2042,6 +2123,48 @@ body {
 .traffic-toggle:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+/* --- Recenter-on-me button (sibling of the traffic toggle) --- */
+.locate-me-toggle {
+  position: absolute;
+  bottom: 100px;
+  inset-inline-end: 24px;
+  z-index: 10;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--pill-bg);
+  backdrop-filter: blur(16px);
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  /* Stack above the traffic toggle */
+  margin-bottom: 56px;
+}
+.locate-me-toggle:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+.locate-me-toggle:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+@media (max-width: 900px) {
+  .locate-me-toggle {
+    top: 124px;
+    bottom: auto;
+    inset-inline-end: 16px;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 0;
+    z-index: 11;
+  }
 }
 
 /* --- User location puck --- */

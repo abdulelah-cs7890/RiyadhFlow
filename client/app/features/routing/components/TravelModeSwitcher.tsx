@@ -8,6 +8,7 @@ interface TravelModeSwitcherProps {
   mode: TravelMode;
   onModeChange: (mode: TravelMode) => void;
   isCalculating?: boolean;
+  etaByMode?: Partial<Record<TravelMode, { mins: number } | null>>;
 }
 
 const MODE_ICONS: Record<TravelMode, JSX.Element> = {
@@ -43,7 +44,7 @@ const MODE_ICONS: Record<TravelMode, JSX.Element> = {
 
 const TRAVEL_MODES: TravelMode[] = ['driving', 'walking', 'cycling', 'metro'];
 
-function TravelModeSwitcher({ mode, onModeChange, isCalculating = false }: TravelModeSwitcherProps) {
+function TravelModeSwitcher({ mode, onModeChange, isCalculating = false, etaByMode }: TravelModeSwitcherProps) {
   const t = useTranslations('routing');
 
   const modeLabels: Record<TravelMode, string> = {
@@ -57,6 +58,7 @@ function TravelModeSwitcher({ mode, onModeChange, isCalculating = false }: Trave
     <div className="travel-mode-switcher" role="radiogroup" aria-label={t('travelModeAriaLabel')}>
       {TRAVEL_MODES.map((value) => {
         const isActive = mode === value;
+        const eta = etaByMode?.[value] ?? null;
         return (
           <button
             key={value}
@@ -73,7 +75,12 @@ function TravelModeSwitcher({ mode, onModeChange, isCalculating = false }: Trave
             ) : (
               MODE_ICONS[value]
             )}
-            <span>{modeLabels[value]}</span>
+            <span className="travel-mode-label">
+              {modeLabels[value]}
+              {eta && (
+                <span className="travel-mode-eta">{eta.mins} min</span>
+              )}
+            </span>
           </button>
         );
       })}

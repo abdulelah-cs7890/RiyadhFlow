@@ -123,7 +123,10 @@
     "searchPlaceholder": "ابحث عن الأماكن في الرياض",
     "searchClear": "مسح البحث",
     "searchNoResults": "لا توجد نتائج",
-    "searchResultType": "مكان"
+    "searchResultType": "مكان",
+    "searchHistoryLabel": "عمليات البحث الأخيرة",
+    "searchHistoryRemove": "إزالة \"{query}\" من السجل",
+    "recentDestinationLabel": "الوجهات الأخيرة"
   },
   "categories": {
     "all": "الكل",
@@ -133,7 +136,10 @@
     "fallback": "أضف `NEXT_PUBLIC_MAPBOX_TOKEN` لعرض الخريطة التفاعلية.",
     "errorFallback": "حدث خطأ أثناء تحميل الخريطة.",
     "tryAgain": "حاول مجدداً",
-    "routeBadge": "{mins} د · {km} كم"
+    "routeBadge": "{mins} د · {km} كم",
+    "cameraPopupTitle": "رادار سرعة",
+    "cameraPopupMaxspeed": "الحد: {speed} كم/س",
+    "cameraPopupNoSpeed": "الحد الأقصى غير معلَن"
   },
   "prayer": {
     "nextPrayer": "الصلاة القادمة: {name}",

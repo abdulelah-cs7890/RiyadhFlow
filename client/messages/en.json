@@ -123,7 +123,10 @@
     "searchPlaceholder": "Search places in Riyadh",
     "searchClear": "Clear search",
     "searchNoResults": "No places found",
-    "searchResultType": "Place"
+    "searchResultType": "Place",
+    "searchHistoryLabel": "Recent searches",
+    "searchHistoryRemove": "Remove \"{query}\" from history",
+    "recentDestinationLabel": "Recent destinations"
   },
   "categories": {
     "all": "All",
@@ -133,7 +136,10 @@
     "fallback": "Add `NEXT_PUBLIC_MAPBOX_TOKEN` to render the interactive map.",
     "errorFallback": "Something went wrong loading the map.",
     "tryAgain": "Try Again",
-    "routeBadge": "{mins} min · {km} km"
+    "routeBadge": "{mins} min · {km} km",
+    "cameraPopupTitle": "Speed camera",
+    "cameraPopupMaxspeed": "Limit: {speed} km/h",
+    "cameraPopupNoSpeed": "Speed limit not posted"
   },
   "prayer": {
     "nextPrayer": "Next prayer: {name}",

@@ -24,6 +24,7 @@ import { useTheme } from './features/theme/hooks/useTheme'
 import AutocompleteInput from './features/routing/components/AutocompleteInput'
 import BestTimePanel from './features/routing/components/BestTimePanel'
 import StartLocationPrompt from './features/routing/components/StartLocationPrompt'
+import { useAllModeEtas } from './features/routing/hooks/useAllModeEtas'
 import TransitSummaryCard from './features/routing/components/TransitSummaryCard'
 import TurnByTurnPanel from './features/routing/components/TurnByTurnPanel'
 import WaypointsList from './features/routing/components/WaypointsList'
@@ -289,6 +290,21 @@ export default function Home() {
     setStartPromptOpen(false);
   }, []);
 
+  // Fetch ETAs for all four modes whenever start + destination are resolved.
+  // Surfaces a "Drive · 12 min" preview on each TravelModeSwitcher pill.
+  const allModeEtas = useAllModeEtas(startCoords, destCoords, waypoints);
+
+  // Recenter-button: when the button is tapped without a known userLocation,
+  // we kick nearMe.request() and remember to fly once coords land.
+  const pendingRecenterRef = useRef(false);
+  useEffect(() => {
+    if (!pendingRecenterRef.current) return;
+    if (!nearMe.coords) return;
+    pendingRecenterRef.current = false;
+    setUserLocation([...nearMe.coords]);
+    setFlyToLocation([...nearMe.coords]);
+  }, [nearMe.coords]);
+
   // Auto-recompute the route when the user switches travel modes mid-route.
   const prevTravelModeRef = useRef(travelMode);
   useEffect(() => {
@@ -347,6 +363,15 @@ export default function Home() {
     setDestination(placeName ?? tUi('droppedPin'));
     setDestCoords(coords);
   }, [setDestination, tUi]);
+
+  const handleMapLongPress = useCallback((coords: [number, number], placeName: string | null) => {
+    const name = placeName ?? tUi('droppedPin');
+    setDestination(name);
+    setDestCoords(coords);
+    // Reuse the place-card "Directions" path: shows the start-prompt if start
+    // is unset, routes immediately if it's already filled.
+    void handleFindRoute(name, coords);
+  }, [setDestination, tUi, handleFindRoute]);
 
   // Bottom-sheet drag (mobile only). Desktop ignores the handle (display: none in CSS).
   const [sheetCollapsed, setSheetCollapsed] = useState(false);
@@ -447,6 +472,29 @@ export default function Home() {
           />
         </div>
 
+        {!destination && recents.filter((r) => r.destCoords).length > 0 && (
+          <div className="recent-destination-chips" role="list" aria-label={tPlaces('recentDestinationLabel')}>
+            {recents
+              .filter((r) => r.destCoords)
+              .slice(0, 5)
+              .map((r) => (
+                <span key={r.id} className="recent-destination-chip" role="listitem">
+                  <button
+                    type="button"
+                    className="recent-destination-chip-text"
+                    onClick={() => {
+                      setDestination(r.dest);
+                      if (r.destCoords) setDestCoords(r.destCoords);
+                    }}
+                    title={r.dest}
+                  >
+                    🕘 {r.dest}
+                  </button>
+                </span>
+              ))}
+          </div>
+        )}
+
         <div className={`routing-container${isSwapping ? ' is-swapping' : ''}`}>
           <AutocompleteInput
             value={startLocation}
@@ -502,7 +550,17 @@ export default function Home() {
           </div>
         )}
 
-        <TravelModeSwitcher mode={travelMode} onModeChange={setTravelMode} isCalculating={isCalculating} />
+        <TravelModeSwitcher
+          mode={travelMode}
+          onModeChange={setTravelMode}
+          isCalculating={isCalculating}
+          etaByMode={{
+            driving: allModeEtas.driving,
+            walking: allModeEtas.walking,
+            cycling: allModeEtas.cycling,
+            metro: allModeEtas.metro,
+          }}
+        />
 
         <div className="button-group">
           <button
@@ -813,6 +871,23 @@ export default function Home() {
         🚦
       </button>
 
+      <button
+        type="button"
+        className="locate-me-toggle"
+        onClick={() => {
+          if (userLocation) {
+            setFlyToLocation([...userLocation]);
+          } else {
+            pendingRecenterRef.current = true;
+            nearMe.request();
+          }
+        }}
+        title={tGps('useCurrentLocation')}
+        aria-label={tGps('useCurrentLocation')}
+      >
+        📍
+      </button>
+
       <ErrorBoundary>
         <Map
           routeCoords={routeCoords}
@@ -829,6 +904,7 @@ export default function Home() {
           userLocation={userLocation}
           fitRouteSignal={fitRouteSignal}
           onMapClick={handleMapClick}
+          onMapLongPress={handleMapLongPress}
           destPinCoords={destCoords}
           trafficVisible={trafficVisible}
           transitPlan={transit.kind === 'ready' ? transit.plan : null}
