@@ -14,6 +14,8 @@ interface PlaceRow {
   about: string | null
   about_ar: string | null
   image_url: string | null
+  phone: string | null
+  website: string | null
   rating: number | null
   reviews: number | null
   lng: number
@@ -50,7 +52,7 @@ export async function GET(req: NextRequest) {
     const rows = await prisma.$queryRaw<PlaceRow[]>`
       SELECT
         id, name, name_ar, type, type_ar, category::text AS category,
-        address, address_ar, about, about_ar, image_url, rating, reviews,
+        address, address_ar, about, about_ar, image_url, phone, website, rating, reviews,
         ST_X(location::geometry) AS lng,
         ST_Y(location::geometry) AS lat,
         ST_Distance(
@@ -73,7 +75,7 @@ export async function GET(req: NextRequest) {
   const rows = await prisma.$queryRaw<PlaceRow[]>`
     SELECT
       id, name, name_ar, type, type_ar, category::text AS category,
-      address, address_ar, about, about_ar, image_url, rating, reviews,
+      address, address_ar, about, about_ar, image_url, phone, website, rating, reviews,
       ST_X(location::geometry) AS lng,
       ST_Y(location::geometry) AS lat,
       NULL::float AS distance_m

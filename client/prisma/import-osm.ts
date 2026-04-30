@@ -34,6 +34,10 @@ interface OsmTags {
   image?: string
   wikimedia_commons?: string
   wikidata?: string
+  phone?: string
+  'contact:phone'?: string
+  website?: string
+  'contact:website'?: string
   [k: string]: string | undefined
 }
 
@@ -385,6 +389,8 @@ async function main() {
     lng: number
     lat: number
     image_url: string | null
+    phone: string | null
+    website: string | null
     _tags: OsmTags
   }> = []
 
@@ -408,12 +414,16 @@ async function main() {
       const name_ar = tags['name:ar'] ?? null
       const { type, type_ar } = pickType(tags, spec)
       const { address, address_ar } = pickAddress(tags)
+      const phone = tags.phone ?? tags['contact:phone'] ?? null
+      const website = tags.website ?? tags['contact:website'] ?? null
       rows.push({
         name, name_ar, type, type_ar,
         category: spec.category,
         address, address_ar,
         lng: lon, lat,
         image_url: null,
+        phone: phone ? phone.trim().slice(0, 64) : null,
+        website: website ? website.trim().slice(0, 256) : null,
         _tags: tags,
       })
     }
@@ -439,7 +449,7 @@ async function main() {
   for (const r of rows) {
     try {
       await prisma.$executeRaw`
-        INSERT INTO places (id, name, name_ar, type, type_ar, category, address, address_ar, image_url, location, created_at)
+        INSERT INTO places (id, name, name_ar, type, type_ar, category, address, address_ar, image_url, phone, website, location, created_at)
         VALUES (
           gen_random_uuid()::text,
           ${r.name}, ${r.name_ar},
@@ -447,6 +457,7 @@ async function main() {
           ${r.category}::"category",
           ${r.address}, ${r.address_ar},
           ${r.image_url},
+          ${r.phone}, ${r.website},
           ST_SetSRID(ST_MakePoint(${r.lng}, ${r.lat}), 4326),
           NOW()
         )

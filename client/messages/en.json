@@ -35,6 +35,7 @@
     "eco": "Eco",
     "addStop": "Add stop",
     "removeStop": "Remove stop",
+    "reorderStop": "Drag to reorder",
     "stopLabel": "STOP {n}",
     "stopPlaceholder": "e.g., Kingdom Tower",
     "multiStopMetroUnavailable": "Multi-stop is not supported on metro — stops will be ignored.",
@@ -126,7 +127,11 @@
     "searchResultType": "Place",
     "searchHistoryLabel": "Recent searches",
     "searchHistoryRemove": "Remove \"{query}\" from history",
-    "recentDestinationLabel": "Recent destinations"
+    "recentDestinationLabel": "Recent destinations",
+    "call": "Call",
+    "callAction": "Call {phone}",
+    "website": "Website",
+    "websiteAction": "Open website in a new tab"
   },
   "categories": {
     "all": "All",
@@ -159,7 +164,22 @@
     "directions": "Directions",
     "steps": "{count} steps",
     "droppedPin": "Dropped Pin",
-    "toggleSheet": "Toggle panel"
+    "toggleSheet": "Toggle panel",
+    "enable3d": "Enable 3D buildings",
+    "disable3d": "Disable 3D buildings"
+  },
+  "onboarding": {
+    "skip": "Skip",
+    "next": "Next",
+    "done": "Got it",
+    "searchTitle": "Search any place in Riyadh",
+    "searchBody": "Type a name like \"Kingdom Tower\" — we mix our database with Mapbox results so you'll find it.",
+    "modesTitle": "Drive, walk, bike, or take the metro",
+    "modesBody": "Each pill shows the live ETA so you can pick the fastest at a glance.",
+    "findTitle": "Find your route",
+    "findBody": "Hit this when you're ready. We pull live traffic and warn you about speed cameras on the way.",
+    "categoriesTitle": "Or browse by category",
+    "categoriesBody": "Restaurants, mosques, parking, gas stations and more — pick one to drop pins on the map."
   },
   "a11y": {
     "toggleLanguageToAr": "Switch to Arabic",

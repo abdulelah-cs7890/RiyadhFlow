@@ -22,13 +22,16 @@ A Riyadh-first map & routing app. Plan drive / walk / bike / metro routes, brows
 
 ## Features
 
-- 🗺 **Interactive Mapbox map** with category pins, custom markers, traffic overlay, theme-aware styles.
-- 🛣 **Multi-mode routing** — drive / walk / bike via Mapbox Directions; **metro** via a custom Dijkstra over OSM-imported Riyadh Metro data.
-- 📍 **Multi-stop routing** — up to 2 intermediate waypoints, reflected in the Directions URL and Google Maps handoff.
-- 🔎 **Place search bar** — merges Postgres fuzzy search with Mapbox Searchbox suggestions; click a result to fly the map and open the detail card.
-- 🕘 **Saved trips + auto-captured recent trips** (FIFO, capped, deduped) — both persisted in `localStorage`.
-- 🚨 **Speed camera alerts** — 35 cameras pulled from OSM, rendered only on driving routes, surfaced as a pluralized badge on the route summary.
-- 🕌 **Prayer times awareness** — Aladhan API (Umm-Al-Qura / method 4), cached per-day; header pill shows next prayer + countdown (`Maghrib · 14 min` or `Dhuhr · 1h 43m`), plus a "may close soon" hint on PlaceCards for restaurants / hotels / museums / pharmacies.
+- 🗺 **Interactive Mapbox map** with category pins, custom markers, traffic overlay, theme-aware styles, and a one-tap **3D buildings** toggle that tilts the camera to 50° and extrudes building geometry.
+- 🛣 **Multi-mode routing** — drive / walk / bike via Mapbox Directions; **metro** via a custom Dijkstra over OSM-imported Riyadh Metro data. Per-mode ETAs are previewed inline on each travel-mode pill so you can compare options at a glance, and switching modes re-routes automatically.
+- 📍 **Multi-stop routing** — up to 2 intermediate waypoints, drag-and-drop reordering, reflected in the Directions URL and Google Maps handoff.
+- 🔎 **Place search bar** — merges Postgres fuzzy search with Mapbox Searchbox suggestions; recent searches surface as quick-tap chips when the input is empty.
+- 🕘 **Saved trips + auto-captured recent trips** (FIFO, capped, deduped) with one-tap recent-destination chips above the routing inputs. All persisted in `localStorage`.
+- 📞 **PlaceCard quick-actions** — Call (`tel:`) and Website pills appear when the underlying OSM tags exist, alongside Directions.
+- 🚨 **Speed camera alerts** — 35 cameras pulled from OSM, rendered only on driving routes, with click-for-details popups showing the posted limit. Pluralized "N cameras on route" badge on the summary.
+- 🕌 **Prayer times awareness** — Aladhan API (Umm-Al-Qura / method 4), cached per-day; header pill shows next prayer + countdown (`Maghrib · 14 min` or `Dhuhr · 1h 43m`), a "Nearest mosque" action, and a "may close soon" hint on PlaceCards for restaurants / hotels / museums / pharmacies / malls.
+- 🧭 **Mobile-first UX** — bottom-sheet drag handle (snap-or-tap), recenter-on-me button, long-press on map to set destination, retry-able route errors, friendly 404, and a styled "set a starting location" modal.
+- 🚀 **First-visit onboarding tour** — four-step spotlight walkthrough (search → modes → directions → categories) gated by a `localStorage` flag.
 - 🌐 **English + Arabic with RTL**, theme toggle (light/dark), URL-synced state for sharable links, geolocation + near-me mode.
 
 ---

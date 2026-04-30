@@ -25,6 +25,7 @@ import AutocompleteInput from './features/routing/components/AutocompleteInput'
 import BestTimePanel from './features/routing/components/BestTimePanel'
 import StartLocationPrompt from './features/routing/components/StartLocationPrompt'
 import { useAllModeEtas } from './features/routing/hooks/useAllModeEtas'
+import OnboardingTour from './features/onboarding/components/OnboardingTour'
 import TransitSummaryCard from './features/routing/components/TransitSummaryCard'
 import TurnByTurnPanel from './features/routing/components/TurnByTurnPanel'
 import WaypointsList from './features/routing/components/WaypointsList'
@@ -108,6 +109,7 @@ export default function Home() {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [fitRouteSignal, setFitRouteSignal] = useState(0);
   const [trafficVisible, setTrafficVisible] = useState(false);
+  const [buildings3dVisible, setBuildings3dVisible] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -462,7 +464,7 @@ export default function Home() {
           </h2>
         </div>
 
-        <div className="place-search-section">
+        <div className="place-search-section" data-onboarding="search">
           <PlaceSearchBar
             anchorCoords={userLocation ?? startCoords}
             onSelect={(place) => {
@@ -550,21 +552,24 @@ export default function Home() {
           </div>
         )}
 
-        <TravelModeSwitcher
-          mode={travelMode}
-          onModeChange={setTravelMode}
-          isCalculating={isCalculating}
-          etaByMode={{
-            driving: allModeEtas.driving,
-            walking: allModeEtas.walking,
-            cycling: allModeEtas.cycling,
-            metro: allModeEtas.metro,
-          }}
-        />
+        <div data-onboarding="modes">
+          <TravelModeSwitcher
+            mode={travelMode}
+            onModeChange={setTravelMode}
+            isCalculating={isCalculating}
+            etaByMode={{
+              driving: allModeEtas.driving,
+              walking: allModeEtas.walking,
+              cycling: allModeEtas.cycling,
+              metro: allModeEtas.metro,
+            }}
+          />
+        </div>
 
         <div className="button-group">
           <button
             className="route-btn"
+            data-onboarding="find"
             onClick={() => void handleFindRoute()}
             disabled={isCalculating}
           >
@@ -799,15 +804,19 @@ export default function Home() {
         )}
       </div>
 
-      <CategoryBar
-        categories={categoryPills}
-        activeCategory={activeCategory}
-        onCategoryChange={setActiveCategory}
-        activePlaceCount={places.length}
-        nearMeActive={nearMeActive}
-        nearMeStatus={nearMe.status}
-        onNearMeToggle={handleNearMeToggle}
-      />
+      <div data-onboarding="categories">
+        <CategoryBar
+          categories={categoryPills}
+          activeCategory={activeCategory}
+          onCategoryChange={setActiveCategory}
+          activePlaceCount={places.length}
+          nearMeActive={nearMeActive}
+          nearMeStatus={nearMe.status}
+          onNearMeToggle={handleNearMeToggle}
+        />
+      </div>
+
+      <OnboardingTour />
 
       {(activeCategory || nearMeActive) && placesLoading && (
         <div className="category-skeleton-container" aria-busy="true" aria-label={tPlaces('loadingPlaces')}>
@@ -873,6 +882,17 @@ export default function Home() {
 
       <button
         type="button"
+        className={`buildings3d-toggle${buildings3dVisible ? ' active' : ''}`}
+        onClick={() => setBuildings3dVisible((v) => !v)}
+        title={buildings3dVisible ? tUi('disable3d') : tUi('enable3d')}
+        aria-label={buildings3dVisible ? tUi('disable3d') : tUi('enable3d')}
+        aria-pressed={buildings3dVisible}
+      >
+        🏙️
+      </button>
+
+      <button
+        type="button"
         className="locate-me-toggle"
         onClick={() => {
           if (userLocation) {
@@ -907,6 +927,7 @@ export default function Home() {
           onMapLongPress={handleMapLongPress}
           destPinCoords={destCoords}
           trafficVisible={trafficVisible}
+          buildings3dVisible={buildings3dVisible}
           transitPlan={transit.kind === 'ready' ? transit.plan : null}
         />
       </ErrorBoundary>

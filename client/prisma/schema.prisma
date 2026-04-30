@@ -37,6 +37,8 @@ model Place {
   about     String?
   aboutAr   String?                            @map("about_ar")
   imageUrl  String?                            @map("image_url")
+  phone     String?
+  website   String?
   rating    Float?
   reviews   Int?
   location  Unsupported("geometry(Point, 4326)")

@@ -1,6 +1,6 @@
 'use client'
 
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import AutocompleteInput from './AutocompleteInput'
 import { MAX_WAYPOINTS, Waypoint } from '../types'
@@ -21,6 +21,9 @@ function WaypointsList({
   disabled = false,
 }: WaypointsListProps) {
   const tRouting = useTranslations('routing')
+  const [handleDownIndex, setHandleDownIndex] = useState<number | null>(null)
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
   const updateAt = (index: number, next: Waypoint) => {
     const copy = waypoints.slice()
@@ -37,12 +40,68 @@ function WaypointsList({
     onChange([...waypoints, { name: '', coords: null }])
   }
 
+  const reorder = (from: number, to: number) => {
+    if (from === to) return
+    const copy = waypoints.slice()
+    const [moved] = copy.splice(from, 1)
+    copy.splice(to, 0, moved)
+    onChange(copy)
+  }
+
   if (disabled && waypoints.length === 0) return null
+
+  const canReorder = waypoints.length > 1
 
   return (
     <div className="waypoints-list">
       {waypoints.map((wp, i) => (
-        <div key={i} className="waypoint-row">
+        <div
+          key={i}
+          className={`waypoint-row${draggedIndex === i ? ' is-dragging' : ''}${dragOverIndex === i && draggedIndex !== null && draggedIndex !== i ? ' is-drag-target' : ''}`}
+          draggable={handleDownIndex === i && canReorder}
+          onDragStart={(e) => {
+            if (handleDownIndex !== i) { e.preventDefault(); return }
+            setDraggedIndex(i)
+            e.dataTransfer.effectAllowed = 'move'
+            // setDragImage workaround: a transparent ghost so the row itself
+            // is what visually moves with opacity styling instead of a default browser snapshot.
+          }}
+          onDragOver={(e) => {
+            if (draggedIndex === null) return
+            e.preventDefault()
+            e.dataTransfer.dropEffect = 'move'
+            if (dragOverIndex !== i) setDragOverIndex(i)
+          }}
+          onDragLeave={() => {
+            if (dragOverIndex === i) setDragOverIndex(null)
+          }}
+          onDrop={(e) => {
+            e.preventDefault()
+            if (draggedIndex !== null) reorder(draggedIndex, i)
+            setDraggedIndex(null)
+            setDragOverIndex(null)
+            setHandleDownIndex(null)
+          }}
+          onDragEnd={() => {
+            setDraggedIndex(null)
+            setDragOverIndex(null)
+            setHandleDownIndex(null)
+          }}
+        >
+          {canReorder && (
+            <button
+              type="button"
+              className="waypoint-drag-handle"
+              aria-label={tRouting('reorderStop')}
+              title={tRouting('reorderStop')}
+              onMouseDown={() => setHandleDownIndex(i)}
+              onMouseUp={() => setHandleDownIndex(null)}
+              onTouchStart={() => setHandleDownIndex(i)}
+              onTouchEnd={() => setHandleDownIndex(null)}
+            >
+              ⋮⋮
+            </button>
+          )}
           <AutocompleteInput
             value={wp.name}
             onChange={(v) => updateAt(i, { name: v, coords: null })}

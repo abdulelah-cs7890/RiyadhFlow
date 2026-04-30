@@ -82,6 +82,31 @@ function PlaceCard({ place, onClose, onDirections, prayerWarning }: PlaceCardPro
           </div>
         )}
 
+        {(place.phone || place.website) && (
+          <div className="place-quick-actions">
+            {place.phone && (
+              <a
+                className="place-quick-action"
+                href={`tel:${place.phone}`}
+                aria-label={t('callAction', { phone: place.phone })}
+              >
+                📞 {t('call')}
+              </a>
+            )}
+            {place.website && (
+              <a
+                className="place-quick-action"
+                href={place.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={t('websiteAction')}
+              >
+                🌐 {t('website')}
+              </a>
+            )}
+          </div>
+        )}
+
         <button
           className="go-btn"
           onClick={() => onDirections(localizedPlace.name, localizedPlace.coords)}

@@ -936,9 +936,49 @@ body {
 .waypoints-list { display: flex; flex-direction: column; gap: 8px; margin: 4px 0; }
 .waypoint-row {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: auto 1fr auto;
   gap: 6px;
   align-items: end;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+/* Single-row layout (no drag handle slot) when there's only one waypoint */
+.waypoint-row:has(.autocomplete-wrapper):not(:has(.waypoint-drag-handle)) {
+  grid-template-columns: 1fr auto;
+}
+.waypoint-drag-handle {
+  align-self: end;
+  margin-bottom: 4px;
+  width: 24px;
+  height: 32px;
+  border: 1px solid var(--trip-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: grab;
+  font-size: 0.85rem;
+  line-height: 1;
+  letter-spacing: -1px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.waypoint-drag-handle:hover {
+  color: var(--text-brand);
+  border-color: var(--text-brand);
+  background: var(--hover-bg);
+}
+.waypoint-drag-handle:active {
+  cursor: grabbing;
+}
+.waypoint-row.is-dragging {
+  opacity: 0.45;
+}
+.waypoint-row.is-drag-target {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.18);
+  border-radius: 12px;
 }
 .waypoint-remove-btn {
   background: transparent; border: 1px solid var(--trip-border);
@@ -1458,6 +1498,34 @@ body {
   margin-bottom: 20px;
 }
 
+.place-quick-actions {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0 0;
+}
+.place-quick-action {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--pill-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-brand);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.place-quick-action:hover {
+  background: var(--hover-bg);
+  border-color: var(--text-brand);
+  transform: translateY(-1px);
+}
+
 .go-btn {
   width: 100%;
   padding: 14px;
@@ -1905,6 +1973,88 @@ body {
   opacity: 0.9;
 }
 
+/* --- ONBOARDING TOUR --- */
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+}
+.onboarding-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(2px);
+  pointer-events: auto;
+}
+.onboarding-spotlight {
+  position: absolute;
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 9999px rgba(15, 23, 42, 0.55),
+    0 0 0 4px rgba(99, 102, 241, 0.7);
+  pointer-events: none;
+  transition: top 0.3s ease, left 0.3s ease, width 0.3s ease, height 0.3s ease;
+}
+.onboarding-card {
+  position: absolute;
+  width: 320px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 18px 18px 14px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+  transition: top 0.3s ease, left 0.3s ease;
+}
+.onboarding-card-step {
+  font-size: 0.7rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #6366f1;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.onboarding-card-title {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+.onboarding-card-body {
+  margin: 0 0 14px;
+  font-size: 0.88rem;
+  color: #475569;
+  line-height: 1.45;
+}
+.onboarding-card-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.onboarding-skip {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+.onboarding-skip:hover { background: #f1f5f9; color: #1e293b; }
+.onboarding-next {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+.onboarding-next:hover { transform: translateY(-1px); }
+
 /* --- START LOCATION PROMPT (modal) --- */
 .start-prompt-backdrop {
   position: fixed;
@@ -2123,6 +2273,50 @@ body {
 .traffic-toggle:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+/* --- 3D buildings toggle --- */
+.buildings3d-toggle {
+  position: absolute;
+  bottom: 156px;
+  inset-inline-end: 24px;
+  z-index: 10;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--pill-bg);
+  backdrop-filter: blur(16px);
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+.buildings3d-toggle:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+.buildings3d-toggle.active {
+  background: var(--pill-active-bg);
+  color: var(--pill-active-color);
+  border-color: var(--pill-active-bg);
+}
+.buildings3d-toggle:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+@media (max-width: 900px) {
+  .buildings3d-toggle {
+    top: 176px;
+    bottom: auto;
+    inset-inline-end: 16px;
+    width: 40px;
+    height: 40px;
+    z-index: 11;
+  }
 }
 
 /* --- Recenter-on-me button (sibling of the traffic toggle) --- */

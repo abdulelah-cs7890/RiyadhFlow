@@ -35,6 +35,7 @@
     "eco": "اقتصادي",
     "addStop": "إضافة توقف",
     "removeStop": "حذف التوقف",
+    "reorderStop": "اسحب لإعادة الترتيب",
     "stopLabel": "توقف {n}",
     "stopPlaceholder": "مثال: برج المملكة",
     "multiStopMetroUnavailable": "التوقفات المتعددة غير مدعومة في المترو — سيتم تجاهلها.",
@@ -126,7 +127,11 @@
     "searchResultType": "مكان",
     "searchHistoryLabel": "عمليات البحث الأخيرة",
     "searchHistoryRemove": "إزالة \"{query}\" من السجل",
-    "recentDestinationLabel": "الوجهات الأخيرة"
+    "recentDestinationLabel": "الوجهات الأخيرة",
+    "call": "اتصال",
+    "callAction": "اتصل بـ {phone}",
+    "website": "الموقع",
+    "websiteAction": "فتح الموقع في تبويب جديد"
   },
   "categories": {
     "all": "الكل",
@@ -159,7 +164,22 @@
     "directions": "الاتجاهات",
     "steps": "{count} خطوات",
     "droppedPin": "دبوس مثبّت",
-    "toggleSheet": "تبديل حالة اللوحة"
+    "toggleSheet": "تبديل حالة اللوحة",
+    "enable3d": "تفعيل المباني ثلاثية الأبعاد",
+    "disable3d": "إيقاف المباني ثلاثية الأبعاد"
+  },
+  "onboarding": {
+    "skip": "تخطّي",
+    "next": "التالي",
+    "done": "فهمت",
+    "searchTitle": "ابحث عن أي مكان في الرياض",
+    "searchBody": "اكتب اسماً مثل \"برج المملكة\" — ندمج قاعدة بياناتنا مع نتائج Mapbox لتحصل على نتائج دقيقة.",
+    "modesTitle": "قُد، امشِ، اركب، أو خذ المترو",
+    "modesBody": "كل وضع يُظهر زمن الوصول الفوري لتختار الأسرع بنظرة واحدة.",
+    "findTitle": "ابحث عن مسارك",
+    "findBody": "اضغط هنا عندما تكون جاهزاً. نسحب بيانات الحركة الحيّة ونحذّرك من رادارات السرعة في طريقك.",
+    "categoriesTitle": "أو تصفّح حسب الفئة",
+    "categoriesBody": "مطاعم، مساجد، مواقف، محطات وقود وأكثر — اختر واحدة لإظهار الأماكن على الخريطة."
   },
   "a11y": {
     "toggleLanguageToAr": "التبديل إلى العربية",

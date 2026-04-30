@@ -41,6 +41,7 @@ interface MapProps {
   onMapLongPress?: (coords: [number, number], placeName: string | null) => void;
   destPinCoords?: [number, number] | null;
   trafficVisible?: boolean;
+  buildings3dVisible?: boolean;
   transitPlan?: TransitPlan | null;
   waypointCoords?: [number, number][];
 }
@@ -80,6 +81,8 @@ const ALT_ROUTE_LAYER_ID = 'route-alternatives';
 
 const TRAFFIC_SOURCE_ID = 'mapbox-traffic';
 const TRAFFIC_LAYER_ID = 'traffic-flow';
+
+const BUILDINGS_3D_LAYER_ID = 'buildings-3d';
 
 const TRANSIT_WALK_SOURCE_ID = 'transit-walk';
 const TRANSIT_WALK_LAYER_ID = 'transit-walk';
@@ -232,6 +235,47 @@ function removeTrafficLayer(map: mapboxgl.Map) {
   try {
     if (map.getLayer(TRAFFIC_LAYER_ID)) map.removeLayer(TRAFFIC_LAYER_ID);
     if (map.getSource(TRAFFIC_SOURCE_ID)) map.removeSource(TRAFFIC_SOURCE_ID);
+  } catch { /* already removed */ }
+}
+
+function addBuildings3dLayer(map: mapboxgl.Map) {
+  if (map.getLayer(BUILDINGS_3D_LAYER_ID)) return;
+  // Mapbox Streets v11 ships a 'composite' source with a 'building' source-layer.
+  // Filter to features that have a height attribute, extrude to that height.
+  const layers = map.getStyle()?.layers ?? [];
+  const labelLayer = layers.find(
+    (l) => l.type === 'symbol' && (l.layout as { 'text-field'?: unknown })?.['text-field']
+  )?.id;
+  map.addLayer(
+    {
+      id: BUILDINGS_3D_LAYER_ID,
+      source: 'composite',
+      'source-layer': 'building',
+      type: 'fill-extrusion',
+      minzoom: 14,
+      filter: ['==', ['get', 'extrude'], 'true'],
+      paint: {
+        'fill-extrusion-color': '#aaa',
+        'fill-extrusion-height': [
+          'interpolate', ['linear'], ['zoom'],
+          14, 0,
+          15.05, ['get', 'height'],
+        ],
+        'fill-extrusion-base': [
+          'interpolate', ['linear'], ['zoom'],
+          14, 0,
+          15.05, ['get', 'min_height'],
+        ],
+        'fill-extrusion-opacity': 0.65,
+      },
+    },
+    labelLayer,
+  );
+}
+
+function removeBuildings3dLayer(map: mapboxgl.Map) {
+  try {
+    if (map.getLayer(BUILDINGS_3D_LAYER_ID)) map.removeLayer(BUILDINGS_3D_LAYER_ID);
   } catch { /* already removed */ }
 }
 
@@ -390,6 +434,7 @@ export default function Map({
   onMapLongPress,
   destPinCoords,
   trafficVisible = false,
+  buildings3dVisible = false,
   transitPlan = null,
   waypointCoords = [],
 }: MapProps) {
@@ -721,6 +766,9 @@ export default function Map({
       if (trafficVisibleRef.current) {
         addTrafficLayer(map);
       }
+      if (buildings3dRef.current) {
+        addBuildings3dLayer(map);
+      }
       applyMapLanguage(map, localeRef.current);
     });
   }, [theme, drawRouteByIndex]);
@@ -750,6 +798,28 @@ export default function Map({
     if (map.isStyleLoaded()) apply();
     else map.once('style.load', apply);
   }, [trafficVisible, mapReady]);
+
+  // Toggle 3D buildings layer + map pitch
+  const buildings3dRef = useRef(buildings3dVisible);
+  buildings3dRef.current = buildings3dVisible;
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+
+    const apply = () => {
+      if (buildings3dVisible) {
+        addBuildings3dLayer(map);
+        // Tilt for the dramatic 3D feel; users can still drag to flatten.
+        map.easeTo({ pitch: 50, duration: 600 });
+      } else {
+        removeBuildings3dLayer(map);
+        map.easeTo({ pitch: 0, duration: 600 });
+      }
+    };
+
+    if (map.isStyleLoaded()) apply();
+    else map.once('style.load', apply);
+  }, [buildings3dVisible, mapReady]);
 
   useEffect(() => {
     const map = mapRef.current;

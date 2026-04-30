@@ -9,11 +9,14 @@ This project demonstrates frontend architecture, map interactions, state synchro
 - Hyper-glass UI with responsive desktop/mobile behavior
 - Interactive Mapbox map with category-based place pins and traffic overlay
 - Four travel modes: **drive / walk / bike / metro** (metro routed via a local Dijkstra over OSM-imported Riyadh Metro data)
-- Multi-stop routing (up to 2 waypoints) reflected in the Directions URL and Google Maps handoff
-- Place search bar merging Postgres fuzzy search with Mapbox Searchbox suggestions
-- Place details card with media, reviews, and one-click route intent; falls back to a category-emoji banner when no image is available
-- Speed camera alerts rendered on driving routes (static OSM data, 40 m proximity threshold)
-- Prayer times awareness (Aladhan / Umm Al-Qura) — header pill + "may close soon" warning on closure-sensitive place cards
+- Multi-stop routing (up to 2 waypoints) with drag-and-drop reordering, reflected in the Directions URL and Google Maps handoff
+- Place search bar merging Postgres fuzzy search with Mapbox Searchbox suggestions; recent-search chips for quick re-runs
+- Place details card with media, reviews, Call/Website quick-actions when OSM data exists, and one-click route intent; falls back to a category-emoji banner when no image is available
+- Speed camera alerts rendered on driving routes (static OSM data, 40 m proximity threshold) with click-for-details popups
+- Prayer times awareness (Aladhan / Umm Al-Qura) — header pill + "may close soon" warning on closure-sensitive place cards + "Nearest mosque" action
+- Compare-all-modes panel: live ETAs for drive / walk / bike / metro shown inline on each travel-mode pill; auto-recompute on mode switch
+- 3D buildings toggle that tilts the camera and extrudes the Mapbox building source-layer
+- First-visit onboarding tour (search → modes → find → categories) gated by a `localStorage` flag
 - **English + Arabic with RTL** via `next-intl`, theme toggle (light/dark)
 - URL-synced app state (`start`, `destination`, `category`, `mode`, `waypoints`, coords) for fully shareable links
 - Saved trips + auto-captured recent trips (FIFO, capped, deduped), persisted in `localStorage`

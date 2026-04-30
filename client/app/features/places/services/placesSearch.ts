@@ -41,6 +41,8 @@ interface DbPlaceRow {
   about: string | null;
   about_ar: string | null;
   image_url: string | null;
+  phone: string | null;
+  website: string | null;
   rating: number | null;
   reviews: number | null;
   lng: number;
@@ -75,6 +77,8 @@ export async function fetchPlacesFromDb(
       about: r.about ?? undefined,
       about_ar: r.about_ar ?? undefined,
       image: r.image_url ?? (cat ? CATEGORY_DEFAULT_IMAGES[cat] : undefined),
+      phone: r.phone ?? undefined,
+      website: r.website ?? undefined,
       rating: r.rating ?? undefined,
       reviews: r.reviews ?? undefined,
       coords: [Number(r.lng), Number(r.lat)],
