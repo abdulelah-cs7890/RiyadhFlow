@@ -1,10 +1,18 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import Map from './components/Map'
+import dynamic from 'next/dynamic'
 import { ErrorBoundary } from './components/ErrorBoundary'
+
+// Lazy-load Map: keeps mapbox-gl (~250 KB gzipped) + the bundled
+// riyadh-metro.json + speed-cameras.json out of the initial chunk so the
+// glass-pane (search, prayer pill, recent trips) hydrates first.
+const Map = dynamic(() => import('./components/Map'), {
+  ssr: false,
+  loading: () => <div className="map-fallback" role="status">⏳</div>,
+})
 import { PlaceData } from './utils/mockData'
 import { useRoutePlanner } from './features/routing/hooks/useRoutePlanner'
 import { useUrlSyncedRouteState } from './features/routing/hooks/useUrlSyncedRouteState'
@@ -296,6 +304,15 @@ export default function Home() {
   // Surfaces a "Drive · 12 min" preview on each TravelModeSwitcher pill.
   const allModeEtas = useAllModeEtas(startCoords, destCoords, waypoints);
 
+  // Stable identity for the memoized TravelModeSwitcher: only changes when
+  // an ETA value actually changes, not on every parent render.
+  const etaByMode = useMemo(() => ({
+    driving: allModeEtas.driving,
+    walking: allModeEtas.walking,
+    cycling: allModeEtas.cycling,
+    metro: allModeEtas.metro,
+  }), [allModeEtas.driving, allModeEtas.walking, allModeEtas.cycling, allModeEtas.metro]);
+
   // Recenter-button: when the button is tapped without a known userLocation,
   // we kick nearMe.request() and remember to fly once coords land.
   const pendingRecenterRef = useRef(false);
@@ -557,12 +574,7 @@ export default function Home() {
             mode={travelMode}
             onModeChange={setTravelMode}
             isCalculating={isCalculating}
-            etaByMode={{
-              driving: allModeEtas.driving,
-              walking: allModeEtas.walking,
-              cycling: allModeEtas.cycling,
-              metro: allModeEtas.metro,
-            }}
+            etaByMode={etaByMode}
           />
         </div>
 

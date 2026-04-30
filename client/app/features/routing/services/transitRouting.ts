@@ -1,5 +1,3 @@
-import metroNetwork from '../data/riyadh-metro.json'
-
 export interface WalkLeg {
   kind: 'walk'
   from: [number, number]
@@ -71,25 +69,42 @@ interface Network {
   stations: Station[]
 }
 
-const NET = metroNetwork as unknown as Network
-
+// Lazily fetched + cached on first metro routing call. Was previously a
+// 144 KB JSON imported at module scope, which forced the whole network into
+// the initial JS bundle. Now it streams from /data/riyadh-metro.json once
+// per session (and is HTTP-cached by the browser thereafter).
+let NET: Network = { lines: [], stations: [] }
 const stationById = new Map<string, Station>()
-for (const s of NET.stations) stationById.set(s.id, s)
-
 const lineById = new Map<string, Line>()
-for (const l of NET.lines) lineById.set(l.id, l)
-
-// Adjacency: stationId → array of { neighborId, lineId }. Same-line hops only.
 const adjacency = new Map<string, Array<{ to: string; lineId: string }>>()
-for (const line of NET.lines) {
-  for (let i = 0; i < line.stationIds.length - 1; i++) {
-    const a = line.stationIds[i]
-    const b = line.stationIds[i + 1]
-    if (!adjacency.has(a)) adjacency.set(a, [])
-    if (!adjacency.has(b)) adjacency.set(b, [])
-    adjacency.get(a)!.push({ to: b, lineId: line.id })
-    adjacency.get(b)!.push({ to: a, lineId: line.id })
-  }
+let networkLoaded: Promise<void> | null = null
+
+async function loadNetwork(): Promise<void> {
+  if (networkLoaded) return networkLoaded
+  networkLoaded = (async () => {
+    const res = await fetch('/data/riyadh-metro.json')
+    if (!res.ok) {
+      networkLoaded = null
+      throw new Error(`Failed to load metro network: HTTP ${res.status}`)
+    }
+    NET = (await res.json()) as Network
+    stationById.clear()
+    lineById.clear()
+    adjacency.clear()
+    for (const s of NET.stations) stationById.set(s.id, s)
+    for (const l of NET.lines) lineById.set(l.id, l)
+    for (const line of NET.lines) {
+      for (let i = 0; i < line.stationIds.length - 1; i++) {
+        const a = line.stationIds[i]
+        const b = line.stationIds[i + 1]
+        if (!adjacency.has(a)) adjacency.set(a, [])
+        if (!adjacency.has(b)) adjacency.set(b, [])
+        adjacency.get(a)!.push({ to: b, lineId: line.id })
+        adjacency.get(b)!.push({ to: a, lineId: line.id })
+      }
+    }
+  })()
+  return networkLoaded
 }
 
 function haversineMeters(a: [number, number], b: [number, number]): number {
@@ -295,10 +310,11 @@ function sliceLineGeometry(
   return { type: 'LineString', coordinates: [first, ...slice, last] }
 }
 
-export function planTransitTrip(
+export async function planTransitTrip(
   start: [number, number],
   end: [number, number],
-): TransitPlan | TransitFailure {
+): Promise<TransitPlan | TransitFailure> {
+  await loadNetwork()
   const startCandidates = kNearestStations(start, CANDIDATE_STATIONS).filter(
     (c) => c.meters / 1000 <= MAX_WALK_KM,
   )

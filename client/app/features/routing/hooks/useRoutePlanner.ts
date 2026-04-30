@@ -120,10 +120,11 @@ export function useRoutePlanner(): UseRoutePlannerResult {
       }
 
       if (preResolved?.travelMode === 'metro') {
-        const result = planTransitTrip(
+        const result = await planTransitTrip(
           [startCoords[0], startCoords[1]],
           [destinationCoords[0], destinationCoords[1]],
         );
+        if (controller.signal.aborted) return;
         if (result.kind === 'route') {
           setTransit({ kind: 'ready', plan: result });
         } else {

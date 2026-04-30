@@ -89,21 +89,24 @@ export function useAllModeEtas(
       const controller = new AbortController()
       abortRef.current = controller
 
-      const metroPlan = wpCoords.length === 0
-        ? planTransitTrip(start, end)
-        : { kind: 'no-route' as const, nearestStationKm: null }
-
-      const metroEta: EtaResult = metroPlan.kind === 'route'
-        ? { mins: Math.round(metroPlan.totalMinutes), km: 0 }
-        : null
+      const metroPromise: Promise<{ kind: 'route'; totalMinutes: number } | { kind: 'no-route' }> =
+        wpCoords.length === 0
+          ? planTransitTrip(start, end).then((plan) => plan.kind === 'route'
+            ? { kind: 'route' as const, totalMinutes: plan.totalMinutes }
+            : { kind: 'no-route' as const })
+          : Promise.resolve({ kind: 'no-route' as const })
 
       Promise.all([
         fetchOneEta(MAPBOX_PROFILE.driving, start, end, wpCoords, controller.signal),
         fetchOneEta(MAPBOX_PROFILE.walking, start, end, wpCoords, controller.signal),
         fetchOneEta(MAPBOX_PROFILE.cycling, start, end, wpCoords, controller.signal),
-      ]).then(([driving, walking, cycling]) => {
+        metroPromise,
+      ]).then(([driving, walking, cycling, metroPlan]) => {
         if (controller.signal.aborted) return
-        setState({ driving, walking, cycling, metro: metroEta, isLoading: false })
+        const metro: EtaResult = metroPlan.kind === 'route'
+          ? { mins: Math.round(metroPlan.totalMinutes), km: 0 }
+          : null
+        setState({ driving, walking, cycling, metro, isLoading: false })
       })
     }, 350)
 
