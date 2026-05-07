@@ -159,6 +159,28 @@
     "nearestMosque": "Nearest mosque",
     "nearestMosqueError": "No mosque found nearby. Try enabling location."
   },
+  "weather": {
+    "humidity": "Humidity",
+    "wind": "Wind",
+    "kph": "km/h",
+    "pm10": "PM10",
+    "air": "Air quality",
+    "condition": {
+      "clear": "Clear",
+      "partly-cloudy": "Partly cloudy",
+      "cloudy": "Cloudy",
+      "fog": "Fog",
+      "rain": "Rain",
+      "snow": "Snow",
+      "thunderstorm": "Thunderstorm"
+    },
+    "dust": {
+      "normal": "Clear air",
+      "dusty": "Dusty",
+      "storm": "Dust storm — limit walking and biking",
+      "severe": "Severe dust — avoid walking and biking"
+    }
+  },
   "ui": {
     "appTitle": "RiyadhFlow 🚗",
     "directions": "Directions",

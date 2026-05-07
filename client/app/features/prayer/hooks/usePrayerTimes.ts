@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import {
   isNowPrayer,
   nextPrayerAfter,
+  type HijriDate,
   type NextPrayer,
   type PrayerName,
   type PrayerTimes,
@@ -27,6 +28,13 @@ function todayKey(): string {
 interface AladhanResponse {
   data: {
     timings: Record<string, string>
+    date?: {
+      hijri?: {
+        day?: string
+        year?: string
+        month?: { en?: string; ar?: string }
+      }
+    }
   }
 }
 
@@ -44,29 +52,49 @@ function extractTimes(json: AladhanResponse): PrayerTimes | null {
   }
 }
 
+function extractHijri(json: AladhanResponse): HijriDate | null {
+  const h = json?.data?.date?.hijri
+  if (!h?.day || !h?.year || !h?.month?.en || !h?.month?.ar) return null
+  return {
+    day: h.day,
+    year: h.year,
+    monthEn: h.month.en,
+    monthAr: h.month.ar,
+  }
+}
+
 interface CacheEntry {
   dateKey: string
   times: PrayerTimes
+  hijri?: HijriDate | null
 }
 
-function readCache(dateKey: string): PrayerTimes | null {
+interface CachedPayload {
+  times: PrayerTimes
+  hijri: HijriDate | null
+}
+
+function readCache(dateKey: string): CachedPayload | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return null
     const entry = JSON.parse(raw) as CacheEntry
-    if (entry.dateKey === dateKey && entry.times) return entry.times
+    if (entry.dateKey === dateKey && entry.times) {
+      return { times: entry.times, hijri: entry.hijri ?? null }
+    }
   } catch { /* corrupt */ }
   return null
 }
 
-function writeCache(dateKey: string, times: PrayerTimes) {
+function writeCache(dateKey: string, times: PrayerTimes, hijri: HijriDate | null) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ dateKey, times }))
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ dateKey, times, hijri }))
   } catch { /* quota */ }
 }
 
 export interface UsePrayerTimesResult {
   times: PrayerTimes | null
+  hijri: HijriDate | null
   next: NextPrayer | null
   nowPrayer: PrayerName | null
   isLoading: boolean
@@ -75,6 +103,7 @@ export interface UsePrayerTimesResult {
 
 export function usePrayerTimes(): UsePrayerTimesResult {
   const [times, setTimes] = useState<PrayerTimes | null>(null)
+  const [hijri, setHijri] = useState<HijriDate | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [tick, setTick] = useState(0)
@@ -84,7 +113,8 @@ export function usePrayerTimes(): UsePrayerTimesResult {
     const dateKey = todayKey()
     const cached = readCache(dateKey)
     if (cached) {
-      setTimes(cached)
+      setTimes(cached.times)
+      setHijri(cached.hijri)
       return
     }
 
@@ -102,8 +132,10 @@ export function usePrayerTimes(): UsePrayerTimesResult {
           setError('invalid-response')
           return
         }
+        const parsedHijri = extractHijri(json)
         setTimes(parsed)
-        writeCache(dateKey, parsed)
+        setHijri(parsedHijri)
+        writeCache(dateKey, parsed, parsedHijri)
       })
       .catch((err) => {
         if (err?.name === 'AbortError') return
@@ -125,5 +157,5 @@ export function usePrayerTimes(): UsePrayerTimesResult {
   const nowPrayer = times ? isNowPrayer(new Date(), times, 20) : null
   void tick // referenced to keep the interval wired into the next-prayer recompute
 
-  return { times, next, nowPrayer, isLoading, error }
+  return { times, hijri, next, nowPrayer, isLoading, error }
 }

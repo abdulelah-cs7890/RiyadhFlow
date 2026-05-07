@@ -1,15 +1,16 @@
 import React from 'react'
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import RouteAlternativesPanel from '@/app/features/routing/components/RouteAlternativesPanel'
+import { renderWithIntl } from '../_helpers/renderWithIntl'
 
 describe('RouteAlternativesPanel', () => {
   it('renders alternatives and triggers onSelect', async () => {
     const onSelect = vi.fn();
     const user = userEvent.setup();
 
-    render(
+    renderWithIntl(
       <RouteAlternativesPanel
         alternatives={[
           { index: 0, distance: 11000, duration: 900 },

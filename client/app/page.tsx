@@ -20,23 +20,26 @@ import { useSavedTrips } from './features/trips/hooks/useSavedTrips'
 import { useRecentTrips } from './features/trips/hooks/useRecentTrips'
 import { usePlaces } from './features/places/hooks/usePlaces'
 import CategoryBar from './features/places/components/CategoryBar'
-import PlaceCard from './features/places/components/PlaceCard'
 import PlaceSearchBar from './features/places/components/PlaceSearchBar'
 import { categoryPills } from './features/places/constants/categoryPills'
 import { RouteAlternative } from './features/routing/types'
-import RouteAlternativesPanel from './features/routing/components/RouteAlternativesPanel'
 import RouteSummaryCard from './features/routing/components/RouteSummaryCard'
 import TravelModeSwitcher from './features/routing/components/TravelModeSwitcher'
 import ThemeToggle from './features/theme/components/ThemeToggle'
 import { useTheme } from './features/theme/hooks/useTheme'
 import AutocompleteInput from './features/routing/components/AutocompleteInput'
-import BestTimePanel from './features/routing/components/BestTimePanel'
-import StartLocationPrompt from './features/routing/components/StartLocationPrompt'
 import { useAllModeEtas } from './features/routing/hooks/useAllModeEtas'
-import OnboardingTour from './features/onboarding/components/OnboardingTour'
-import TransitSummaryCard from './features/routing/components/TransitSummaryCard'
-import TurnByTurnPanel from './features/routing/components/TurnByTurnPanel'
 import WaypointsList from './features/routing/components/WaypointsList'
+
+// Conditionally-rendered panels — defer their JS until the user reaches the
+// interaction that needs them (route computed, place selected, onboarding, etc.)
+const PlaceCard = dynamic(() => import('./features/places/components/PlaceCard'), { ssr: false })
+const RouteAlternativesPanel = dynamic(() => import('./features/routing/components/RouteAlternativesPanel'), { ssr: false })
+const TurnByTurnPanel = dynamic(() => import('./features/routing/components/TurnByTurnPanel'), { ssr: false })
+const BestTimePanel = dynamic(() => import('./features/routing/components/BestTimePanel'), { ssr: false })
+const TransitSummaryCard = dynamic(() => import('./features/routing/components/TransitSummaryCard'), { ssr: false })
+const StartLocationPrompt = dynamic(() => import('./features/routing/components/StartLocationPrompt'), { ssr: false })
+const OnboardingTour = dynamic(() => import('./features/onboarding/components/OnboardingTour'), { ssr: false })
 import { ROUTE_LABEL_KEYS } from './features/routing/types'
 import { buildGoogleMapsUrl } from './features/routing/utils/deeplinks'
 import { reverseGeocode } from './features/routing/services/geocoding'
@@ -45,6 +48,7 @@ import LanguageToggle from './components/LanguageToggle'
 import { useGeolocation } from './hooks/useGeolocation'
 import PrayerStatusPill from './features/prayer/components/PrayerStatusPill'
 import { usePrayerTimes } from './features/prayer/hooks/usePrayerTimes'
+import WeatherPill from './features/weather/components/WeatherPill'
 import type { PrayerWarning } from './features/places/components/PlaceCard'
 
 const PRAYER_CLOSURE_CATEGORIES = new Set(['Restaurants', 'Hotels', 'Museums', 'Pharmacies', 'Malls'])
@@ -467,7 +471,10 @@ export default function Home() {
         <div className="glass-pane-header">
           <h2 className="title">
             {tUi('appTitle')}
-            <span style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <span className="title-weather-slot">
+              <WeatherPill />
+            </span>
+            <span className="title-controls">
               <PrayerStatusPill
                 userCoords={userLocation ?? startCoords}
                 onShowNearestMosque={(place) => {

@@ -10,6 +10,13 @@ export interface NextPrayer {
   isTomorrow: boolean;
 }
 
+export interface HijriDate {
+  day: string;
+  year: string;
+  monthEn: string;
+  monthAr: string;
+}
+
 // Parses "HH:mm" (Aladhan API returns 24-hour times, sometimes with a suffix
 // like " (+03)" — strip anything after whitespace).
 export function parseHmToMinutes(value: string): number {

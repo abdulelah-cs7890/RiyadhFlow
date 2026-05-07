@@ -1,7 +1,7 @@
 'use client'
 
 import { memo, useEffect, useRef, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { usePrayerTimes } from '../hooks/usePrayerTimes'
 import { PRAYER_ORDER, type PrayerName } from '../utils/prayerTimes'
 import { fetchPlacesFromDb } from '@/app/features/places/services/placesSearch'
@@ -22,7 +22,8 @@ interface PrayerStatusPillProps {
 
 function PrayerStatusPill({ userCoords = null, onShowNearestMosque }: PrayerStatusPillProps) {
   const t = useTranslations('prayer')
-  const { times, next, isLoading, error } = usePrayerTimes()
+  const locale = useLocale()
+  const { times, hijri, next, isLoading, error } = usePrayerTimes()
   const [expanded, setExpanded] = useState(false)
   const [mosqueLoading, setMosqueLoading] = useState(false)
   const [mosqueError, setMosqueError] = useState(false)
@@ -70,6 +71,11 @@ function PrayerStatusPill({ userCoords = null, onShowNearestMosque }: PrayerStat
       </button>
       {expanded && (
         <div className="prayer-pill-panel" role="region" aria-label={t('nextPrayer', { name: prayerName })}>
+          {hijri && (
+            <div className="prayer-pill-hijri" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+              {hijri.day} {locale === 'ar' ? hijri.monthAr : hijri.monthEn} {hijri.year} {locale === 'ar' ? 'هـ' : 'AH'}
+            </div>
+          )}
           {PRAYER_ORDER.map((name) => (
             <div
               key={name}

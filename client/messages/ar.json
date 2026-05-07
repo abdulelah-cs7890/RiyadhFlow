@@ -159,6 +159,28 @@
     "nearestMosque": "أقرب مسجد",
     "nearestMosqueError": "لم يُعثر على مسجد قريب. فعّل الموقع وحاول مجدداً."
   },
+  "weather": {
+    "humidity": "الرطوبة",
+    "wind": "الرياح",
+    "kph": "كم/س",
+    "pm10": "PM10",
+    "air": "جودة الهواء",
+    "condition": {
+      "clear": "صافٍ",
+      "partly-cloudy": "غائم جزئياً",
+      "cloudy": "غائم",
+      "fog": "ضباب",
+      "rain": "أمطار",
+      "snow": "ثلج",
+      "thunderstorm": "عواصف رعدية"
+    },
+    "dust": {
+      "normal": "هواء نقي",
+      "dusty": "غبار خفيف",
+      "storm": "عاصفة غبار — قلّل المشي والدراجة",
+      "severe": "غبار شديد — تجنّب المشي والدراجة"
+    }
+  },
   "ui": {
     "appTitle": "RiyadhFlow 🚗",
     "directions": "الاتجاهات",
