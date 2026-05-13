@@ -2,16 +2,18 @@
 
 import { memo, useEffect, useId, useRef } from 'react'
 import { useTranslations } from 'next-intl'
-import { Crosshair } from 'lucide-react'
+import { Crosshair, Loader2 } from 'lucide-react'
 
 interface StartLocationPromptProps {
   open: boolean;
   onClose: () => void;
   onUseCurrentLocation: () => void;
+  isLocating?: boolean;
 }
 
-function StartLocationPrompt({ open, onClose, onUseCurrentLocation }: StartLocationPromptProps) {
+function StartLocationPrompt({ open, onClose, onUseCurrentLocation, isLocating = false }: StartLocationPromptProps) {
   const t = useTranslations('errors')
+  const tGps = useTranslations('gps')
   const titleId = useId()
   const cardRef = useRef<HTMLDivElement>(null)
 
@@ -30,7 +32,7 @@ function StartLocationPrompt({ open, onClose, onUseCurrentLocation }: StartLocat
     <div
       className="start-prompt-backdrop"
       onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose()
+        if (e.target === e.currentTarget && !isLocating) onClose()
       }}
       role="presentation"
     >
@@ -48,14 +50,26 @@ function StartLocationPrompt({ open, onClose, onUseCurrentLocation }: StartLocat
             type="button"
             className="start-prompt-btn start-prompt-btn--primary"
             onClick={onUseCurrentLocation}
+            disabled={isLocating}
+            aria-busy={isLocating}
           >
-            <Crosshair size={14} aria-hidden strokeWidth={2} />
-            <span>{t('startPromptUseLocation')}</span>
+            {isLocating ? (
+              <>
+                <Loader2 size={14} className="lucide-spin" aria-hidden strokeWidth={2} />
+                <span>{tGps('locating')}</span>
+              </>
+            ) : (
+              <>
+                <Crosshair size={14} aria-hidden strokeWidth={2} />
+                <span>{t('startPromptUseLocation')}</span>
+              </>
+            )}
           </button>
           <button
             type="button"
             className="start-prompt-btn start-prompt-btn--secondary"
             onClick={onClose}
+            disabled={isLocating}
           >
             {t('startPromptCancel')}
           </button>

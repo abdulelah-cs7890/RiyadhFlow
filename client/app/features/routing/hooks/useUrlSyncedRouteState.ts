@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { Category } from '@/app/utils/mockData'
 import { TravelMode, Waypoint } from '../types'
@@ -25,22 +25,25 @@ export function useUrlSyncedRouteState(): UseUrlSyncedRouteStateResult {
   const router = useRouter();
   const pathname = usePathname();
 
-  const initialState = useMemo(() => {
-    if (typeof window === 'undefined') {
-      return { start: '', destination: '', category: null as CategoryState, mode: 'driving' as TravelMode, waypoints: [] as Waypoint[] };
-    }
-    const parsed = parseUrlRouteState(window.location.search);
-    return { ...parsed, waypoints: parsed.waypoints ?? [] };
-  }, []);
-
-  const [startLocation, setStartLocation] = useState(initialState.start);
-  const [destination, setDestination] = useState(initialState.destination);
-  const [activeCategory, setActiveCategory] = useState<CategoryState>(initialState.category);
-  const [travelMode, setTravelMode] = useState<TravelMode>(initialState.mode);
-  const [waypoints, setWaypoints] = useState<Waypoint[]>(initialState.waypoints);
+  // IMPORTANT: initial state must match SSR. Reading window.location.search
+  // here would cause a hydration mismatch on any URL with route state
+  // (e.g., after the user clicks a category and refreshes). We initialize
+  // with empty defaults and hydrate from the URL in a post-mount effect.
+  const [startLocation, setStartLocation] = useState('');
+  const [destination, setDestination] = useState('');
+  const [activeCategory, setActiveCategory] = useState<CategoryState>(null);
+  const [travelMode, setTravelMode] = useState<TravelMode>('driving');
+  const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
+    // Post-hydration: pull any state encoded in the URL into local state.
+    const parsed = parseUrlRouteState(window.location.search);
+    if (parsed.start) setStartLocation(parsed.start);
+    if (parsed.destination) setDestination(parsed.destination);
+    if (parsed.category) setActiveCategory(parsed.category);
+    if (parsed.mode) setTravelMode(parsed.mode);
+    if (parsed.waypoints && parsed.waypoints.length > 0) setWaypoints(parsed.waypoints);
     setIsHydrated(true);
   }, []);
 

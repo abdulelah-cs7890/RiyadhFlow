@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useId, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { History, MapPin, Search, X } from 'lucide-react'
+import { History, MapPin, Search, SearchX, X } from 'lucide-react'
 import { PlaceData } from '@/app/utils/mockData'
 import { useSearchSuggestions } from '@/app/features/routing/hooks/useSearchSuggestions'
 import { Suggestion } from '@/app/features/routing/services/searchSuggestions'
@@ -117,8 +117,10 @@ function PlaceSearchBar({ onSelect, anchorCoords = null }: PlaceSearchBarProps) 
     }
   };
 
+  const trimmed = value.trim();
   const showDropdown = isOpen && suggestions.length > 0;
-  const showHistory = !showDropdown && historyOpen && history.length > 0;
+  const showNoResults = isOpen && suggestions.length === 0 && trimmed.length >= 2;
+  const showHistory = !showDropdown && !showNoResults && historyOpen && history.length > 0;
 
   return (
     <div className="place-search-wrap" ref={wrapperRef}>
@@ -176,6 +178,12 @@ function PlaceSearchBar({ onSelect, anchorCoords = null }: PlaceSearchBarProps) 
               </button>
             </span>
           ))}
+        </div>
+      )}
+      {showNoResults && (
+        <div className="place-search-noresults" role="status" aria-live="polite">
+          <SearchX size={16} aria-hidden strokeWidth={2} />
+          <span>{t('searchNoResults')}</span>
         </div>
       )}
       {showDropdown && (

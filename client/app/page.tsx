@@ -5,15 +5,18 @@ import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import dynamic from 'next/dynamic'
 import {
+  AlertCircle,
   Bookmark,
   Box,
   Circle,
   Crosshair,
   History,
+  Inbox,
   Loader2,
   MapPin,
   Navigation,
   Sparkles,
+  X,
 } from 'lucide-react'
 import { ErrorBoundary } from './components/ErrorBoundary'
 
@@ -235,13 +238,20 @@ export default function Home() {
   const handleFindRoute = useCallback(async (
     destinationOverride?: string,
     destinationCoordsOverride?: [number, number],
+    // Optional start overrides for the place-card → "Use my current location"
+    // path, where we know the freshly-resolved start before React has
+    // re-rendered with the new startCoords / startLocation state.
+    startLocationOverride?: string,
+    startCoordsOverride?: [number, number],
   ) => {
     const resolvedDestination = destinationOverride ?? destination;
+    const resolvedStartLocation = startLocationOverride ?? startLocation;
+    const resolvedStartCoords = startCoordsOverride ?? startCoords;
 
     // Guard for the place-card path: if the user tapped Directions on a place
     // but never picked a starting location, surface a styled prompt instead of
     // the inline "enterBoth" toast hidden behind the open PlaceCard.
-    if (destinationOverride && destinationCoordsOverride && !startLocation && !startCoords) {
+    if (destinationOverride && destinationCoordsOverride && !resolvedStartLocation && !resolvedStartCoords) {
       pendingDestinationRef.current = { name: destinationOverride, coords: destinationCoordsOverride };
       setStartPromptOpen(true);
       return;
@@ -255,8 +265,8 @@ export default function Home() {
     const endCoords = destinationCoordsOverride
       ?? (destinationOverride ? undefined : (destCoords ?? undefined));
 
-    await findRoute(startLocation, resolvedDestination, {
-      start: startCoords ?? undefined,
+    await findRoute(resolvedStartLocation, resolvedDestination, {
+      start: resolvedStartCoords ?? undefined,
       end: endCoords,
       travelMode,
       waypoints,
@@ -280,7 +290,10 @@ export default function Home() {
       setStartCoords(coords);
       setUserLocation([...coords]);
       if (pending) {
-        await handleFindRoute(pending.name, pending.coords);
+        // Pass the freshly-resolved start explicitly so handleFindRoute's
+        // guard doesn't see stale `startCoords` / `startLocation` from the
+        // closure and re-open the prompt.
+        await handleFindRoute(pending.name, pending.coords, resolvedName, coords);
       }
     })();
     // handleFindRoute / setters are stable enough; we only want this on coords change.
@@ -304,7 +317,7 @@ export default function Home() {
         setStartCoords(coords);
         setUserLocation([...coords]);
         if (pending) {
-          await handleFindRoute(pending.name, pending.coords);
+          await handleFindRoute(pending.name, pending.coords, resolvedName, coords);
         }
       })();
       return;
@@ -638,7 +651,8 @@ export default function Home() {
 
         {error && (
           <div className="route-error" role="alert">
-            <span>{error}</span>
+            <AlertCircle size={16} aria-hidden strokeWidth={2} className="route-error-icon" />
+            <span className="route-error-text">{error}</span>
             <span className="route-error-actions">
               {canRetry && (
                 <button
@@ -649,7 +663,9 @@ export default function Home() {
                   {tErrors('retry')}
                 </button>
               )}
-              <button onClick={clearError} aria-label={tErrors('dismiss')}>×</button>
+              <button onClick={clearError} aria-label={tErrors('dismiss')}>
+                <X size={14} aria-hidden strokeWidth={2.5} />
+              </button>
             </span>
           </div>
         )}
@@ -869,9 +885,12 @@ export default function Home() {
 
       {(activeCategory || (nearMeActive && nearMe.coords)) && !places.length && !placesLoading && (
         <div className="category-empty-state" role="status" aria-live="polite">
-          {activeCategory
-            ? tPlaces('noPlaces', { category: activeCategory })
-            : tPlaces('noPlacesNearby')}
+          <Inbox size={16} aria-hidden strokeWidth={2} />
+          <span>
+            {activeCategory
+              ? tPlaces('noPlaces', { category: activeCategory })
+              : tPlaces('noPlacesNearby')}
+          </span>
         </div>
       )}
 
@@ -905,6 +924,7 @@ export default function Home() {
         open={startPromptOpen}
         onClose={handleStartPromptClose}
         onUseCurrentLocation={handleStartPromptUseLocation}
+        isLocating={nearMe.status === 'loading'}
       />
 
       <button

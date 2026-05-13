@@ -208,6 +208,16 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: pane-enter 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes pane-enter {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+[dir="rtl"] .glass-pane { animation-name: pane-enter-rtl; }
+@keyframes pane-enter-rtl {
+  from { opacity: 0; transform: translateX(8px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 /* Drag handle — hidden on desktop, visible on mobile via the @media block below */
@@ -408,6 +418,26 @@ body {
 @keyframes gps-spin {
   to { transform: rotate(360deg); }
 }
+
+.place-search-noresults {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  animation: fadeIn 0.18s ease-out both;
+}
+.place-search-noresults > svg { color: var(--text-muted); flex: 0 0 auto; }
 
 .autocomplete-dropdown {
   position: absolute;
@@ -1427,8 +1457,13 @@ html[lang="ar"] body { font-family: var(--font-cairo), system-ui, -apple-system,
   background: var(--trip-bg);
   border: 1px solid var(--trip-border);
   border-radius: 16px;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s ease, box-shadow 0.18s ease;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+.trip-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--text-muted);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
 }
 
 .trip-card:hover {
@@ -1498,11 +1533,11 @@ html[lang="ar"] body { font-family: var(--font-cairo), system-ui, -apple-system,
   inset-inline-start: 448px;
   inset-inline-end: 24px;
   display: flex;
-  gap: 12px;
+  gap: 4px;
   overflow-x: auto;
   white-space: nowrap;
   z-index: 10;
-  padding-bottom: 8px;
+  padding: 4px 4px 8px;
 }
 
 .category-bar-container::-webkit-scrollbar {
@@ -1510,46 +1545,45 @@ html[lang="ar"] body { font-family: var(--font-cairo), system-ui, -apple-system,
 }
 
 .category-pill {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  border-radius: 30px;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
   cursor: pointer;
-  background: var(--pill-bg);
-  backdrop-filter: blur(16px) saturate(150%);
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--text-brand);
-  transition: all 0.2s ease;
+  background: transparent;
+  border: 1px solid transparent;
+  box-shadow: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 }
 
 .category-pill:hover {
-  transform: translateY(-2px);
   background: var(--hover-bg);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  color: var(--text-primary);
 }
 
 .category-pill.active {
-  background: var(--pill-active-bg);
-  color: var(--pill-active-color);
-  border-color: var(--pill-active-bg);
+  background: var(--accent-soft);
+  border-color: var(--accent-soft-border);
+  color: var(--accent);
 }
 
 .category-pill--nearme {
-  border-color: rgba(45, 126, 247, 0.55);
+  border-color: var(--card-border);
 }
 
 .category-pill--nearme.active {
-  background: #2d7ef7;
-  color: #fff;
-  border-color: #2d7ef7;
+  background: var(--accent-soft);
+  border-color: var(--accent-soft-border);
+  color: var(--accent);
 }
 
 .category-pill--nearme:disabled {
-  opacity: 0.75;
+  opacity: 0.6;
   cursor: progress;
 }
 
@@ -1557,13 +1591,14 @@ html[lang="ar"] body { font-family: var(--font-cairo), system-ui, -apple-system,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.3);
-  font-size: 0.72rem;
-  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: var(--accent-fg);
+  font-size: 0.7rem;
+  font-weight: 600;
   line-height: 1;
 }
 
@@ -1614,18 +1649,23 @@ html[lang="ar"] body { font-family: var(--font-cairo), system-ui, -apple-system,
 
 .category-empty-state {
   position: absolute;
-  top: 82px;
+  top: 70px;
   inset-inline-start: 448px;
   z-index: 11;
-  padding: 10px 14px;
-  border-radius: 14px;
-  background: var(--pill-bg);
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
-  color: var(--text-dim);
-  font-size: 0.86rem;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 500;
+  animation: fadeIn 0.2s ease-out both;
 }
+.category-empty-state > svg { color: var(--text-muted); flex: 0 0 auto; }
 
 /* --- PLACE DETAILS CARD --- */
 .place-card {
@@ -1779,7 +1819,7 @@ html[lang="ar"] body { font-family: var(--font-cairo), system-ui, -apple-system,
 .go-btn:hover { background: #2563eb; transform: translateY(-2px); }
 
 .custom-marker {
-  transition: transform 0.2s ease, filter 0.2s ease;
+  transition: translate 0.2s ease, scale 0.2s ease, filter 0.2s ease;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
 }
 
@@ -1795,12 +1835,22 @@ html[lang="ar"] body { font-family: var(--font-cairo), system-ui, -apple-system,
   border-radius: 50%;
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
   color: #ffffff;
+  animation: marker-pop-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .custom-marker--place > svg {
   display: block;
 }
 .custom-marker--place.is-selected {
   background: var(--accent);
+  box-shadow: 0 2px 6px rgba(217, 119, 87, 0.4), inset 0 0 0 1.5px rgba(255, 255, 255, 0.5);
+}
+/* Use the standalone `scale` property (not `transform: scale(...)`) so the
+   keyframe composes with Mapbox's inline `transform: translate(...)` that
+   positions the marker geographically. Animating transform here would
+   overwrite Mapbox's positioning and stack every marker at map (0, 0). */
+@keyframes marker-pop-in {
+  from { opacity: 0; scale: 0.7; }
+  to   { opacity: 1; scale: 1; }
 }
 [data-theme="dark"] .custom-marker--place {
   border-color: #1e293b;
@@ -1832,12 +1882,17 @@ html[lang="ar"] body { font-family: var(--font-cairo), system-ui, -apple-system,
   cursor: pointer;
 }
 
+/* Use the standalone `translate` and `scale` properties (not `transform`) so
+   we don't clobber Mapbox's inline `transform: translate(...)` that positions
+   the marker geographically. */
 .custom-marker:hover {
-  transform: translateY(-2px) scale(1.04);
+  translate: 0 -2px;
+  scale: 1.04;
 }
 
 .custom-marker.is-selected {
-  transform: translateY(-4px) scale(1.1);
+  translate: 0 -4px;
+  scale: 1.1;
   filter: drop-shadow(0 8px 14px rgba(217, 119, 87, 0.4));
 }
 
@@ -2167,14 +2222,15 @@ html[lang="ar"] body { font-family: var(--font-cairo), system-ui, -apple-system,
 .route-error {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
+  gap: 8px;
+  padding: 10px 12px;
   background: var(--error-bg);
   border: 1px solid var(--error-border);
-  border-radius: 8px;
+  border-radius: 10px;
   color: var(--error-text);
   font-size: 13px;
   margin-top: 8px;
+  animation: fadeIn 0.2s ease-out both;
   gap: 8px;
 }
 .route-error button {
@@ -2193,14 +2249,17 @@ html[lang="ar"] body { font-family: var(--font-cairo), system-ui, -apple-system,
   gap: 8px;
   flex-shrink: 0;
 }
+.route-error-icon { color: var(--error-text); flex: 0 0 auto; }
+.route-error-text { flex: 1 1 auto; }
 .route-error-retry-btn {
   background: var(--error-text) !important;
-  color: var(--error-bg) !important;
+  color: #ffffff !important;
   border-radius: 8px !important;
   padding: 4px 10px !important;
   font-size: 12px !important;
   font-weight: 600 !important;
   line-height: 1.2 !important;
+  border: none !important;
 }
 .route-error-retry-btn:hover {
   opacity: 0.9;
@@ -2340,21 +2399,44 @@ html[lang="ar"] body { font-family: var(--font-cairo), system-ui, -apple-system,
   font-weight: 600;
   cursor: pointer;
   border: 1px solid transparent;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
 }
-.start-prompt-btn:hover { transform: translateY(-1px); }
 .start-prompt-btn--primary {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: #fff;
+  background: var(--text-primary);
+  color: #ffffff;
+  border-color: var(--text-primary);
+}
+.start-prompt-btn--primary:hover:not(:disabled) {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+[data-theme="dark"] .start-prompt-btn--primary {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #f1f5f9;
+}
+[data-theme="dark"] .start-prompt-btn--primary:hover:not(:disabled) {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-color: var(--accent);
 }
 .start-prompt-btn--secondary {
   background: transparent;
-  color: var(--text-muted);
-  border-color: var(--glass-border);
+  color: var(--text-secondary);
+  border-color: var(--card-border);
 }
-.start-prompt-btn--secondary:hover {
+.start-prompt-btn--secondary:hover:not(:disabled) {
   background: var(--hover-bg);
-  color: var(--text-brand);
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+.start-prompt-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -2753,4 +2835,15 @@ html[lang="ar"] body { font-family: var(--font-cairo), system-ui, -apple-system,
 
 [dir="rtl"] .place-card {
   animation-name: slideInFromLeft;
+}
+
+/* Respect users who prefer reduced motion — kill all keyframe animations and
+   transitions globally. Keep state changes (hover/focus colors) instant. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
