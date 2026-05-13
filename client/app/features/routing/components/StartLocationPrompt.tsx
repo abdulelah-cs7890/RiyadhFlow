@@ -2,6 +2,7 @@
 
 import { memo, useEffect, useId, useRef } from 'react'
 import { useTranslations } from 'next-intl'
+import { Crosshair } from 'lucide-react'
 
 interface StartLocationPromptProps {
   open: boolean;
@@ -48,7 +49,8 @@ function StartLocationPrompt({ open, onClose, onUseCurrentLocation }: StartLocat
             className="start-prompt-btn start-prompt-btn--primary"
             onClick={onUseCurrentLocation}
           >
-            {t('startPromptUseLocation')}
+            <Crosshair size={14} aria-hidden strokeWidth={2} />
+            <span>{t('startPromptUseLocation')}</span>
           </button>
           <button
             type="button"

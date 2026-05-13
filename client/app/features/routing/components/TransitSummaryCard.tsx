@@ -2,6 +2,7 @@
 
 import { memo } from 'react'
 import { useTranslations } from 'next-intl'
+import { Footprints, TrainFront } from 'lucide-react'
 import { useLocale } from '../../../i18n/LocaleProvider'
 import type { TransitPlan } from '../services/transitRouting'
 
@@ -22,7 +23,7 @@ function TransitSummaryCard({ plan }: TransitSummaryCardProps) {
   return (
     <div className="transit-summary">
       <div className="transit-summary-header">
-        <span className="transit-summary-icon" aria-hidden="true">🚇</span>
+        <TrainFront size={16} className="transit-summary-icon" aria-hidden strokeWidth={2} />
         <h3 className="transit-summary-title">{t('summaryTitle')}</h3>
         <span className="transit-summary-total">
           {t('totalTime', { mins: Math.round(plan.totalMinutes) })}
@@ -47,7 +48,7 @@ function TransitSummaryCard({ plan }: TransitSummaryCardProps) {
             const isBoarding = Boolean(leg.toStationName)
             return (
               <li key={i} className="transit-leg transit-leg--walk">
-                <span className="transit-leg-icon" aria-hidden="true">🚶</span>
+                <Footprints size={14} className="transit-leg-icon" aria-hidden strokeWidth={2} />
                 <span className="transit-leg-text">
                   {stationName
                     ? (isBoarding

@@ -1,6 +1,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
+import { Clock, Zap } from 'lucide-react'
 import { useDepartureComparison } from '../hooks/useDepartureComparison'
 import { TravelMode } from '../types'
 
@@ -36,7 +37,7 @@ export default function BestTimePanel({ startCoords, endCoords, travelMode }: Be
   return (
     <div className="best-time-pane">
       <div className="best-time-header">
-        <span>⏱️</span>
+        <Clock size={16} aria-hidden strokeWidth={2} />
         <h3 className="best-time-title">{t('title')}</h3>
       </div>
 
@@ -73,8 +74,10 @@ export default function BestTimePanel({ startCoords, endCoords, travelMode }: Be
                 className={`best-time-row${isFastest ? ' best-time-row--fastest' : ''}`}
               >
                 <span className="best-time-depart">
-                  {isFastest && <span aria-label={t('fastest')}>🏆 </span>}
-                  {t('leave')} {formatHHmm(opt.departAt)}
+                  {isFastest && (
+                    <Zap size={12} aria-label={t('fastest')} strokeWidth={2} fill="currentColor" />
+                  )}
+                  <span>{t('leave')} {formatHHmm(opt.departAt)}</span>
                 </span>
                 <span className="best-time-eta">{t('etaMins', { mins: opt.etaMinutes })}</span>
                 <span className="best-time-delta">

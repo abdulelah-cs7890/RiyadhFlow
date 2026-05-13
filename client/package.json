@@ -29,6 +29,8 @@
   "dependencies": {
     "@prisma/client": "^6.19.3",
     "@vercel/analytics": "^2.0.1",
+    "geist": "^1.7.0",
+    "lucide-react": "^1.14.0",
     "mapbox-gl": "^3.20.0",
     "next": "^13.4.19",
     "next-intl": "^4.9.1",

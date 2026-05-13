@@ -2,6 +2,7 @@
 
 import { memo, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { GripVertical, MapPin, X } from 'lucide-react'
 import AutocompleteInput from './AutocompleteInput'
 import { MAX_WAYPOINTS, Waypoint } from '../types'
 
@@ -99,7 +100,7 @@ function WaypointsList({
               onTouchStart={() => setHandleDownIndex(i)}
               onTouchEnd={() => setHandleDownIndex(null)}
             >
-              ⋮⋮
+              <GripVertical size={14} aria-hidden strokeWidth={2} />
             </button>
           )}
           <AutocompleteInput
@@ -108,7 +109,7 @@ function WaypointsList({
             onSelect={(name, coords) => updateAt(i, { name, coords })}
             placeholder={tRouting('stopPlaceholder')}
             label={tRouting('stopLabel', { n: i + 1 })}
-            icon="🛑"
+            icon={<MapPin size={14} aria-hidden strokeWidth={2} />}
             onSubmit={onSubmit}
             anchorCoords={anchorCoords}
           />
@@ -119,7 +120,7 @@ function WaypointsList({
             aria-label={tRouting('removeStop')}
             title={tRouting('removeStop')}
           >
-            ✕
+            <X size={14} aria-hidden strokeWidth={2.5} />
           </button>
         </div>
       ))}

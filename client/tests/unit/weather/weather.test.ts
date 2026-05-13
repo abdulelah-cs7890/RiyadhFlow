@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   classifyDust,
   codeToCondition,
-  conditionEmoji,
+  conditionIcon,
 } from '@/app/features/weather/utils/weather'
 
 describe('codeToCondition', () => {
@@ -24,11 +24,13 @@ describe('codeToCondition', () => {
   })
 })
 
-describe('conditionEmoji', () => {
-  it('returns a non-empty string for every condition', () => {
+describe('conditionIcon', () => {
+  it('returns a Lucide icon component for every condition', () => {
     const conditions = ['clear', 'partly-cloudy', 'cloudy', 'fog', 'rain', 'snow', 'thunderstorm'] as const
     for (const c of conditions) {
-      expect(conditionEmoji(c).length).toBeGreaterThan(0)
+      const Icon = conditionIcon(c)
+      expect(typeof Icon).toBe('object') // forwardRef component
+      expect(Icon).toBeTruthy()
     }
   })
 })

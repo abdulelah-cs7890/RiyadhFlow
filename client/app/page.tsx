@@ -4,6 +4,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import dynamic from 'next/dynamic'
+import {
+  Bookmark,
+  Box,
+  Circle,
+  Crosshair,
+  History,
+  Loader2,
+  MapPin,
+  Navigation,
+  Sparkles,
+} from 'lucide-react'
 import { ErrorBoundary } from './components/ErrorBoundary'
 
 // Lazy-load Map: keeps mapbox-gl (~250 KB gzipped) + the bundled
@@ -11,7 +22,11 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 // glass-pane (search, prayer pill, recent trips) hydrates first.
 const Map = dynamic(() => import('./components/Map'), {
   ssr: false,
-  loading: () => <div className="map-fallback" role="status">⏳</div>,
+  loading: () => (
+    <div className="map-fallback" role="status">
+      <Loader2 className="lucide-spin" size={28} strokeWidth={1.75} aria-hidden />
+    </div>
+  ),
 })
 import { PlaceData } from './utils/mockData'
 import { useRoutePlanner } from './features/routing/hooks/useRoutePlanner'
@@ -514,7 +529,8 @@ export default function Home() {
                     }}
                     title={r.dest}
                   >
-                    🕘 {r.dest}
+                    <History size={12} aria-hidden strokeWidth={2} />
+                    <span>{r.dest}</span>
                   </button>
                 </span>
               ))}
@@ -528,7 +544,7 @@ export default function Home() {
             onSelect={(name, coords) => { setStartLocation(name); setStartCoords(coords); }}
             placeholder={tRouting('startPlaceholder')}
             label={tRouting('startLabel')}
-            icon="🚩"
+            icon={<Circle size={10} fill="currentColor" strokeWidth={0} aria-hidden />}
             showCurrentLocation
             onCurrentLocation={(coords) => {
               setUserLocation([...coords]);
@@ -564,7 +580,7 @@ export default function Home() {
             onSelect={(name, coords) => { setDestination(name); setDestCoords(coords); }}
             placeholder={tRouting('destinationPlaceholder')}
             label={tRouting('destinationLabel')}
-            icon="📍"
+            icon={<MapPin size={14} aria-hidden strokeWidth={2} />}
             onSubmit={() => void handleFindRoute()}
             anchorCoords={userLocation ?? startCoords}
           />
@@ -598,7 +614,10 @@ export default function Home() {
                 <span className="spinner-label">{tRouting('analyzing')}</span>
               </>
             ) : (
-              tRouting('findRoute')
+              <>
+                <Navigation size={16} aria-hidden strokeWidth={2.25} />
+                <span>{tRouting('findRoute')}</span>
+              </>
             )}
           </button>
           <button className="save-btn" onClick={handleSaveTrip} disabled={isCalculating || !startLocation || !destination}>
@@ -731,7 +750,7 @@ export default function Home() {
           <>
             <div className="insights-pane">
               <div className="insights-header">
-                <span>🧠</span>
+                <Sparkles size={15} aria-hidden strokeWidth={2} />
                 <h3 className="insights-title">{tInsights('title')}</h3>
               </div>
               <p className="insights-text">
@@ -780,7 +799,7 @@ export default function Home() {
                     onClick={() => handleLoadTrip(trip)}
                     title={tTrips('loadTrip')}
                   >
-                    <span>🕘</span>
+                    <History size={14} aria-hidden strokeWidth={2} />
                     <span>{trip.start} → {trip.dest}</span>
                   </button>
                 </div>
@@ -799,7 +818,7 @@ export default function Home() {
                   onClick={() => handleLoadTrip(trip)}
                   title={tTrips('loadTrip')}
                 >
-                  <span>📌</span>
+                  <Bookmark size={14} aria-hidden strokeWidth={2} />
                   <span>{trip.start} → {trip.dest}</span>
                 </button>
                 <button
@@ -890,29 +909,29 @@ export default function Home() {
 
       <button
         type="button"
-        className={`traffic-toggle${trafficVisible ? ' active' : ''}`}
+        className={`map-floating-btn traffic-toggle${trafficVisible ? ' active' : ''}`}
         onClick={() => setTrafficVisible((v) => !v)}
         title={trafficVisible ? 'Hide traffic layer' : 'Show traffic layer'}
         aria-label={trafficVisible ? 'Hide traffic' : 'Show traffic'}
         aria-pressed={trafficVisible}
       >
-        🚦
+        <span className="map-floating-btn-text">Traffic</span>
       </button>
 
       <button
         type="button"
-        className={`buildings3d-toggle${buildings3dVisible ? ' active' : ''}`}
+        className={`map-floating-btn buildings3d-toggle${buildings3dVisible ? ' active' : ''}`}
         onClick={() => setBuildings3dVisible((v) => !v)}
         title={buildings3dVisible ? tUi('disable3d') : tUi('enable3d')}
         aria-label={buildings3dVisible ? tUi('disable3d') : tUi('enable3d')}
         aria-pressed={buildings3dVisible}
       >
-        🏙️
+        <Box size={16} aria-hidden strokeWidth={2} />
       </button>
 
       <button
         type="button"
-        className="locate-me-toggle"
+        className="map-floating-btn locate-me-toggle"
         onClick={() => {
           if (userLocation) {
             setFlyToLocation([...userLocation]);
@@ -924,7 +943,7 @@ export default function Home() {
         title={tGps('useCurrentLocation')}
         aria-label={tGps('useCurrentLocation')}
       >
-        📍
+        <Crosshair size={16} aria-hidden strokeWidth={2} />
       </button>
 
       <ErrorBoundary>

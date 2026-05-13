@@ -1,8 +1,11 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { createElement } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
+import { MapPin } from 'lucide-react'
 import type { Feature, LineString } from 'geojson'
 import { Category, PlaceData } from '../utils/mockData'
 import { RouteAlternative, RouteInfo, TravelMode } from '../features/routing/types'
@@ -10,9 +13,24 @@ import type { TransitPlan } from '../features/routing/services/transitRouting'
 import { reverseGeocode } from '../features/routing/services/geocoding'
 import { camerasOnRoute, SpeedCamera } from '../features/routing/utils/speedCameras'
 import speedCamerasData from '../features/routing/data/riyadh-speed-cameras.json'
-import { CATEGORY_EMOJIS } from '../features/places/constants/categoryPills'
+import { CATEGORY_ICONS } from '../features/places/constants/categoryPills'
 import { useLocale } from '../i18n/LocaleProvider'
 import { useTranslations } from 'next-intl'
+
+// Render a Lucide icon to a string of SVG markup so we can stamp it inside
+// a Mapbox Marker's HTML element. Cached per icon to avoid re-renders.
+const iconSvgCache: Record<string, string> = {}
+function lucideSvgFor(category: Category | undefined): string {
+  const Icon = category ? CATEGORY_ICONS[category] : MapPin
+  const key = Icon.displayName ?? Icon.name ?? 'fallback'
+  const cached = iconSvgCache[key]
+  if (cached) return cached
+  const svg = renderToStaticMarkup(
+    createElement(Icon, { size: 14, strokeWidth: 2.25, color: '#ffffff', 'aria-hidden': true }),
+  )
+  iconSvgCache[key] = svg
+  return svg
+}
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
 
@@ -96,7 +114,8 @@ const SPEED_CAMERAS_LAYER_ID = 'speed-cameras';
 
 const ALL_SPEED_CAMERAS = speedCamerasData as SpeedCamera[];
 
-const SELECTED_ROUTE_COLOR = { light: '#0070f3', dark: '#38bdf8' };
+// Terracotta primary, slate alternates. Matches the --accent / slate token scale.
+const SELECTED_ROUTE_COLOR = { light: '#d97757', dark: '#e89274' };
 const ALT_ROUTE_COLOR = { light: '#94a3b8', dark: '#64748b' };
 
 function upsertRouteLayer(
@@ -662,7 +681,7 @@ export default function Map({
         : tMapRef.current('cameraPopupNoSpeed');
       new mapboxgl.Popup({ offset: 12, closeButton: true, className: 'speed-camera-popup' })
         .setLngLat([lng, lat])
-        .setHTML(`<strong>📷 ${titleText}</strong><br/><span>${speedText}</span>`)
+        .setHTML(`<strong>${titleText}</strong><br/><span>${speedText}</span>`)
         .addTo(map);
     });
     map.on('mouseenter', SPEED_CAMERAS_LAYER_ID, () => {
@@ -946,16 +965,11 @@ export default function Map({
 
     if (!places.length) return;
 
-    const activeEmoji = activeCategory ? CATEGORY_EMOJIS[activeCategory] : undefined;
-
     places.forEach((loc) => {
       const markerEl = document.createElement('div');
       markerEl.className = 'custom-marker custom-marker--place';
-      const emoji = activeEmoji ?? (loc.category ? CATEGORY_EMOJIS[loc.category] : undefined);
-      if (emoji) {
-        markerEl.textContent = emoji;
-        markerEl.classList.add('custom-marker--emoji');
-      }
+      const iconSvg = lucideSvgFor((activeCategory ?? loc.category) as Category | undefined);
+      markerEl.innerHTML = iconSvg;
       markerEl.setAttribute('role', 'button');
       markerEl.setAttribute('tabindex', '0');
       markerEl.setAttribute('aria-label', tPlacesRef.current('viewDetails', { name: loc.name }));

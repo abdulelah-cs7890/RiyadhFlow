@@ -2,6 +2,7 @@
 
 import { memo, useEffect, useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
+import { Loader2, Star } from 'lucide-react'
 import { usePrayerTimes } from '../hooks/usePrayerTimes'
 import { PRAYER_ORDER, type PrayerName } from '../utils/prayerTimes'
 import { fetchPlacesFromDb } from '@/app/features/places/services/placesSearch'
@@ -56,13 +57,14 @@ function PrayerStatusPill({ userCoords = null, onShowNearestMosque }: PrayerStat
   const countdown = hours > 0
     ? t('hoursLabel', { hours, mins })
     : t('minutesLabel', { mins })
-  const label = `🕌 ${prayerName} · ${countdown}`
+  const label = `${prayerName} · ${countdown}`
+  const isSoon = next.minutesUntil <= 30 && !next.isTomorrow
 
   return (
     <div ref={wrapRef} className={`prayer-pill-wrap${expanded ? ' is-expanded' : ''}`}>
       <button
         type="button"
-        className="prayer-pill"
+        className={`prayer-pill${isSoon ? ' is-soon' : ''}`}
         onClick={() => setExpanded((v) => !v)}
         aria-expanded={expanded}
         title={t('nextPrayer', { name: prayerName })}
@@ -113,7 +115,14 @@ function PrayerStatusPill({ userCoords = null, onShowNearestMosque }: PrayerStat
                 }
               }}
             >
-              {mosqueLoading ? '…' : `🕌 ${t('nearestMosque')}`}
+              {mosqueLoading ? (
+                <Loader2 size={14} className="lucide-spin" aria-hidden strokeWidth={2} />
+              ) : (
+                <>
+                  <Star size={14} aria-hidden strokeWidth={2} />
+                  <span>{t('nearestMosque')}</span>
+                </>
+              )}
             </button>
           )}
           {mosqueError && (

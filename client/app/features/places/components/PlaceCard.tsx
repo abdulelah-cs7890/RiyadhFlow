@@ -3,10 +3,11 @@
 import { memo, useState } from 'react'
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
+import { Globe, MapPin, Navigation, Phone, Star, X } from 'lucide-react'
 import { PlaceData } from '@/app/utils/mockData'
 import { useLocale } from '@/app/i18n/LocaleProvider'
 import { getLocalizedPlace } from '@/app/i18n/helpers'
-import { CATEGORY_EMOJIS } from '../constants/categoryPills'
+import { CATEGORY_ICONS } from '../constants/categoryPills'
 
 export interface PrayerWarning {
   prayer: string;
@@ -28,7 +29,7 @@ function PlaceCard({ place, onClose, onDirections, prayerWarning }: PlaceCardPro
   const [imageFailed, setImageFailed] = useState(false);
 
   const hasImage = Boolean(localizedPlace.image) && !imageFailed;
-  const emoji = place.category ? CATEGORY_EMOJIS[place.category] : '📍';
+  const FallbackIcon = place.category ? CATEGORY_ICONS[place.category] : MapPin;
 
   return (
     <div className="place-card">
@@ -37,7 +38,7 @@ function PlaceCard({ place, onClose, onDirections, prayerWarning }: PlaceCardPro
         aria-label={t('closePlaceDetails')}
         onClick={onClose}
       >
-        ✕
+        <X size={16} aria-hidden strokeWidth={2.5} />
       </button>
       {hasImage ? (
         <Image
@@ -51,7 +52,7 @@ function PlaceCard({ place, onClose, onDirections, prayerWarning }: PlaceCardPro
         />
       ) : (
         <div className="place-image-fallback" aria-hidden="true">
-          <span className="place-image-fallback-emoji">{emoji}</span>
+          <FallbackIcon size={48} strokeWidth={1.5} className="place-image-fallback-icon" />
         </div>
       )}
 
@@ -60,7 +61,7 @@ function PlaceCard({ place, onClose, onDirections, prayerWarning }: PlaceCardPro
 
         {localizedPlace.rating != null && localizedPlace.reviews != null && (
           <div className="place-rating">
-            <span className="star">★</span>
+            <Star size={14} className="place-rating-star" aria-hidden strokeWidth={2} />
             <strong>{localizedPlace.rating}</strong>
             <span>{t('reviews', { count: localizedPlace.reviews.toLocaleString() })}</span>
           </div>
@@ -69,7 +70,7 @@ function PlaceCard({ place, onClose, onDirections, prayerWarning }: PlaceCardPro
 
         {localizedPlace.distance_m != null && (
           <div className="place-distance" aria-label={t('distanceFromYou')}>
-            <span aria-hidden="true">📍</span>
+            <MapPin size={13} aria-hidden strokeWidth={2} />
             <span>{t('km', { km: (localizedPlace.distance_m / 1000).toFixed(localizedPlace.distance_m < 1000 ? 2 : 1) })}</span>
           </div>
         )}
@@ -78,7 +79,7 @@ function PlaceCard({ place, onClose, onDirections, prayerWarning }: PlaceCardPro
 
         {prayerWarning && (
           <div className="prayer-warning" role="note">
-            🕌 {tPrayer('mayClose', { prayer: prayerWarning.prayer, mins: prayerWarning.inMinutes })}
+            {tPrayer('mayClose', { prayer: prayerWarning.prayer, mins: prayerWarning.inMinutes })}
           </div>
         )}
 
@@ -90,7 +91,8 @@ function PlaceCard({ place, onClose, onDirections, prayerWarning }: PlaceCardPro
                 href={`tel:${place.phone}`}
                 aria-label={t('callAction', { phone: place.phone })}
               >
-                📞 {t('call')}
+                <Phone size={14} aria-hidden strokeWidth={2} />
+                <span>{t('call')}</span>
               </a>
             )}
             {place.website && (
@@ -101,7 +103,8 @@ function PlaceCard({ place, onClose, onDirections, prayerWarning }: PlaceCardPro
                 rel="noopener noreferrer"
                 aria-label={t('websiteAction')}
               >
-                🌐 {t('website')}
+                <Globe size={14} aria-hidden strokeWidth={2} />
+                <span>{t('website')}</span>
               </a>
             )}
           </div>
@@ -111,7 +114,8 @@ function PlaceCard({ place, onClose, onDirections, prayerWarning }: PlaceCardPro
           className="go-btn"
           onClick={() => onDirections(localizedPlace.name, localizedPlace.coords)}
         >
-          {t('directions')}
+          <Navigation size={15} aria-hidden strokeWidth={2.25} />
+          <span>{t('directions')}</span>
         </button>
       </div>
     </div>

@@ -2,23 +2,23 @@
   "routing": {
     "startLabel": "نقطة الانطلاق",
     "destinationLabel": "الوجهة",
-    "startPlaceholder": "مثال: جامعة الملك سعود",
-    "destinationPlaceholder": "مثال: الفيحاء",
+    "startPlaceholder": "من أين؟",
+    "destinationPlaceholder": "إلى أين؟",
     "swapLocations": "تبديل المواقع",
     "swapAriaLabel": "تبديل نقطة الانطلاق والوجهة",
-    "findRoute": "🚦 أفضل مسار",
+    "findRoute": "أفضل مسار",
     "analyzing": "جارٍ التحليل...",
-    "save": "💾 حفظ",
-    "saved": "✓ تم الحفظ!",
-    "reset": "✕ إعادة تعيين",
+    "save": "حفظ",
+    "saved": "تم الحفظ",
+    "reset": "إعادة تعيين",
     "clearRoute": "مسح المسار والمدخلات",
     "resetRoute": "إعادة تعيين المسار",
-    "recenter": "🎯 توسيط",
+    "recenter": "توسيط",
     "recenterTitle": "توسيط الخريطة على هذا المسار",
-    "openGoogleMaps": "🧭 فتح في خرائط جوجل",
+    "openGoogleMaps": "فتح في خرائط جوجل",
     "openGoogleMapsTitle": "فتح هذا المسار في خرائط جوجل",
-    "share": "🔗 مشاركة",
-    "copied": "✓ تم النسخ!",
+    "share": "مشاركة",
+    "copied": "تم النسخ",
     "shareTitle": "نسخ رابط المشاركة",
     "via": "عبر {road}",
     "arriveBy": "الوصول في {time}",
@@ -37,9 +37,9 @@
     "removeStop": "حذف التوقف",
     "reorderStop": "اسحب لإعادة الترتيب",
     "stopLabel": "توقف {n}",
-    "stopPlaceholder": "مثال: برج المملكة",
+    "stopPlaceholder": "أضف توقفاً",
     "multiStopMetroUnavailable": "التوقفات المتعددة غير مدعومة في المترو — سيتم تجاهلها.",
-    "camerasOnRoute": "⚠ {count, plural, zero {لا رادارات} one {رادار واحد} two {رادارَان} few {# رادارات} many {# راداراً} other {# رادار}} على المسار",
+    "camerasOnRoute": "{count, plural, zero {لا رادارات} one {رادار واحد} two {رادارَان} few {# رادارات} many {# راداراً} other {# رادار}} على المسار",
     "cameraTooltip": "رادارات ثابتة لقياس السرعة على هذا المسار",
     "metro": {
       "summaryTitle": "مسار المترو",
@@ -51,7 +51,7 @@
       "transferCount": "{count, plural, zero {لا تحويلات} one {تحويل واحد} two {تحويلان} few {# تحويلات} many {# تحويلاً} other {# تحويل}}",
       "noRoute": "لا يوجد مسار مترو من هنا — أقرب محطة تبعد {km} كم.",
       "switchToDriving": "التبديل إلى القيادة",
-      "walkTotal": "🚶 {km, number, ::.0} كم مشي إجمالاً"
+      "walkTotal": "{km, number, ::.0} كم مشي إجمالاً"
     }
   },
   "gps": {
@@ -77,7 +77,7 @@
     "notFoundCta": "العودة إلى الخريطة",
     "startPromptTitle": "من أين تبدأ؟",
     "startPromptBody": "اختر نقطة البداية للحصول على الاتجاهات.",
-    "startPromptUseLocation": "📍 استخدم موقعي الحالي",
+    "startPromptUseLocation": "استخدم موقعي الحالي",
     "startPromptCancel": "إلغاء"
   },
   "trips": {
@@ -108,7 +108,7 @@
     "retry": "حاول مرة أخرى"
   },
   "places": {
-    "directions": "🧭 الاتجاهات إلى هنا",
+    "directions": "الاتجاهات",
     "reviews": "({count} تقييم)",
     "closePlaceDetails": "إغلاق تفاصيل المكان",
     "noPlaces": "لا توجد أماكن لـ {category} الآن.",
@@ -182,7 +182,7 @@
     }
   },
   "ui": {
-    "appTitle": "RiyadhFlow 🚗",
+    "appTitle": "RiyadhFlow",
     "directions": "الاتجاهات",
     "steps": "{count} خطوات",
     "droppedPin": "دبوس مثبّت",

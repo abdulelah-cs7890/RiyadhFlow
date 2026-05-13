@@ -2,8 +2,9 @@
 
 import { memo, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { CloudFog } from 'lucide-react'
 import { useWeather } from '../hooks/useWeather'
-import { classifyDust, conditionEmoji } from '../utils/weather'
+import { classifyDust, conditionIcon } from '../utils/weather'
 
 function WeatherPill() {
   const t = useTranslations('weather')
@@ -34,10 +35,13 @@ function WeatherPill() {
 
   const dust = classifyDust(weather.pm10, weather.dust)
   const isDustWarn = dust.level === 'storm' || dust.level === 'severe'
-  const emoji = isDustWarn ? '🌫️' : conditionEmoji(weather.condition)
-  const label = `${emoji} ${weather.tempC}°`
+  const Icon = isDustWarn ? CloudFog : conditionIcon(weather.condition)
   const conditionLabel = t(`condition.${weather.condition}`)
   const dustLabel = t(`dust.${dust.level}`)
+  // Short dust label for the pill itself: "Dusty" / "Dust storm" / "Severe dust"
+  const dustShort = dust.level === 'severe' ? t('dust.severe').split('—')[0].trim()
+    : dust.level === 'storm' ? t('dust.storm').split('—')[0].trim()
+    : null
 
   return (
     <div ref={wrapRef} className={`weather-pill-wrap${expanded ? ' is-expanded' : ''}`}>
@@ -48,17 +52,19 @@ function WeatherPill() {
         aria-expanded={expanded}
         title={conditionLabel}
       >
-        {label}
-        {isDustWarn && <span className="weather-pill-warn-dot" aria-hidden>⚠️</span>}
+        <Icon size={14} aria-hidden strokeWidth={2} />
+        <span>{weather.tempC}°</span>
+        {dustShort && <span className="weather-pill-dust-tag">· {dustShort}</span>}
       </button>
       {expanded && (
         <div className="weather-pill-panel" role="region" aria-label={conditionLabel}>
           <div className="weather-pill-headline">
-            {emoji} {weather.tempC}° · {conditionLabel}
+            <Icon size={16} aria-hidden strokeWidth={2} />
+            <span>{weather.tempC}° · {conditionLabel}</span>
           </div>
           {isDustWarn && (
             <div className="weather-pill-dust-warn" role="alert">
-              ⚠️ {dustLabel}
+              {dustLabel}
             </div>
           )}
           <div className="weather-pill-row">

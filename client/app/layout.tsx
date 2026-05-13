@@ -1,10 +1,13 @@
 import { ReactNode } from 'react'
 import { Cairo } from 'next/font/google'
+import { GeistSans } from 'geist/font/sans'
 import { Analytics } from '@vercel/analytics/react'
 import './globals.css'
 import { LocaleProvider } from './i18n/LocaleProvider'
 import RegisterServiceWorker from './components/RegisterServiceWorker'
 
+// Bilingual stack: Cairo for Arabic, Geist for Latin. Both are exposed as CSS
+// variables; globals.css picks per :lang().
 const cairo = Cairo({ subsets: ['arabic', 'latin'], display: 'swap', variable: '--font-cairo' });
 
 export const metadata = {
@@ -46,7 +49,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           }}
         />
       </head>
-      <body className={cairo.variable}>
+      <body className={`${cairo.variable} ${GeistSans.variable}`}>
         <LocaleProvider>{children}</LocaleProvider>
         <RegisterServiceWorker />
         <Analytics />

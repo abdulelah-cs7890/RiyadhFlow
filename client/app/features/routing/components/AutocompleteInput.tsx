@@ -1,7 +1,8 @@
 'use client'
 
-import { memo, useCallback, useEffect, useId, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { useTranslations } from 'next-intl'
+import { MapPin } from 'lucide-react'
 import { Suggestion } from '../services/searchSuggestions'
 import { useSearchSuggestions } from '../hooks/useSearchSuggestions'
 import { reverseGeocode } from '../services/geocoding'
@@ -13,7 +14,7 @@ interface AutocompleteInputProps {
   onSelect: (name: string, coords: [number, number]) => void;
   placeholder: string;
   label: string;
-  icon: string;
+  icon: ReactNode;
   showCurrentLocation?: boolean;
   onCurrentLocation?: (coords: [number, number]) => void;
   onSubmit?: () => void;
@@ -228,7 +229,10 @@ function AutocompleteInput({
                   }}
                 >
                   <span className="autocomplete-item-name">
-                    {s.source === 'db' ? `📍 ${s.name}` : s.name}
+                    {s.source === 'db' && (
+                      <MapPin size={14} aria-hidden strokeWidth={2} className="autocomplete-item-icon" />
+                    )}
+                    {s.name}
                   </span>
                   <span className="autocomplete-item-address">{address}</span>
                 </li>

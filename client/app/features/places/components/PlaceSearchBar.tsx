@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useEffect, useId, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { History, MapPin, Search, X } from 'lucide-react'
 import { PlaceData } from '@/app/utils/mockData'
 import { useSearchSuggestions } from '@/app/features/routing/hooks/useSearchSuggestions'
 import { Suggestion } from '@/app/features/routing/services/searchSuggestions'
@@ -123,10 +124,10 @@ function PlaceSearchBar({ onSelect, anchorCoords = null }: PlaceSearchBarProps) 
     <div className="place-search-wrap" ref={wrapperRef}>
       <div className="input-label-row">
         <span className="input-label">{t('searchLabel')}</span>
-        <span className="input-icon" aria-hidden="true">🔎</span>
+        <Search size={14} className="input-icon" aria-hidden strokeWidth={2} />
       </div>
       <div className="place-search-input-row">
-        <span className="place-search-icon" aria-hidden="true">🔎</span>
+        <Search size={16} className="place-search-icon" aria-hidden strokeWidth={2} />
         <input
           className="glass-input place-search-input"
           type="text"
@@ -161,7 +162,8 @@ function PlaceSearchBar({ onSelect, anchorCoords = null }: PlaceSearchBarProps) 
                 className="search-history-chip-text"
                 onMouseDown={(e) => { e.preventDefault(); handleHistoryPick(q); }}
               >
-                🕘 {q}
+                <History size={12} aria-hidden strokeWidth={2} />
+                <span>{q}</span>
               </button>
               <button
                 type="button"
@@ -170,7 +172,7 @@ function PlaceSearchBar({ onSelect, anchorCoords = null }: PlaceSearchBarProps) 
                 aria-label={t('searchHistoryRemove', { query: q })}
                 title={t('searchHistoryRemove', { query: q })}
               >
-                ✕
+                <X size={12} aria-hidden strokeWidth={2.5} />
               </button>
             </span>
           ))}
@@ -197,7 +199,10 @@ function PlaceSearchBar({ onSelect, anchorCoords = null }: PlaceSearchBarProps) 
                 }}
               >
                 <span className="autocomplete-item-name">
-                  {s.source === 'db' ? `📍 ${s.name}` : s.name}
+                  {s.source === 'db' && (
+                    <MapPin size={14} aria-hidden strokeWidth={2} className="autocomplete-item-icon" />
+                  )}
+                  {s.name}
                 </span>
                 <span className="autocomplete-item-address">{address}</span>
               </li>

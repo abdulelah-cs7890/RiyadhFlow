@@ -2,6 +2,7 @@
 
 import { memo } from 'react'
 import { useTranslations } from 'next-intl'
+import { Loader2, Locate } from 'lucide-react'
 import { Category } from '@/app/utils/mockData'
 import { CategoryPill, getCategoryLabel } from '../constants/categoryPills'
 import { useLocale } from '@/app/i18n/LocaleProvider'
@@ -45,7 +46,9 @@ function CategoryBar({
           onClick={onNearMeToggle}
           disabled={nearMeStatus === 'loading'}
         >
-          <span aria-hidden="true">{nearMeStatus === 'loading' ? '⏳' : '📍'}</span>
+          {nearMeStatus === 'loading'
+            ? <Loader2 size={14} aria-hidden strokeWidth={2} className="lucide-spin" />
+            : <Locate size={14} aria-hidden strokeWidth={2} />}
           <span>{nearMeLabel}</span>
         </button>
       )}
@@ -53,6 +56,7 @@ function CategoryBar({
         const isAll = category.label === 'All';
         const isActive = isAll ? activeCategory === null : activeCategory === category.label;
         const displayLabel = isAll ? t('all') : getCategoryLabel(category.label as Category, locale);
+        const Icon = category.Icon;
 
         return (
           <button
@@ -66,7 +70,7 @@ function CategoryBar({
               onCategoryChange(nextCategory);
             }}
           >
-            {category.emoji && <span>{category.emoji}</span>}
+            {Icon && <Icon size={14} aria-hidden strokeWidth={2} />}
             <span>{displayLabel}</span>
             {isActive && !isAll && activePlaceCount != null && activePlaceCount > 0 && (
               <span className="category-pill-count">{activePlaceCount}</span>

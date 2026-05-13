@@ -1,3 +1,14 @@
+import {
+  Cloud,
+  CloudFog,
+  CloudLightning,
+  CloudRain,
+  CloudSnow,
+  CloudSun,
+  Sun,
+  type LucideIcon,
+} from 'lucide-react'
+
 export type WeatherCondition =
   | 'clear'
   | 'partly-cloudy'
@@ -36,15 +47,15 @@ export function codeToCondition(code: number): WeatherCondition {
   return 'clear'
 }
 
-export function conditionEmoji(c: WeatherCondition): string {
+export function conditionIcon(c: WeatherCondition): LucideIcon {
   switch (c) {
-    case 'clear': return '☀️'
-    case 'partly-cloudy': return '🌤️'
-    case 'cloudy': return '☁️'
-    case 'fog': return '🌫️'
-    case 'rain': return '🌧️'
-    case 'snow': return '❄️'
-    case 'thunderstorm': return '⛈️'
+    case 'clear': return Sun
+    case 'partly-cloudy': return CloudSun
+    case 'cloudy': return Cloud
+    case 'fog': return CloudFog
+    case 'rain': return CloudRain
+    case 'snow': return CloudSnow
+    case 'thunderstorm': return CloudLightning
   }
 }
 

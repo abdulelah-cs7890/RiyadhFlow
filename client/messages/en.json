@@ -2,23 +2,23 @@
   "routing": {
     "startLabel": "START",
     "destinationLabel": "DESTINATION",
-    "startPlaceholder": "e.g., King Saud University",
-    "destinationPlaceholder": "e.g., Al Fayha",
+    "startPlaceholder": "Where from?",
+    "destinationPlaceholder": "Where to?",
     "swapLocations": "Swap locations",
     "swapAriaLabel": "Swap Start and Destination",
-    "findRoute": "🚦 Find Best Route",
+    "findRoute": "Find best route",
     "analyzing": "Analyzing...",
-    "save": "💾 Save",
-    "saved": "✓ Saved!",
-    "reset": "✕ Reset",
+    "save": "Save",
+    "saved": "Saved",
+    "reset": "Reset",
     "clearRoute": "Clear route and inputs",
     "resetRoute": "Reset route",
-    "recenter": "🎯 Recenter",
+    "recenter": "Recenter",
     "recenterTitle": "Recenter map on this route",
-    "openGoogleMaps": "🧭 Open in Google Maps",
+    "openGoogleMaps": "Open in Google Maps",
     "openGoogleMapsTitle": "Open this route in Google Maps",
-    "share": "🔗 Share",
-    "copied": "✓ Copied!",
+    "share": "Share",
+    "copied": "Copied",
     "shareTitle": "Copy shareable link",
     "via": "via {road}",
     "arriveBy": "Arrive by {time}",
@@ -37,9 +37,9 @@
     "removeStop": "Remove stop",
     "reorderStop": "Drag to reorder",
     "stopLabel": "STOP {n}",
-    "stopPlaceholder": "e.g., Kingdom Tower",
+    "stopPlaceholder": "Add a stop",
     "multiStopMetroUnavailable": "Multi-stop is not supported on metro — stops will be ignored.",
-    "camerasOnRoute": "⚠ {count, plural, one {# camera} other {# cameras}} on route",
+    "camerasOnRoute": "{count, plural, one {# camera} other {# cameras}} on route",
     "cameraTooltip": "Fixed speed-enforcement cameras along this route",
     "metro": {
       "summaryTitle": "Metro route",
@@ -51,7 +51,7 @@
       "transferCount": "{count, plural, one {# transfer} other {# transfers}}",
       "noRoute": "No metro route from here — nearest station is {km} km away.",
       "switchToDriving": "Switch to driving",
-      "walkTotal": "🚶 {km, number, ::.0} km walk total"
+      "walkTotal": "{km, number, ::.0} km walking"
     }
   },
   "gps": {
@@ -77,7 +77,7 @@
     "notFoundCta": "Back to the map",
     "startPromptTitle": "Where are you starting from?",
     "startPromptBody": "Pick your starting point to get directions.",
-    "startPromptUseLocation": "📍 Use my current location",
+    "startPromptUseLocation": "Use my current location",
     "startPromptCancel": "Cancel"
   },
   "trips": {
@@ -108,7 +108,7 @@
     "retry": "Try again"
   },
   "places": {
-    "directions": "🧭 Directions to here",
+    "directions": "Directions",
     "reviews": "({count} reviews)",
     "closePlaceDetails": "Close place details",
     "noPlaces": "No places found for {category} right now.",
@@ -182,7 +182,7 @@
     }
   },
   "ui": {
-    "appTitle": "RiyadhFlow 🚗",
+    "appTitle": "RiyadhFlow",
     "directions": "Directions",
     "steps": "{count} steps",
     "droppedPin": "Dropped Pin",

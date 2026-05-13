@@ -1,19 +1,33 @@
+import {
+  Dumbbell,
+  Fuel,
+  Hotel,
+  Landmark,
+  ParkingSquare,
+  Pill,
+  ShoppingBag,
+  Sparkles,
+  Star,
+  TrainFront,
+  UtensilsCrossed,
+  type LucideIcon,
+} from 'lucide-react'
 import { CATEGORY_LABELS, Category } from '@/app/utils/mockData'
 
-export type CategoryPill = { label: 'All' | Category; emoji?: string };
+export type CategoryPill = { label: 'All' | Category; Icon?: LucideIcon };
 
-export const CATEGORY_EMOJIS: Record<Category, string> = {
-  'Restaurants': '🍽️',
-  'Hotels': '🏨',
-  'Things to do': '🎡',
-  'Museums': '🏛️',
-  'Transit': '🚇',
-  'Pharmacies': '💊',
-  'Gyms': '🏋️',
-  'Mosques': '🕌',
-  'Parking': '🅿️',
-  'Gas Stations': '⛽',
-  'Malls': '🛍️',
+export const CATEGORY_ICONS: Record<Category, LucideIcon> = {
+  'Restaurants': UtensilsCrossed,
+  'Hotels': Hotel,
+  'Things to do': Sparkles,
+  'Museums': Landmark,
+  'Transit': TrainFront,
+  'Pharmacies': Pill,
+  'Gyms': Dumbbell,
+  'Mosques': Star,
+  'Parking': ParkingSquare,
+  'Gas Stations': Fuel,
+  'Malls': ShoppingBag,
 };
 
 export const CATEGORY_LABELS_AR: Record<Category, string> = {
@@ -37,5 +51,5 @@ export const getCategoryLabel = (cat: Category | 'All', locale: 'en' | 'ar'): st
 
 export const categoryPills: CategoryPill[] = [
   { label: 'All' },
-  ...CATEGORY_LABELS.map((label) => ({ label, emoji: CATEGORY_EMOJIS[label] })),
+  ...CATEGORY_LABELS.map((label) => ({ label, Icon: CATEGORY_ICONS[label] })),
 ];

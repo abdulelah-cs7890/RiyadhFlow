@@ -1,10 +1,12 @@
+import { WifiOff } from 'lucide-react'
+
 export const dynamic = 'force-static'
 
 export default function OfflinePage() {
   return (
     <main className="offline-shell">
       <div className="offline-card">
-        <div className="offline-emoji" aria-hidden>📡</div>
+        <WifiOff size={48} strokeWidth={1.5} className="offline-icon" aria-hidden />
         <h1 className="offline-title">You&rsquo;re offline</h1>
         <p className="offline-body">
           RiyadhFlow needs an internet connection to load maps, routes, and place data.
