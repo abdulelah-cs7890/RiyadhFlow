@@ -2506,17 +2506,20 @@ html[lang="ar"] body { font-family: var(--font-cairo), system-ui, -apple-system,
 /* --- Route action row (Recenter + Open in Google Maps) --- */
 .route-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 12px;
 }
 
 .recenter-btn,
-.handoff-btn {
+.handoff-btn,
+.preview-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  flex: 1;
+  flex: 1 1 calc(50% - 4px);
+  min-width: 0;
   padding: 12px 14px;
   border: 1px solid var(--btn-border);
   border-radius: 14px;
@@ -2526,24 +2529,65 @@ html[lang="ar"] body { font-family: var(--font-cairo), system-ui, -apple-system,
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .recenter-btn:hover,
-.handoff-btn:hover {
+.handoff-btn:hover,
+.preview-btn:hover {
   background: var(--input-focus-bg);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .recenter-btn:focus-visible,
-.handoff-btn:focus-visible {
+.handoff-btn:focus-visible,
+.preview-btn:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
+/* Preview button — terracotta accent when active. */
+.preview-btn.is-active {
+  background: var(--accent-soft);
+  border-color: var(--accent-soft-border);
+  color: var(--accent);
+}
+.preview-btn.is-active:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+/* Route-preview progress bar — fixed strip at the top of the viewport during a
+   fly-along. Driven by --preview-progress (0..1), written by Map.tsx every
+   animation frame, so React doesn't re-render the bar 60 times per second. */
+.route-preview-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 100;
+  background: transparent;
+  pointer-events: none;
+}
+.route-preview-progress::before {
+  content: '';
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transform-origin: left center;
+  transform: scaleX(var(--preview-progress, 0));
+  transition: transform 0.12s linear;
+  box-shadow: 0 0 12px var(--accent);
+}
+[dir="rtl"] .route-preview-progress::before {
+  transform-origin: right center;
+}
+
 .share-btn {
-  flex: 1;
+  flex: 1 1 calc(50% - 4px);
+  min-width: 0;
   padding: 12px 14px;
   border-radius: 14px;
   background: var(--card-bg);

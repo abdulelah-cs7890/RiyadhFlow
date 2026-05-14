@@ -10,6 +10,7 @@ import {
   Box,
   Circle,
   Crosshair,
+  Film,
   History,
   Inbox,
   Loader2,
@@ -123,11 +124,15 @@ export default function Home() {
   const nearMe = useGeolocation();
   const [nearMeActive, setNearMeActive] = useState(false);
   const placesUserLocation = nearMeActive ? nearMe.coords : null;
-  const { places, isLoading: placesLoading } = usePlaces(activeCategory, placesUserLocation);
 
   const pathname = usePathname();
   const [selectedPlace, setSelectedPlace] = useState<PlaceData | null>(null);
   const [routeAlternatives, setRouteAlternatives] = useState<RouteAlternative[]>([]);
+  // `routeActive` tells usePlaces to drop the default exploration set once
+  // the user has computed a route — the markers would just clutter the route.
+  // Picking a category or "Near Me" still brings places back.
+  const routeActive = routeAlternatives.length > 0;
+  const { places, isLoading: placesLoading } = usePlaces(activeCategory, placesUserLocation, routeActive);
   const [selectedRouteIndex, setSelectedRouteIndex] = useState(0);
   const [isSwapping, setIsSwapping] = useState(false);
   const [saveFlash, setSaveFlash] = useState(false);
@@ -138,6 +143,7 @@ export default function Home() {
   const [flyToLocation, setFlyToLocation] = useState<[number, number] | null>(null);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [fitRouteSignal, setFitRouteSignal] = useState(0);
+  const [isPreviewing, setIsPreviewing] = useState(false);
   const [trafficVisible, setTrafficVisible] = useState(false);
   const [buildings3dVisible, setBuildings3dVisible] = useState(false);
 
@@ -750,6 +756,16 @@ export default function Home() {
               >
                 {tRouting('recenter')}
               </button>
+              <button
+                type="button"
+                className={`preview-btn${isPreviewing ? ' is-active' : ''}`}
+                onClick={() => setIsPreviewing((on) => !on)}
+                title={isPreviewing ? tRouting('cancelPreview') : tRouting('previewRoute')}
+                aria-pressed={isPreviewing}
+              >
+                {isPreviewing ? <X size={14} aria-hidden strokeWidth={2.5} /> : <Film size={14} aria-hidden strokeWidth={2} />}
+                <span>{isPreviewing ? tRouting('cancelPreview') : tRouting('previewRoute')}</span>
+              </button>
               {(startCoords || startLocation) && (destCoords || destination) && (
                 <a
                   className="handoff-btn"
@@ -1016,8 +1032,13 @@ export default function Home() {
           trafficVisible={trafficVisible}
           buildings3dVisible={buildings3dVisible}
           transitPlan={transit.kind === 'ready' ? transit.plan : null}
+          previewActive={isPreviewing}
+          onPreviewEnd={() => setIsPreviewing(false)}
         />
       </ErrorBoundary>
+      {isPreviewing && (
+        <div className="route-preview-progress" role="progressbar" aria-label="Route preview" aria-valuemin={0} aria-valuemax={100} />
+      )}
     </main>
   )
 }

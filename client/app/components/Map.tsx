@@ -5,6 +5,9 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { createElement } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
+import along from '@turf/along'
+import length from '@turf/length'
+import bearing from '@turf/bearing'
 import { MapPin } from 'lucide-react'
 import type { Feature, LineString } from 'geojson'
 import { Category, PlaceData } from '../utils/mockData'
@@ -62,6 +65,10 @@ interface MapProps {
   buildings3dVisible?: boolean;
   transitPlan?: TransitPlan | null;
   waypointCoords?: [number, number][];
+  /** When true, run a cinematic fly-along animation over the currently selected route. */
+  previewActive?: boolean;
+  /** Called when the preview animation finishes naturally, is cancelled (ESC / map click), or aborts. */
+  onPreviewEnd?: () => void;
 }
 
 interface MapboxStep {
@@ -456,6 +463,8 @@ export default function Map({
   buildings3dVisible = false,
   transitPlan = null,
   waypointCoords = [],
+  previewActive = false,
+  onPreviewEnd,
 }: MapProps) {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
@@ -730,6 +739,112 @@ export default function Map({
     const coords = routes[safeIndex].geometry.coordinates;
     map.fitBounds(getRouteBounds(coords), { padding: 80, maxZoom: 14 });
   }, [fitRouteSignal, selectedRouteIndex]);
+
+  // Cinematic 3D fly-along route preview. Animates the camera along the selected
+  // route's polyline at ~0.6s/km (clamped 4–10s), with pitch 60°, zoom 17, and
+  // bearing locked to the route's heading at each frame. ESC, a click on the map,
+  // or `previewActive` flipping back to false all cancel cleanly via the same
+  // cleanup path. The animation writes progress (0..1) to a CSS variable on
+  // documentElement so the progress bar can update without re-rendering React.
+  const onPreviewEndRef = useRef(onPreviewEnd);
+  onPreviewEndRef.current = onPreviewEnd;
+  useEffect(() => {
+    if (!previewActive) return;
+    const map = mapRef.current;
+    const routes = routeAlternativesRef.current;
+    if (!map || !routes.length || travelMode === 'metro') {
+      onPreviewEndRef.current?.();
+      return;
+    }
+
+    const safeIndex = Math.min(Math.max(selectedRouteIndex, 0), routes.length - 1);
+    const route = routes[safeIndex];
+    const routeFeature: Feature<LineString> = {
+      type: 'Feature',
+      properties: {},
+      geometry: { type: 'LineString', coordinates: route.geometry.coordinates },
+    };
+
+    const totalKm = length(routeFeature);
+    const baseDurationMs = Math.max(4000, Math.min(10000, totalKm * 600));
+
+    // Save camera + 3D-layer state so we can restore on end. The 3D toggle is
+    // controlled by props elsewhere, so we only flip it on if it was off and
+    // remember to flip it off again on cleanup.
+    const initial = {
+      pitch: map.getPitch(),
+      bearing: map.getBearing(),
+      zoom: map.getZoom(),
+      center: map.getCenter(),
+      buildings3dOn: Boolean(map.getLayer(BUILDINGS_3D_LAYER_ID)),
+    };
+
+    if (!initial.buildings3dOn && map.isStyleLoaded()) {
+      addBuildings3dLayer(map);
+    }
+    map.easeTo({ pitch: 60, zoom: 17, duration: 800 });
+
+    let rafId = 0;
+    let startTs = 0;
+    let cleanedUp = false;
+    const root = typeof document !== 'undefined' ? document.documentElement : null;
+
+    const setProgressVar = (t: number) => {
+      if (root) root.style.setProperty('--preview-progress', String(t));
+    };
+
+    const escListener = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') cleanup();
+    };
+    const mapClickHandler = () => cleanup();
+    document.addEventListener('keydown', escListener);
+    map.once('click', mapClickHandler);
+
+    const cleanup = () => {
+      if (cleanedUp) return;
+      cleanedUp = true;
+      cancelAnimationFrame(rafId);
+      document.removeEventListener('keydown', escListener);
+      map.off('click', mapClickHandler);
+      setProgressVar(0);
+      // Restore the camera to exactly what it was before preview, in one
+      // easeTo call. No delayed fitBounds, no delayed layer removal — those
+      // would race with subsequent route changes / mode switches and leave
+      // stale layers visible.
+      map.easeTo({
+        pitch: initial.pitch,
+        bearing: initial.bearing,
+        zoom: initial.zoom,
+        center: initial.center,
+        duration: 800,
+      });
+      if (!initial.buildings3dOn && map.getLayer(BUILDINGS_3D_LAYER_ID)) {
+        removeBuildings3dLayer(map);
+      }
+      onPreviewEndRef.current?.();
+    };
+
+    const step = (ts: number) => {
+      if (cleanedUp) return;
+      if (!startTs) startTs = ts;
+      const t = Math.min(1, (ts - startTs) / baseDurationMs);
+      const distanceKm = totalKm * t;
+      const pt = along(routeFeature, distanceKm, { units: 'kilometers' });
+      const aheadPt = along(routeFeature, Math.min(totalKm, distanceKm + 0.05), { units: 'kilometers' });
+      const heading = bearing(pt, aheadPt);
+      map.jumpTo({
+        center: pt.geometry.coordinates as [number, number],
+        bearing: heading,
+      });
+      setProgressVar(t);
+      if (t < 1) rafId = requestAnimationFrame(step);
+      else cleanup();
+    };
+
+    rafId = requestAnimationFrame(step);
+
+    return () => { cleanup(); };
+  }, [previewActive, selectedRouteIndex, travelMode]);
 
   // User-location puck — persistent pulsing dot wherever the user's GPS last resolved
   useEffect(() => {

@@ -29,6 +29,9 @@
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
+    "@turf/along": "^7.3.5",
+    "@turf/bearing": "^7.3.5",
+    "@turf/length": "^7.3.5",
     "@vercel/analytics": "^2.0.1",
     "geist": "^1.7.0",
     "lucide-react": "^1.14.0",

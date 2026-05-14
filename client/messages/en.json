@@ -15,6 +15,8 @@
     "resetRoute": "Reset route",
     "recenter": "Recenter",
     "recenterTitle": "Recenter map on this route",
+    "previewRoute": "Preview",
+    "cancelPreview": "Cancel",
     "openGoogleMaps": "Open in Google Maps",
     "openGoogleMapsTitle": "Open this route in Google Maps",
     "share": "Share",
