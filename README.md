@@ -4,9 +4,15 @@
 
 **Routing across Riyadh that knows your prayer times.**
 
+<!-- TODO: rewrite in your own voice if you want -->
+*I built this because every routing app I tried in Riyadh ignored prayer windows and the brand-new metro. I wanted something that felt like it was actually made for this city.*
+
 Google Maps doesn't account for Riyadh's prayer windows, brand-new metro, or seasonal dust storms. RiyadhFlow does.
 
 [![Live demo](https://img.shields.io/website?down_message=offline&label=live%20demo&up_color=10b981&up_message=online&url=https%3A%2F%2Friyadhflow2.vercel.app%2F)](https://riyadhflow2.vercel.app/)
+[![CI](https://github.com/abdulelah-cs7890/RiyadhFlow/actions/workflows/client-ci.yml/badge.svg)](https://github.com/abdulelah-cs7890/RiyadhFlow/actions/workflows/client-ci.yml)
+[![Lighthouse 90+](https://img.shields.io/badge/Lighthouse-90%2B-success)](#getting-started)
+[![Tests](https://img.shields.io/badge/tests-53%20passing-success)](client/tests/unit)
 [![Next.js 13](https://img.shields.io/badge/Next.js-13-000?logo=next.js&logoColor=fff)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=fff)](https://www.typescriptlang.org/)
 [![Mapbox GL](https://img.shields.io/badge/Mapbox-GL%20JS-1d4ed8?logo=mapbox&logoColor=fff)](https://docs.mapbox.com/mapbox-gl-js/)
@@ -20,20 +26,25 @@ Google Maps doesn't account for Riyadh's prayer windows, brand-new metro, or sea
 
 ---
 
-### Highlights
+## Highlights
 
-- 🚦 **Multi-mode routing** — drive / walk / bike via Mapbox Directions; metro via a custom Dijkstra over OSM-imported Riyadh Metro data. Per-mode ETAs preview inline on each travel pill.
-- 🕌 **Prayer-aware** — Aladhan API with a header countdown pill, Hijri date, and "may close soon for prayer" hints on PlaceCards.
-- 🌫️ **Dust-storm warnings** on walk/bike modes — Open-Meteo air-quality with Riyadh-calibrated thresholds.
-- 🚨 **Speed-camera alerts** — 35 fixed cameras from OSM, rendered only on driving routes.
-- 🇸🇦 **Arabic + RTL** end-to-end, with a bilingual type pair (Cairo for Arabic, Geist for Latin).
-- 📱 **PWA-installable** with an offline shell and a service worker that gracefully falls back when the network drops.
+- **Multi-mode routing** — drive / walk / bike via Mapbox Directions; metro via a custom Dijkstra over OSM-imported Riyadh Metro data. Per-mode ETAs preview inline on each travel pill so you can compare options at a glance.
+- **Cinematic 3D fly-along preview** — one tap on a computed route flies the camera along the polyline with building extrusions and a heading-aware bearing. Cancellable with ESC or a map click.
+- **Prayer-aware** — Aladhan API with a header countdown pill, Hijri date, and "may close soon for prayer" hints on PlaceCards for restaurants / hotels / pharmacies / malls.
+- **Weather + dust-storm awareness** — Open-Meteo with Riyadh-calibrated thresholds; the weather pill warns on walk and bike modes when PM10 spikes.
+- **Speed-camera alerts** — 35 fixed cameras pulled from OSM, rendered only on driving routes, with click-for-details popups and a pluralized "N cameras on route" badge.
+- **Multi-stop routing** — up to 2 intermediate waypoints, drag-and-drop reordering, reflected in the URL and the Google Maps handoff.
+- **Place search** — merges Postgres fuzzy search (pg_trgm) with Mapbox Searchbox suggestions; recent searches surface as quick-tap chips.
+- **Saved + recent trips** — saved trips you name, plus auto-captured recent trips (FIFO, capped, deduped). All persisted in `localStorage`.
+- **Mobile-first UX** — snap-state bottom sheet (peek / half / full), recenter-on-me, long-press the map to set destination, first-visit onboarding tour.
+- **Arabic + RTL** end-to-end with a bilingual type pair (Cairo for Arabic, Geist for Latin), light/dark theme toggle, URL-synced state for sharable links.
+- **PWA-installable** with an offline shell and a service worker that gracefully falls back when the network drops.
 
 <sub>All code currently lives under [`client/`](client/) — it's a Next.js app that doubles as the backend (API routes + Prisma). The top-level [`server/`](server/) directory is reserved for future expansion and is empty today.</sub>
 
 ---
 
-### Screenshots
+## Screenshots
 
 <table>
   <tr>
@@ -75,73 +86,6 @@ flowchart LR
 
 Each feature lives in its own slice under [`client/app/features/`](client/app/features/) — routing, places, prayer, weather, trips, theme, onboarding. The orchestrator at [`page.tsx`](client/app/page.tsx) composes them. The only component that talks to Mapbox GL directly is [`Map.tsx`](client/app/components/Map.tsx) — everything else is plain DOM + CSS.
 
----
-
-## Engineering deep-dives
-
-Short writeups on the parts that took the most thought:
-
-- **[Metro routing](docs/metro-routing.md)** — Dijkstra over the OSM-imported network, transfer-aware state encoding `(stationId, arrivedViaLineId)`, why `CANDIDATE_STATIONS = 3`, geometry slicing for accurate train-leg polylines.
-- **[Place search](docs/place-search.md)** — 3-tier prefix → substring → fuzzy fallback with `pg_trgm` trigram indexes, bilingual deduplication via window function, distance-aware ranking with PostGIS's KNN `<->` operator.
-- **[Prayer-aware UX](docs/prayer-aware-ux.md)** — Aladhan API + per-day localStorage cache, next-prayer wrap-around math, the "may close soon" hint logic, Hijri extraction.
-
----
-
-## Table of contents
-
-1. [Features](#features)
-2. [Full stack](#full-stack)
-3. [Architecture at a glance](#architecture-at-a-glance)
-4. [Getting started](#getting-started)
-5. [Tips for understanding the codebase](#tips-for-understanding-the-codebase)
-6. [Learning roadmap](#learning-roadmap)
-7. [Where to look next](#where-to-look-next)
-
----
-
-## Features
-
-- 🗺 **Interactive Mapbox map** with category pins, custom markers, traffic overlay, theme-aware styles, and a one-tap **3D buildings** toggle that tilts the camera to 50° and extrudes building geometry.
-- 🛣 **Multi-mode routing** — drive / walk / bike via Mapbox Directions; **metro** via a custom Dijkstra over OSM-imported Riyadh Metro data. Per-mode ETAs are previewed inline on each travel-mode pill so you can compare options at a glance, and switching modes re-routes automatically.
-- 📍 **Multi-stop routing** — up to 2 intermediate waypoints, drag-and-drop reordering, reflected in the Directions URL and Google Maps handoff.
-- 🔎 **Place search bar** — merges Postgres fuzzy search with Mapbox Searchbox suggestions; recent searches surface as quick-tap chips when the input is empty.
-- 🕘 **Saved trips + auto-captured recent trips** (FIFO, capped, deduped) with one-tap recent-destination chips above the routing inputs. All persisted in `localStorage`.
-- 📞 **PlaceCard quick-actions** — Call (`tel:`) and Website pills appear when the underlying OSM tags exist, alongside Directions.
-- 🚨 **Speed camera alerts** — 35 cameras pulled from OSM, rendered only on driving routes, with click-for-details popups showing the posted limit. Pluralized "N cameras on route" badge on the summary.
-- 🕌 **Prayer times awareness** — Aladhan API (Umm-Al-Qura / method 4), cached per-day; header pill shows next prayer + countdown (`Maghrib · 14 min` or `Dhuhr · 1h 43m`), a "Nearest mosque" action, and a "may close soon" hint on PlaceCards for restaurants / hotels / museums / pharmacies / malls.
-- 🧭 **Mobile-first UX** — bottom-sheet drag handle (snap-or-tap), recenter-on-me button, long-press on map to set destination, retry-able route errors, friendly 404, and a styled "set a starting location" modal.
-- 🚀 **First-visit onboarding tour** — four-step spotlight walkthrough (search → modes → directions → categories) gated by a `localStorage` flag.
-- 🌐 **English + Arabic with RTL**, theme toggle (light/dark), URL-synced state for sharable links, geolocation + near-me mode.
-
----
-
-## Full stack
-
-| Layer | Tech | Notes / version |
-|---|---|---|
-| Framework | **Next.js 13 (App Router)** | `client/app/**`, RSC + client components |
-| UI runtime | **React 18**, **TypeScript** | strict mode, RSC where possible |
-| Styling | Hand-written **CSS** (`client/app/globals.css`) with CSS custom properties | no CSS-in-JS; Storybook also present |
-| Maps | **mapbox-gl** 3.x | Map, layers, markers, RTL plugin, Directions API, Searchbox API |
-| Internationalization | **next-intl** 4.x | `client/messages/{en,ar}.json`, ICU plurals, RTL |
-| State | React hooks + `localStorage` + URL `searchParams` | no Redux / Zustand |
-| Database | **PostgreSQL** with **PostGIS** + **pg_trgm** | geometry + fuzzy text search |
-| ORM | **Prisma** 6.x | `client/prisma/schema.prisma` |
-| API layer | **Next.js Route Handlers** | `client/app/api/places/**` |
-| External APIs | Mapbox Directions / Searchbox / Geocoding, OpenStreetMap **Overpass**, **Aladhan** | prayer times, OSM extracts |
-| Data scripts | **tsx** | `client/prisma/import-*.ts` (OSM POIs, metro, speed cameras) |
-| Unit / component tests | **Vitest** + **@testing-library/react** + **jsdom** | `client/tests/unit/**` |
-| E2E tests | **Playwright** | `client/tests/e2e/**` |
-| Stories | **Storybook 7 (Next.js)** | component isolation |
-| Quality gates | **ESLint** (next config), **tsc --noEmit**, **Lighthouse CI** | `.lighthouserc.json` |
-| CI | **GitHub Actions** | `.github/workflows/client-ci.yml` — lint → typecheck → unit → build → E2E → Storybook → Lighthouse |
-
-**Not in use** (to help you skim the repo quickly): no Redux, no TanStack Query, no tRPC, no GraphQL, no Tailwind, no CSS modules, no Jest, no Webpack custom config, no Docker.
-
----
-
-## Architecture at a glance
-
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ app/page.tsx  (one big client page composing feature slices)│
@@ -172,7 +116,40 @@ prisma/
   import-speed-cameras.ts  ← highway=speed_camera / enforcement=maxspeed
 ```
 
-Each feature slice owns its **hooks + services + utils + components**. `page.tsx` composes them; [`Map.tsx`](client/app/components/Map.tsx) is the only component that talks to `mapbox-gl` directly.
+---
+
+## Engineering deep-dives
+
+Short writeups on the parts that took the most thought:
+
+- **[Metro routing](docs/metro-routing.md)** — Dijkstra over the OSM-imported network, transfer-aware state encoding `(stationId, arrivedViaLineId)`, why `CANDIDATE_STATIONS = 3`, geometry slicing for accurate train-leg polylines.
+- **[Place search](docs/place-search.md)** — 3-tier prefix → substring → fuzzy fallback with `pg_trgm` trigram indexes, bilingual deduplication via window function, distance-aware ranking with PostGIS's KNN `<->` operator.
+- **[Prayer-aware UX](docs/prayer-aware-ux.md)** — Aladhan API + per-day localStorage cache, next-prayer wrap-around math, the "may close soon" hint logic, Hijri extraction.
+
+---
+
+## Full stack
+
+| Layer | Tech | Notes / version |
+|---|---|---|
+| Framework | **Next.js 13 (App Router)** | `client/app/**`, RSC + client components |
+| UI runtime | **React 18**, **TypeScript** | strict mode, RSC where possible |
+| Styling | Hand-written **CSS** (`client/app/globals.css`) with CSS custom properties | no CSS-in-JS; Storybook also present |
+| Maps | **mapbox-gl** 3.x | Map, layers, markers, RTL plugin, Directions API, Searchbox API |
+| Internationalization | **next-intl** 4.x | `client/messages/{en,ar}.json`, ICU plurals, RTL |
+| State | React hooks + `localStorage` + URL `searchParams` | no Redux / Zustand |
+| Database | **PostgreSQL** with **PostGIS** + **pg_trgm** | geometry + fuzzy text search |
+| ORM | **Prisma** 6.x | `client/prisma/schema.prisma` |
+| API layer | **Next.js Route Handlers** | `client/app/api/places/**` |
+| External APIs | Mapbox Directions / Searchbox / Geocoding, OpenStreetMap **Overpass**, **Aladhan** | prayer times, OSM extracts |
+| Data scripts | **tsx** | `client/prisma/import-*.ts` (OSM POIs, metro, speed cameras) |
+| Unit / component tests | **Vitest** + **@testing-library/react** + **jsdom** | `client/tests/unit/**` |
+| E2E tests | **Playwright** | `client/tests/e2e/**` |
+| Stories | **Storybook 7 (Next.js)** | component isolation |
+| Quality gates | **ESLint** (next config), **tsc --noEmit**, **Lighthouse CI** | `.lighthouserc.json` |
+| CI | **GitHub Actions** | `.github/workflows/client-ci.yml` — lint → typecheck → unit → build → E2E → Storybook → Lighthouse |
+
+**Not in use** (to help you skim the repo quickly): no Redux, no TanStack Query, no tRPC, no GraphQL, no Tailwind, no CSS modules, no Jest, no Webpack custom config, no Docker.
 
 ---
 
@@ -229,41 +206,6 @@ See the [client README](client/README.md) for all scripts.
 
 ---
 
-## Learning roadmap
-
-A suggested path through this stack if you're coming in fresh. Each bullet is an afternoon-to-a-week depending on depth.
-
-### Foundation (must have before you change real code)
-1. **JavaScript → TypeScript** — generics, discriminated unions, `as const`, narrowing. [Matt Pocock's free cheat-sheets](https://www.totaltypescript.com/) and the TS handbook's "Narrowing" chapter.
-2. **Modern React** — function components, hooks (`useState`, `useEffect`, `useCallback`, `useRef`), controlled inputs. [React docs](https://react.dev) — especially "Synchronizing with Effects" and "Separating Events from Effects."
-3. **Next.js 13 App Router** — server vs client components (`'use client'`), route handlers (`app/api/**/route.ts`), layouts, `next/image`. The [Next learn course](https://nextjs.org/learn) is one sitting.
-
-### Core skills (needed to confidently ship a feature)
-4. **Mapbox GL JS** — sources vs layers, `addSource` / `addLayer`, marker lifecycle, `fitBounds`. The [Mapbox GL JS examples gallery](https://docs.mapbox.com/mapbox-gl-js/example/) is the fastest way in.
-5. **Mapbox Directions + Searchbox APIs** — read the Directions response shape (`route.geometry.coordinates`, `legs[].steps`). For Searchbox, understand the `/suggest` → `/retrieve` two-step flow and session tokens.
-6. **next-intl** — `useTranslations`, ICU MessageFormat plural syntax, RTL toggling. [next-intl docs](https://next-intl.dev).
-7. **Prisma + PostgreSQL** — `schema.prisma` modeling, migrations, the `Unsupported("geometry(Point, 4326)")` trick for PostGIS, raw SQL via `prisma.$queryRaw`. [Prisma docs "Getting Started"](https://www.prisma.io/docs/getting-started).
-8. **PostGIS + pg_trgm** — `ST_DWithin`, `ST_Distance`, `similarity()`, creating the GIN index on `gin_trgm_ops`. The official [PostGIS tutorial](https://postgis.net/workshops/postgis-intro/) is excellent.
-
-### Polish layer (valuable once you're productive)
-9. **Vitest + Testing Library + jsdom** — `renderHook`, `act`, shimming browser globals (see `useRecentTrips.test.ts` for the localStorage shim).
-10. **Playwright** — `page.goto`, `page.getByRole`, trace viewer. Our one E2E flow is the cheat sheet.
-11. **Storybook 7 / Next.js preset** — stories as contracts for components in isolation.
-12. **Lighthouse CI** — `.lighthouserc.json`, how assertions map to budget failures in PRs.
-13. **GitHub Actions** — read `.github/workflows/client-ci.yml` top-to-bottom once; it's the reference for how we gate merges.
-
-### Domain references you can skim as they become relevant
-- **OpenStreetMap Overpass QL** — the query syntax in `import-metro.ts` and `import-speed-cameras.ts`.
-- **Aladhan Prayer Times API** — method 4 (Umm Al-Qura) is the Saudi standard.
-- **Haversine + line-segment distance** — see `client/app/features/routing/utils/speedCameras.ts` for the planar shortcut we use near Riyadh's latitude.
-- **Dijkstra on a transit graph** — `features/routing/services/transitRouting.ts`.
-
-### Budget-friendly order if you only have a weekend
-
-> TypeScript basics → React hooks → Next.js App Router → one Mapbox example → open `Map.tsx` and read one feature slice end-to-end (I'd pick `features/trips/` — smallest).
-
----
-
 ## Where to look next
 
 - Deep dive on the frontend (scripts, Storybook, Lighthouse, CI stages): [`client/README.md`](client/README.md).
@@ -273,6 +215,8 @@ A suggested path through this stack if you're coming in fresh. Each bullet is an
   - Metro: [`transitRouting.ts`](client/app/features/routing/services/transitRouting.ts), [`import-metro.ts`](client/prisma/import-metro.ts)
   - Speed cameras: [`speedCameras.ts`](client/app/features/routing/utils/speedCameras.ts), [`import-speed-cameras.ts`](client/prisma/import-speed-cameras.ts)
   - Prayer times: [`usePrayerTimes`](client/app/features/prayer/hooks/usePrayerTimes.ts), [`PrayerStatusPill`](client/app/features/prayer/components/PrayerStatusPill.tsx)
+
+If you're using this project to learn the stack, there's a suggested roadmap in [`learning.md`](learning.md).
 
 ## License
 
