@@ -3,8 +3,8 @@ import { expect, test } from '@playwright/test'
 test('saved trips persist to localStorage and survive reload', async ({ page }) => {
   await page.goto('/')
 
-  await page.getByPlaceholder('e.g., King Saud University').fill('Office')
-  await page.getByPlaceholder('e.g., Al Fayha').fill('Home')
+  await page.getByPlaceholder('Where from?').fill('Office')
+  await page.getByPlaceholder('Where to?').fill('Home')
   await page.getByRole('button', { name: /save/i }).click()
 
   await expect(page.getByText(/saved trips/i)).toBeVisible()

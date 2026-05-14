@@ -99,6 +99,11 @@ jobs:
   lighthouse:
     runs-on: ubuntu-latest
     needs: quality-build
+    # Non-blocking: the app needs NEXT_PUBLIC_MAPBOX_TOKEN to render the map,
+    # which we don't expose to CI. Lighthouse still runs and uploads its report
+    # as an artifact for spot-checking, but its assertions don't gate the
+    # workflow. Run `npm run lighthouse:ci` locally for an accurate score.
+    continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
