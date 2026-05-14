@@ -1942,12 +1942,26 @@ html[lang="ar"] body { font-family: var(--font-cairo), system-ui, -apple-system,
     left: 16px;
     right: 16px;
     width: auto;
-    max-height: 48vh;
+    max-height: 88vh;
     touch-action: pan-y;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    /* Disable the desktop-only slide-in mount animation on mobile — the sheet
+       has its own snap-state transform that would conflict. */
+    animation: none;
   }
-  .glass-pane.is-collapsed {
-    transform: translateY(calc(100% - 120px));
+  /* Snap states — set by `data-sheet` on .glass-pane in page.tsx */
+  .glass-pane[data-sheet="full"] { transform: translateY(0); }
+  .glass-pane[data-sheet="half"] { transform: translateY(calc(100% - 50vh)); }
+  .glass-pane[data-sheet="peek"] {
+    transform: translateY(calc(100% - 80px));
     cursor: pointer;
+  }
+  /* When the sheet is fully expanded, anchor the title row so users know where
+     they are while scrolling the long content. */
+  .glass-pane[data-sheet="full"] .glass-pane-header {
+    position: sticky;
+    top: 0;
+    z-index: 5;
   }
   .sheet-handle {
     display: flex;
@@ -2788,14 +2802,36 @@ html[lang="ar"] body { font-family: var(--font-cairo), system-ui, -apple-system,
   }
 
   .theme-toggle {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
   }
 
   .swap-btn {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
   }
+
+  /* Bump the place-card close button hit area to the 44px minimum.
+     The visual circle stays at 32px via an inner ::before. */
+  .place-close {
+    width: 44px;
+    height: 44px;
+    background: transparent;
+    border: none;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .place-close::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border-radius: 50%;
+    background: var(--place-close-bg);
+    z-index: -1;
+  }
+  .place-close > svg { position: relative; z-index: 1; }
 
   .travel-mode-btn {
     min-height: 36px;

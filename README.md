@@ -1,10 +1,46 @@
-# RiyadhFlow 🚗
+<div align="center">
 
-A Riyadh-first map & routing app. Plan drive / walk / bike / metro routes, browse places by category, get speed-camera and prayer-time awareness, and share a single URL that restores everything.
+# RiyadhFlow
 
-> 🌐 **Live:** <https://riyadhflow2.vercel.app/>
->
-> All code currently lives under [`client/`](client/) — it's a Next.js app that doubles as the backend (API routes + Prisma). The top-level [`server/`](server/) directory is reserved for future expansion and is empty today.
+**Routing across Riyadh that knows your prayer times.**
+
+Drive, walk, bike, or take the brand-new Riyadh Metro — with speed-camera alerts, dust-storm warnings, and Arabic-first UX.
+
+[**Live demo →**](https://riyadhflow2.vercel.app/) · [Architecture](#architecture) · [Run locally](#getting-started)
+
+![RiyadhFlow desktop](docs/media/hero-desktop.png)
+
+</div>
+
+---
+
+### Highlights
+
+- 🚦 **Multi-mode routing** — drive / walk / bike via Mapbox Directions; metro via a custom Dijkstra over OSM-imported Riyadh Metro data. Per-mode ETAs preview inline on each travel pill.
+- 🕌 **Prayer-aware** — Aladhan API with a header countdown pill, Hijri date, and "may close soon for prayer" hints on PlaceCards.
+- 🌫️ **Dust-storm warnings** on walk/bike modes — Open-Meteo air-quality with Riyadh-calibrated thresholds.
+- 🚨 **Speed-camera alerts** — 35 fixed cameras from OSM, rendered only on driving routes.
+- 🇸🇦 **Arabic + RTL** end-to-end, with a bilingual type pair (Cairo for Arabic, Geist for Latin).
+- 📱 **PWA-installable** with an offline shell and a service worker that gracefully falls back when the network drops.
+
+<sub>All code currently lives under [`client/`](client/) — it's a Next.js app that doubles as the backend (API routes + Prisma). The top-level [`server/`](server/) directory is reserved for future expansion and is empty today.</sub>
+
+---
+
+## Architecture
+
+```mermaid
+flowchart LR
+  user[Browser] -->|search, plan| next[Next.js 13 App Router]
+  next -->|fuzzy + spatial| db[(Postgres + PostGIS + pg_trgm)]
+  next -->|directions, search| mapbox[Mapbox]
+  next -->|prayer times| aladhan[Aladhan API]
+  next -->|weather + air quality| ometeo[Open-Meteo]
+  ingest[Import scripts] -->|OSM Overpass| db
+  ingest -->|cameras, metro| db
+```
+
+Each feature lives in its own slice under [`client/app/features/`](client/app/features/) — routing, places, prayer, weather, trips, theme, onboarding. The orchestrator at [`page.tsx`](client/app/page.tsx) composes them. The only component that talks to Mapbox GL directly is [`Map.tsx`](client/app/components/Map.tsx) — everything else is plain DOM + CSS.
 
 ---
 

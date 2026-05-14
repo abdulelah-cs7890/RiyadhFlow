@@ -425,14 +425,22 @@ export default function Home() {
   }, [setDestination, tUi, handleFindRoute]);
 
   // Bottom-sheet drag (mobile only). Desktop ignores the handle (display: none in CSS).
-  const [sheetCollapsed, setSheetCollapsed] = useState(false);
+  // Three snap states: peek (just the header), half (~50vh visible), full (~88vh).
+  // Tap on the handle cycles forward; a drag snaps to the nearest target based on
+  // position + velocity (a quick flick advances an extra step).
+  type SheetState = 'full' | 'half' | 'peek';
+  const SHEET_ORDER: SheetState[] = ['full', 'half', 'peek'];
+  const [sheetState, setSheetState] = useState<SheetState>('half');
   const [dragDelta, setDragDelta] = useState(0);
   const dragStartYRef = useRef<number | null>(null);
   const wasDragRef = useRef(false);
+  // Keep ~80ms of pointer samples so we can compute end-of-drag velocity.
+  const dragHistoryRef = useRef<{ y: number; t: number }[]>([]);
 
   const onSheetPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     dragStartYRef.current = e.clientY;
     wasDragRef.current = false;
+    dragHistoryRef.current = [{ y: e.clientY, t: performance.now() }];
     e.currentTarget.setPointerCapture(e.pointerId);
   }, []);
 
@@ -440,47 +448,68 @@ export default function Home() {
     if (dragStartYRef.current === null) return;
     const delta = e.clientY - dragStartYRef.current;
     if (Math.abs(delta) > 4) wasDragRef.current = true;
-    // Clamp: only allow downward drag from expanded, only upward from collapsed.
-    setDragDelta(sheetCollapsed ? Math.min(0, delta) : Math.max(0, delta));
-  }, [sheetCollapsed]);
+    const now = performance.now();
+    dragHistoryRef.current.push({ y: e.clientY, t: now });
+    const cutoff = now - 80;
+    dragHistoryRef.current = dragHistoryRef.current.filter((s) => s.t >= cutoff);
+    // Clamp: at extremes, only allow drag toward the opposite end.
+    if (sheetState === 'full') setDragDelta(Math.max(0, delta));
+    else if (sheetState === 'peek') setDragDelta(Math.min(0, delta));
+    else setDragDelta(delta);
+  }, [sheetState]);
 
-  const onSheetPointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+  const onSheetPointerUp = useCallback(() => {
     if (dragStartYRef.current === null) return;
-    const delta = e.clientY - dragStartYRef.current;
+    const samples = dragHistoryRef.current;
+    const last = samples[samples.length - 1];
+    const first = samples[0] ?? last;
+    const dy = last && first ? last.y - first.y : 0;
+    const dt = last && first ? Math.max(1, last.t - first.t) : 1;
+    const velocity = dy / dt; // px/ms
+    const delta = last ? last.y - dragStartYRef.current : 0;
     dragStartYRef.current = null;
-    // Asymmetric thresholds: collapsing requires a clear downward intent,
-    // expanding is generous so a quick upward tug always wins.
-    const COLLAPSE_THRESHOLD = 80;
-    const EXPAND_THRESHOLD = 30;
-    if (wasDragRef.current) {
-      if (!sheetCollapsed && delta > COLLAPSE_THRESHOLD) setSheetCollapsed(true);
-      else if (sheetCollapsed && delta < -EXPAND_THRESHOLD) setSheetCollapsed(false);
+    dragHistoryRef.current = [];
+
+    if (!wasDragRef.current) {
+      // Tap: cycle forward through states.
+      setSheetState((s) => SHEET_ORDER[(SHEET_ORDER.indexOf(s) + 1) % SHEET_ORDER.length]);
     } else {
-      // Tap on handle: toggle.
-      setSheetCollapsed((c) => !c);
+      const idx = SHEET_ORDER.indexOf(sheetState);
+      const direction = delta > 0 ? 1 : -1; // +1 = collapse, -1 = expand
+      const abs = Math.abs(delta);
+      const fastFlick = Math.abs(velocity) > 0.5 && Math.sign(velocity) === Math.sign(delta);
+      let steps = 0;
+      if (abs >= 180 || (fastFlick && abs >= 30)) steps = 2;
+      else if (abs >= 50) steps = 1;
+      const nextIdx = Math.max(0, Math.min(SHEET_ORDER.length - 1, idx + direction * steps));
+      setSheetState(SHEET_ORDER[nextIdx]);
     }
     setDragDelta(0);
-  }, [sheetCollapsed]);
+  }, [sheetState]);
 
   const sheetStyle: React.CSSProperties | undefined = dragDelta !== 0
-    ? sheetCollapsed
-      ? { transform: `translateY(calc(100% - 64px + ${dragDelta}px))`, transition: 'none' }
-      : { transform: `translateY(${dragDelta}px)`, transition: 'none' }
+    ? (() => {
+        const base = sheetState === 'full' ? '0px'
+          : sheetState === 'half' ? 'calc(100% - 50vh)'
+          : 'calc(100% - 80px)';
+        return { transform: `translateY(calc(${base} + ${dragDelta}px))`, transition: 'none' };
+      })()
     : undefined;
 
   return (
     <main className="app-container">
       <div
-        className={`glass-pane${sheetCollapsed ? ' is-collapsed' : ''}`}
+        className="glass-pane"
+        data-sheet={sheetState}
         style={sheetStyle}
         onClick={(e) => {
-          // When collapsed, tapping anywhere on the visible peek expands.
-          // The handle already has its own pointerup → toggle handler; let it
-          // win and bail out if it was the target.
-          if (!sheetCollapsed) return;
+          // When peeking, tapping anywhere on the visible peek expands to half.
+          // The handle already has its own pointerup → cycle handler; bail if it
+          // was the target.
+          if (sheetState !== 'peek') return;
           const target = e.target as HTMLElement;
           if (target.closest('.sheet-handle')) return;
-          setSheetCollapsed(false);
+          setSheetState('half');
         }}
       >
         <div
@@ -492,7 +521,7 @@ export default function Home() {
           role="button"
           tabIndex={0}
           aria-label={tUi('toggleSheet')}
-          aria-expanded={!sheetCollapsed}
+          aria-expanded={sheetState !== 'peek'}
         >
           <span className="sheet-handle-bar" />
         </div>

@@ -1,5 +1,7 @@
 # RiyadhFlow Frontend
 
+> 👈 For the project pitch, architecture diagram, and live-demo link, see the [repo README](../README.md). This file is the developer guide.
+
 RiyadhFlow is a Next.js + TypeScript map experience focused on smart route planning inside Riyadh.  
 This project demonstrates frontend architecture, map interactions, state synchronization, accessibility, testing, and CI quality gates.
 
