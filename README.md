@@ -77,6 +77,16 @@ Each feature lives in its own slice under [`client/app/features/`](client/app/fe
 
 ---
 
+## Engineering deep-dives
+
+Short writeups on the parts that took the most thought:
+
+- **[Metro routing](docs/metro-routing.md)** — Dijkstra over the OSM-imported network, transfer-aware state encoding `(stationId, arrivedViaLineId)`, why `CANDIDATE_STATIONS = 3`, geometry slicing for accurate train-leg polylines.
+- **[Place search](docs/place-search.md)** — 3-tier prefix → substring → fuzzy fallback with `pg_trgm` trigram indexes, bilingual deduplication via window function, distance-aware ranking with PostGIS's KNN `<->` operator.
+- **[Prayer-aware UX](docs/prayer-aware-ux.md)** — Aladhan API + per-day localStorage cache, next-prayer wrap-around math, the "may close soon" hint logic, Hijri extraction.
+
+---
+
 ## Table of contents
 
 1. [Features](#features)

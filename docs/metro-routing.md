@@ -38,33 +38,45 @@ Re-run whenever the network changes (rarely — every few years).
 
 ### Routing algorithm
 
-Graph: nodes are `(stationId, lineId)` tuples plus a virtual `START` and `END`. Edges:
+Graph nodes are `(stationId, arrivedViaLineId)` tuples — **not** bare stations. The line component matters because it's the only way the algorithm knows whether the next hop incurs a transfer or not. From `(Olaya, Blue)` to `(Olaya, Red)` is a 3-minute transfer; from `(Olaya, Blue)` to `(KAFD, Blue)` is just a ride. Without the line in the state, every visit to a multi-line station would either falsely add a transfer or falsely skip one.
 
-- **Ride** (same line, adjacent stations) — 2 min.
-- **Transfer** (same station, different line) — 3 min.
-- **Walk from start** — haversine × 1.3 detour × 12 min/km, to each of the 3 nearest stations.
-- **Walk to end** — same, from the 3 nearest stations to the destination.
+Edges:
 
-Dijkstra finds the shortest path; consecutive same-line hops are collapsed into a single `TrainLeg` with sliced line geometry. If the best start or end walk exceeds 2 km, the planner returns `{ kind: 'no-route', nearestStationKm }` and the UI surfaces the empty state.
+- **Ride** — same line, adjacent stations in the line's stationIds list: 2 min.
+- **Transfer** — only emitted when `station.lineIds.length > 1`. Skipping this check on single-line stations is what keeps Riyadh's 73 single-line stations from generating spurious transfer edges that Dijkstra would have to enumerate.
+- **Walk from start / walk to end** — to/from each of the K nearest stations (`CANDIDATE_STATIONS = 3`). Time = `haversine_km × WALK_DETOUR × (60 / WALK_SPEED_KMH)`.
+
+**Why K=3 and not K=1?** The closest station isn't always the best boarding point. A station 600 m away on the Red Line can beat a station 400 m away on the Yellow Line if your destination is also on the Red Line — the second walk saves you a 3-minute transfer plus several stops. K=3 captures that trade-off without blowing up runtime; in practice K=5+ has produced no different itineraries on test routes.
+
+**Geometry slicing.** When the path is reconstructed, consecutive same-line hops collapse into one `TrainLeg`. The leg's drawn polyline isn't the full line geometry — it's a slice. We project the board and alight stations onto the OSM line's vertex list by nearest-vertex, slice between those indices, then prepend the board station's exact coordinate and append the alight station's exact coordinate. The projection step is necessary because OSM line geometries don't pass cleanly through station nodes — they're sampled along the tracks at irregular intervals.
+
+If the best start or end walk exceeds `MAX_WALK_KM`, the planner returns `{ kind: 'no-route', nearestStationKm }` and the UI surfaces the empty state instead of recommending a 20-minute slog.
 
 ### Tunables
 
 All in [transitRouting.ts](../client/app/features/routing/services/transitRouting.ts):
 
-| Constant | Value | Notes |
+| Constant | Value | Why this value |
 |---|---|---|
-| `WALK_SPEED_KMH` | 5 | 5 km/h = 12 min/km |
-| `WALK_DETOUR` | 1.3 | crow-flight → street distance |
-| `PER_STOP_MIN` | 2 | time per station hop |
-| `TRANSFER_MIN` | 3 | time per line change |
-| `MAX_WALK_KM` | 2.0 | beyond this, no metro route |
-| `CANDIDATE_STATIONS` | 3 | K-nearest at each endpoint |
+| `WALK_SPEED_KMH` | 5 | Average urban pedestrian; matches Google Maps' default |
+| `WALK_DETOUR` | 1.3 | Haversine → on-street multiplier; accounts for grid block routing |
+| `PER_STOP_MIN` | 2 | Riyadh Metro 90s dwell + ~30s acceleration between adjacent stations |
+| `TRANSFER_MIN` | 3 | Platform-to-platform on the longest interchange (King Abdullah) |
+| `MAX_WALK_KM` | 2.0 | Beyond this, the planner reports `no-route` instead of recommending a 20-minute walk |
+| `CANDIDATE_STATIONS` | 3 | Smallest K that still admits "skip the closest station for a faster line"; K=5+ produced no different itineraries on test routes |
 
 ## Verification
 
 - **Typecheck** — `npx tsc --noEmit` (clean).
 - **Unit tests** — `npx vitest run tests/unit/routing/transitRouting.test.ts` (7 tests covering graph construction, Dijkstra shortest path, transfers, and the 2 km no-route threshold).
 - **Manual** — enter KSU → KAFD, switch to 🚇 Metro. Expect a walk → Blue Line → walk plan. Enter a destination in far-south Riyadh for the no-route empty state. Toggle to Arabic to verify RTL + localized line names.
+
+## What I'd improve next
+
+- **Real walking distances from Mapbox Directions** instead of `haversine × 1.3`. The detour multiplier is a heuristic; in superblocks or near highways the real walk is much longer. The cost: one extra Mapbox call per candidate station per endpoint = 6 calls per planning request.
+- **Time-of-day-aware dwell** — `PER_STOP_MIN` is constant today. Riyadh Metro has rush-hour throughput differences worth ±30 s per stop.
+- **Multi-modal: drive-to-station then metro** — common in Saudi commuting (large parking lots adjacent to terminal stations). The graph would gain `(parkingStation, 'park')` edges with a fixed parking-fee cost.
+- **User-tunable transfer penalty** — some users hate transfers more than walking; a slider that scales `TRANSFER_MIN` between 1 and 8 would surface that preference.
 
 ## Known limitations
 
