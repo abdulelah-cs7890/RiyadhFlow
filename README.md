@@ -4,7 +4,13 @@
 
 **Routing across Riyadh that knows your prayer times.**
 
-Drive, walk, bike, or take the brand-new Riyadh Metro — with speed-camera alerts, dust-storm warnings, and Arabic-first UX.
+Google Maps doesn't account for Riyadh's prayer windows, brand-new metro, or seasonal dust storms. RiyadhFlow does.
+
+[![Live demo](https://img.shields.io/website?down_message=offline&label=live%20demo&up_color=10b981&up_message=online&url=https%3A%2F%2Friyadhflow2.vercel.app%2F)](https://riyadhflow2.vercel.app/)
+[![Next.js 13](https://img.shields.io/badge/Next.js-13-000?logo=next.js&logoColor=fff)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=fff)](https://www.typescriptlang.org/)
+[![Mapbox GL](https://img.shields.io/badge/Mapbox-GL%20JS-1d4ed8?logo=mapbox&logoColor=fff)](https://docs.mapbox.com/mapbox-gl-js/)
+[![PostgreSQL + PostGIS](https://img.shields.io/badge/PostgreSQL-PostGIS-336791?logo=postgresql&logoColor=fff)](https://postgis.net/)
 
 [**Live demo →**](https://riyadhflow2.vercel.app/) · [Architecture](#architecture) · [Run locally](#getting-started)
 
@@ -24,6 +30,33 @@ Drive, walk, bike, or take the brand-new Riyadh Metro — with speed-camera aler
 - 📱 **PWA-installable** with an offline shell and a service worker that gracefully falls back when the network drops.
 
 <sub>All code currently lives under [`client/`](client/) — it's a Next.js app that doubles as the backend (API routes + Prisma). The top-level [`server/`](server/) directory is reserved for future expansion and is empty today.</sub>
+
+---
+
+### Screenshots
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/media/feature-prayer.png" alt="Prayer pill expanded with Hijri date and per-prayer times" /><br/>
+      <sub><b>Prayer-aware</b> — Hijri date and next-prayer countdown</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/media/feature-metro.png" alt="Metro mode with transit summary card showing red line + walk legs" /><br/>
+      <sub><b>Metro routing</b> — custom Dijkstra over OSM data, with transfer-aware ETAs</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/media/feature-dust.png" alt="Weather pill with severe dust storm warning, PM10 941" /><br/>
+      <sub><b>Dust-storm aware</b> — Open-Meteo air-quality, Riyadh-calibrated</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/media/hero-mobile.png" alt="Mobile peek-state bottom sheet over the map" /><br/>
+      <sub><b>Mobile</b> — bottom-sheet with peek / half / full snap states</sub>
+    </td>
+  </tr>
+</table>
 
 ---
 
